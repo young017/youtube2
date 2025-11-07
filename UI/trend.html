@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>월별 트렌드 분석 - YouTube Data Analytics</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --secondary-color: #1a1a1a;
+            --accent-color: #ff3333;
+            --text-dark: #ffffff;
+            --text-light: #cccccc;
+            --bg-light: #0a0a0a;
+            --bg-dark: #000000;
+        }
+        
+        body {
+            background-color: #000000;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+        }
+        
+        .hero-section {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 100px 0;
+            border-bottom: 3px solid #ff0000;
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(220, 53, 69, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: #ff0000;
+            margin-bottom: 1rem;
+        }
+        
+        .footer {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 50px 0 20px;
+            border-top: 3px solid #ff0000;
+        }
+        
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.95) !important;
+            border-bottom: 2px solid #ff0000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #ff0000 !important;
+        }
+        
+        .nav-link {
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: #ff0000 !important;
+        }
+        
+        .navbar-toggler {
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 0, 0, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        
+        .btn-custom {
+            background-color: #ff0000;
+            border: 2px solid #ff0000;
+            color: #ffffff;
+            padding: 12px 30px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom:hover {
+            background-color: transparent;
+            color: #ff0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        .trend-card {
+            background-color: #1a1a1a;
+            border: 2px solid #ff0000;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            color: #ffffff;
+        }
+        
+        .month-header {
+            background-color: #ff0000;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .topic-item {
+            background-color: #1a1a1a;
+            border-left: 4px solid #ff0000;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+            color: #ffffff;
+        }
+        
+        .topic-item:hover {
+            background-color: #ff0000;
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+        
+        .topic-rank {
+            background-color: #ff0000;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .chart-container {
+            background-color: #1a1a1a;
+            border: 2px solid #ff0000;
+            border-radius: 0;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: #1a1a1a;
+            border: 2px solid #ff0000;
+            padding: 25px;
+            border-radius: 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            color: #ffffff;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background-color: #ff0000;
+            color: #ffffff;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff0000;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card:hover .stat-number {
+            color: #ffffff;
+        }
+        
+        .stat-label {
+            color: #cccccc;
+            font-weight: 500;
+        }
+        
+        .stat-card:hover .stat-label {
+            color: #ffffff;
+        }
+        
+        .rank-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #ffffff;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .rank-1 { background-color: #ff0000; }
+        .rank-2 { background-color: #ff0000; }
+        .rank-3 { background-color: #ff0000; }
+        .rank-4 { background-color: #ff0000; }
+        .rank-5 { background-color: #ff0000; }
+        
+        .rank-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+        
+        .table-dark th {
+            background-color: #ff0000;
+            color: #ffffff;
+            border-color: #ff0000;
+        }
+        
+        .table-dark td {
+            border-color: #ff0000;
+        }
+        
+        .bg-primary { background-color: #ff0000 !important; }
+        .bg-success { background-color: #ff0000 !important; }
+        .bg-warning { background-color: #ff0000 !important; }
+        .bg-info { background-color: #ff0000 !important; }
+        .bg-secondary { background-color: #ff0000 !important; }
+        
+        .progress-bar {
+            background-color: #ff0000;
+        }
+        
+        .alert-success {
+            background-color: #ff0000;
+            border-color: #ff0000;
+            color: #ffffff;
+        }
+        
+        .alert-warning {
+            background-color: #000000;
+            border-color: #ff0000;
+            color: #ffffff;
+        }
+        
+        .monthly-trend-panel {
+            background-color: #ff0000;
+            border-radius: 15px;
+            padding: 30px;
+            height: 100%;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .monthly-trend-panel:hover {
+            transform: translateY(-5px);
+        }
+        
+        .panel-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .panel-header h4 {
+            color: #ffffff;
+            font-weight: bold;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .trend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .trend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .trend-item:last-child {
+            border-bottom: none;
+        }
+        
+        .trend-rank {
+            color: #ffffff;
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 25px;
+        }
+        
+        .trend-category {
+            color: #ffffff;
+            flex-grow: 1;
+            font-size: 0.95rem;
+        }
+        
+        .trend-count {
+            color: #ffffff;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .trend-more {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2rem;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .trend-ranking-container {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 20px;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab-btn.active {
+            background-color: #ff0000;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background-color: #1a1a1a;
+            color: #ff0000;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .tab-navigation {
+            border-bottom: 2px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .tab-content {
+            position: relative;
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        .ranking-cards {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+        
+        .ranking-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: #1a1a1a;
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .ranking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 0, 0, 0.4);
+            border-color: #ff0000;
+        }
+        
+        .rank-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ff0000;
+            color: #ffffff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(255, 0, 0, 0.5);
+        }
+        
+        .ranking-card.rank-1 .rank-badge {
+            background-color: #ffd700;
+            color: #000000;
+        }
+        
+        .ranking-card.rank-2 .rank-badge {
+            background-color: #c0c0c0;
+            color: #000000;
+        }
+        
+        .ranking-card.rank-3 .rank-badge {
+            background-color: #cd7f32;
+            color: #ffffff;
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            margin: 20px 0 15px 0;
+        }
+        
+        .card-info h5 {
+            color: #ffffff;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .card-info p {
+            color: #cccccc;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .card-count {
+            background-color: #ff0000;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+        
+        .more-button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .more-btn {
+            background-color: transparent;
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .more-btn:hover {
+            background-color: #ff0000;
+            color: #ffffff;
+            border-color: #ff0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        .back-btn {
+            background-color: #ff0000;
+            border: 2px solid #ff0000;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background-color: transparent;
+            color: #ff0000;
+            transform: translateY(-2px);
+        }
+        
+        .display-4 {
+            color: #ffffff;
+        }
+        
+        .lead {
+            color: #cccccc;
+        }
+        
+        .tab-btn {
+            color: #cccccc;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-graph-up me-2"></i>
+                YouTube Analytics
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">홈</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#features">기능</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="trend.html">트렌드</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="feedback.html">피드백</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" style="margin-top: 76px;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <a href="index.html" class="back-btn mb-4 d-inline-block">
+                        <i class="bi bi-arrow-left me-2"></i>뒤로 가기
+                    </a>
+                    <h1 class="display-4 fw-bold mb-4">월별 트렌드 분석</h1>
+                    <p class="lead mb-4">4월~6월 데이터를 분석하여 각 월별로 어떤 카테고리가 인기였는지 확인해보세요.</p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="bi bi-graph-up-arrow feature-icon"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom: 50px;"></section>
+
+    <!-- Main Content -->
+    <div class="container" style="padding-bottom: 50px;">
+        <!-- Monthly Trend Ranking -->
+        <div class="trend-ranking-container">
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-month="april">4월 트렌드 TOP5</button>
+                <button class="tab-btn" data-month="may">5월 트렌드 TOP5</button>
+                <button class="tab-btn" data-month="june">6월 트렌드 TOP5</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- 4월 트렌드 -->
+                <div class="tab-panel active" id="april">
+                    <div class="ranking-cards">
+                        <div class="ranking-card rank-1">
+                            <div class="rank-badge">1위</div>
+                            <div class="card-icon">🎬</div>
+                            <div class="card-info">
+                                <h5>Entertainment</h5>
+                                <p>엔터테인먼트</p>
+                            </div>
+                            <div class="card-count">45개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-2">
+                            <div class="rank-badge">2위</div>
+                            <div class="card-icon">🎵</div>
+                            <div class="card-info">
+                                <h5>Music</h5>
+                                <p>음악</p>
+                            </div>
+                            <div class="card-count">23개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-3">
+                            <div class="rank-badge">3위</div>
+                            <div class="card-icon">👥</div>
+                            <div class="card-info">
+                                <h5>People & Blogs</h5>
+                                <p>인물 및 블로그</p>
+                            </div>
+                            <div class="card-count">19개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-4">
+                            <div class="rank-badge">4위</div>
+                            <div class="card-icon">😂</div>
+                            <div class="card-info">
+                                <h5>Comedy</h5>
+                                <p>코미디</p>
+                            </div>
+                            <div class="card-count">15개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-5">
+                            <div class="rank-badge">5위</div>
+                            <div class="card-icon">⚽</div>
+                            <div class="card-info">
+                                <h5>Sports</h5>
+                                <p>스포츠</p>
+                            </div>
+                            <div class="card-count">9개</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5월 트렌드 -->
+                <div class="tab-panel" id="may">
+                    <div class="ranking-cards">
+                        <div class="ranking-card rank-1">
+                            <div class="rank-badge">1위</div>
+                            <div class="card-icon">🎬</div>
+                            <div class="card-info">
+                                <h5>Entertainment</h5>
+                                <p>엔터테인먼트</p>
+                            </div>
+                            <div class="card-count">38개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-2">
+                            <div class="rank-badge">2위</div>
+                            <div class="card-icon">👥</div>
+                            <div class="card-info">
+                                <h5>People & Blogs</h5>
+                                <p>인물 및 블로그</p>
+                            </div>
+                            <div class="card-count">26개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-3">
+                            <div class="rank-badge">3위</div>
+                            <div class="card-icon">🎵</div>
+                            <div class="card-info">
+                                <h5>Music</h5>
+                                <p>음악</p>
+                            </div>
+                            <div class="card-count">25개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-4">
+                            <div class="rank-badge">4위</div>
+                            <div class="card-icon">😂</div>
+                            <div class="card-info">
+                                <h5>Comedy</h5>
+                                <p>코미디</p>
+                            </div>
+                            <div class="card-count">13개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-5">
+                            <div class="rank-badge">5위</div>
+                            <div class="card-icon">✈️</div>
+                            <div class="card-info">
+                                <h5>Travel & Events</h5>
+                                <p>여행 및 이벤트</p>
+                            </div>
+                            <div class="card-count">9개</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6월 트렌드 -->
+                <div class="tab-panel" id="june">
+                    <div class="ranking-cards">
+                        <div class="ranking-card rank-1">
+                            <div class="rank-badge">1위</div>
+                            <div class="card-icon">🎬</div>
+                            <div class="card-info">
+                                <h5>Entertainment</h5>
+                                <p>엔터테인먼트</p>
+                            </div>
+                            <div class="card-count">42개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-2">
+                            <div class="rank-badge">2위</div>
+                            <div class="card-icon">🎵</div>
+                            <div class="card-info">
+                                <h5>Music</h5>
+                                <p>음악</p>
+                            </div>
+                            <div class="card-count">26개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-3">
+                            <div class="rank-badge">3위</div>
+                            <div class="card-icon">👥</div>
+                            <div class="card-info">
+                                <h5>People & Blogs</h5>
+                                <p>인물 및 블로그</p>
+                            </div>
+                            <div class="card-count">15개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-4">
+                            <div class="rank-badge">4위</div>
+                            <div class="card-icon">😂</div>
+                            <div class="card-info">
+                                <h5>Comedy</h5>
+                                <p>코미디</p>
+                            </div>
+                            <div class="card-count">14개</div>
+                        </div>
+                        
+                        <div class="ranking-card rank-5">
+                            <div class="rank-badge">5위</div>
+                            <div class="card-icon">⚽</div>
+                            <div class="card-info">
+                                <h5>Sports</h5>
+                                <p>스포츠</p>
+                            </div>
+                            <div class="card-count">13개</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Button -->
+            <div class="more-button-container">
+                <button class="more-btn">
+                    <span>월별 트렌드 더보기</span>
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Tab Functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetMonth = this.getAttribute('data-month');
+                    
+                    // Remove active class from all tabs and panels
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabPanels.forEach(p => p.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding panel
+                    this.classList.add('active');
+                    document.getElementById(targetMonth).classList.add('active');
+                });
+            });
+            
+            // More button functionality
+            const moreBtn = document.querySelector('.more-btn');
+            moreBtn.addEventListener('click', function() {
+                alert('더 많은 월별 트렌드 데이터를 보려면 구독하세요!');
+            });
+        });
+    </script>
+</body>
+</html>

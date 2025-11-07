@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>분석결과 - YouTube Analytics</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --secondary-color: #1a1a1a;
+            --accent-color: #ff3333;
+            --text-dark: #ffffff;
+            --text-light: #cccccc;
+            --bg-light: #0a0a0a;
+            --bg-dark: #000000;
+            --gradient-primary: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            --gradient-secondary: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+        }
+        
+        body {
+            background-color: #000000;
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .navbar {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 0, 0, 0.3);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .nav-link {
+            color: #ffffff;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .btn-custom {
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 0, 0, 0.7);
+            background: var(--gradient-primary);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
+        }
+        
+        .video-card {
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            height: 100%;
+            color: #ffffff;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 0, 0, 0.2);
+            border-color: rgba(255, 0, 0, 0.4);
+        }
+        
+        .video-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .video-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #ffffff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .video-meta {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        
+        .video-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .video-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+        
+        .category-badge {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+        
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 3rem;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            padding: 100px 0 60px;
+            border-bottom: 2px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .analysis-card {
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            height: 100%;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+        
+        .analysis-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 0, 0, 0.3);
+            border-color: rgba(255, 0, 0, 0.4);
+        }
+        
+        /* 페이지네이션 스타일 */
+        .pagination {
+            margin-top: 30px;
+        }
+        
+        .page-link {
+            background-color: #1a1a1a;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ffffff;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .page-link:hover {
+            background-color: rgba(255, 0, 0, 0.2);
+            border-color: rgba(255, 0, 0, 0.5);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            border-color: #ff0000;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        .page-item.disabled .page-link {
+            background-color: #0a0a0a;
+            border-color: rgba(255, 0, 0, 0.1);
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        /* 테이블 스타일 */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .table thead th {
+            font-weight: 600;
+            padding: 15px;
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+        
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+        
+        .analysis-list-item {
+            transition: all 0.2s ease;
+        }
+        
+        .analysis-list-item:hover {
+            background-color: rgba(255, 0, 0, 0.08);
+        }
+        
+        .table tbody a {
+            color: #4A90E2;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .table tbody a:hover {
+            color: #7BB3F0;
+            text-decoration: underline;
+        }
+        
+        .analysis-preview {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .analysis-preview h6 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .analysis-preview p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h5 {
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state p {
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+        
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .modal-title {
+            color: #ffffff;
+        }
+        
+        .btn-close-white {
+            filter: invert(1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-graph-up me-2"></i>
+                YouTube Analytics
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">홈</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#features">기능</a></li>
+                    <li class="nav-item"><a class="nav-link" href="trend.html">트렌드</a></li>
+                    <li class="nav-item"><a class="nav-link" href="feedback.html">피드백</a></li>
+                </ul>
+                <div class="navbar-nav ms-3">
+                    <div id="authButtons">
+                        <!-- 로그인/회원가입 버튼들이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                    <div id="userMenu" class="dropdown" style="display: none;">
+                        <!-- 사용자 메뉴가 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="section-title">분석결과</h1>
+                <p class="section-subtitle">내가 입력한 영상 정보와 저장된 분석 결과를 확인하세요</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="py-5" style="padding: 60px 0; background-color: #0a0a0a;">
+        <div class="container">
+            <!-- 로그인 안내 -->
+            <div id="loginPrompt" class="text-center py-5">
+                <div class="card" style="background: #1a1a1a; border: 1px solid rgba(255, 0, 0, 0.3); border-radius: 20px; padding: 40px;">
+                    <i class="bi bi-person-circle" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 20px;"></i>
+                    <h4 class="text-white mb-3">로그인이 필요합니다</h4>
+                    <p class="text-muted mb-4">영상 정보를 확인하려면 먼저 로그인해주세요.</p>
+                    <div>
+                        <a href="login.html" class="btn btn-custom me-3">로그인</a>
+                        <a href="signup.html" class="btn btn-outline-primary">회원가입</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 로그인된 사용자 컨텐츠 -->
+            <div id="userContent" style="display: none;">
+                    <!-- 저장된 분석 결과 -->
+                <div id="analyses" role="tabpanel">
+                        <!-- 저장된 분석 목록 -->
+                    <div id="analysesList" class="mb-4">
+                        <!-- 분석 결과들이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                    
+                    <!-- 페이지네이션 -->
+                    <nav id="paginationNav" aria-label="페이지네이션" style="display: none;">
+                        <ul class="pagination justify-content-center" id="paginationList">
+                            <!-- 페이지 번호가 여기에 동적으로 추가됩니다 -->
+                        </ul>
+                    </nav>
+                        
+                        <!-- 빈 목록 메시지 -->
+                        <div id="emptyAnalysesList" class="empty-state" style="display: none;">
+                            <i class="bi bi-bookmark"></i>
+                            <h5>저장된 분석 결과가 없습니다</h5>
+                            <p>피드백 결과 페이지에서 분석 결과를 저장해보세요!</p>
+                            <a href="feedback.html" class="btn btn-custom">
+                                <i class="bi bi-plus-circle me-2"></i>영상 분석하기
+                            </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 분석 결과 상세보기 모달 -->
+    <div class="modal fade" id="analysisDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-eye me-2"></i>분석 결과 상세보기
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="analysisDetailContent">
+                        <!-- 분석 결과 상세 내용이 여기에 표시됩니다 -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteCurrentAnalysis()">삭제</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 삭제 확인 모달 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-2 text-warning"></i>삭제 확인
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">이 분석 결과를 삭제하시겠습니까?</p>
+                    <small class="text-muted">삭제된 분석 결과는 복구할 수 없습니다.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">삭제</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" style="background-color: #000000; color: #ffffff; padding: 50px 0 20px; border-top: 3px solid #ff0000;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 YouTube Analytics. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-light text-decoration-none me-3">개인정보처리방침</a>
+                    <a href="#" class="text-light text-decoration-none">이용약관</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        let currentAnalysisIndex = -1;
+        let pendingDeleteIndex = -1;
+
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthState();
+            // loadVideoList(); // 영상 목록 기능 제거
+            loadAnalyses();
+        });
+
+        // 인증 상태 업데이트
+        function updateAuthState() {
+            const currentUser = localStorage.getItem('current_user');
+            const loginPrompt = document.getElementById('loginPrompt');
+            const userContent = document.getElementById('userContent');
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                loginPrompt.style.display = 'none';
+                userContent.style.display = 'block';
+                authButtons.style.display = 'none';
+                userMenu.style.display = 'block';
+
+                userMenu.innerHTML = `
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-2"></i>${user.name}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">${user.email}</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="mypage.html"><i class="bi bi-collection me-2"></i>내 페이지</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>프로필</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>설정</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="bi bi-box-arrow-right me-2"></i>로그아웃</a></li>
+                    </ul>
+                `;
+            } else {
+                loginPrompt.style.display = 'block';
+                userContent.style.display = 'none';
+                authButtons.style.display = 'block';
+                userMenu.style.display = 'none';
+
+                authButtons.innerHTML = `
+                    <a href="login.html" class="btn btn-outline-primary me-2">로그인</a>
+                    <a href="signup.html" class="btn btn-custom">회원가입</a>
+                `;
+            }
+        }
+
+        // 로그아웃
+        async function logout() {
+            try {
+                const sessionToken = localStorage.getItem('session_token');
+                if (sessionToken) {
+                    await fetch('http://localhost:8001/api/auth/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ session_token: sessionToken })
+                    });
+                }
+            } catch (error) {
+                console.error('로그아웃 API 호출 실패:', error);
+            }
+
+            localStorage.removeItem('current_user');
+            localStorage.removeItem('session_token');
+            updateAuthState();
+        }
+
+        // 영상 목록 로드
+        async function loadVideoList() {
+            const loadingDiv = document.getElementById('videoListLoading');
+            const videoListDiv = document.getElementById('videoList');
+            const emptyDiv = document.getElementById('emptyVideoList');
+
+            loadingDiv.style.display = 'block';
+            videoListDiv.innerHTML = '';
+            emptyDiv.style.display = 'none';
+
+            try {
+                const sessionToken = localStorage.getItem('session_token');
+                const response = await fetch('http://localhost:8001/api/videos/list', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data.videos.length > 0) {
+                    displayVideoList(data.data.videos);
+                } else {
+                    emptyDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('영상 목록 로드 실패:', error);
+                emptyDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        // 영상 목록 표시
+        function displayVideoList(videos) {
+            const videoListDiv = document.getElementById('videoList');
+            videoListDiv.innerHTML = '';
+
+            videos.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'col-md-6 col-lg-4';
+
+                const thumbnailHtml = video.thumbnail_image ? 
+                    `<img src="${video.thumbnail_image}" class="video-thumbnail" alt="썸네일">` :
+                    `<div class="video-thumbnail d-flex align-items-center justify-content-center" style="background: #2a2a2a;">
+                        <i class="bi bi-video" style="font-size: 3rem; color: #666;"></i>
+                    </div>`;
+
+                const uploadTime = video.upload_time ? 
+                    new Date(video.upload_time).toLocaleDateString('ko-KR') : '미설정';
+
+                videoCard.innerHTML = `
+                    <div class="video-card">
+                        ${thumbnailHtml}
+                        <div class="video-title">${video.title || '제목 없음'}</div>
+                        <div class="video-meta">
+                            <span class="category-badge">${getCategoryName(video.category)}</span>
+                            <span class="ms-2">${video.length || 0}분</span>
+                        </div>
+                        <div class="video-description">${video.description || '설명이 없습니다.'}</div>
+                        <div class="video-meta">
+                            <small>업로드 예정: ${uploadTime}</small>
+                        </div>
+                        <div class="video-actions">
+                            <button class="btn btn-primary btn-sm" onclick="viewVideoDetails(${video.id})">
+                                <i class="bi bi-eye me-1"></i>상세보기
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="editVideo(${video.id})">
+                                <i class="bi bi-pencil me-1"></i>수정
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                videoListDiv.appendChild(videoCard);
+            });
+        }
+
+        // 현재 페이지 상태
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // 저장된 분석 로드
+        function loadAnalyses(page = 1) {
+            currentPage = page;
+            const analysesListDiv = document.getElementById('analysesList');
+            const emptyDiv = document.getElementById('emptyAnalysesList');
+            const paginationNav = document.getElementById('paginationNav');
+            const savedAnalyses = getSavedAnalyses();
+
+            analysesListDiv.innerHTML = '';
+
+            if (savedAnalyses.length === 0) {
+                emptyDiv.style.display = 'block';
+                paginationNav.style.display = 'none';
+            } else {
+                emptyDiv.style.display = 'none';
+                
+                // 날짜순으로 정렬 (최신이 위로)
+                const sortedAnalyses = [...savedAnalyses].sort((a, b) => {
+                    return new Date(b.analysis_date) - new Date(a.analysis_date);
+                });
+                
+                // 페이지네이션 계산
+                const totalPages = Math.ceil(sortedAnalyses.length / itemsPerPage);
+                const startIndex = (page - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const pageAnalyses = sortedAnalyses.slice(startIndex, endIndex);
+                
+                // 분석 결과 표시
+                pageAnalyses.forEach((analysis) => {
+                    const analysisItem = document.createElement('div');
+                    analysisItem.className = 'analysis-list-item mb-2';
+                    
+                    // 날짜 포맷팅 (연도 제외)
+                    const analysisDate = new Date(analysis.analysis_date);
+                    const formattedDate = analysisDate.toLocaleDateString('ko-KR', {
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    // 원래 인덱스 찾기 (상세보기용)
+                    const originalIndex = savedAnalyses.findIndex(a => a.id === analysis.id);
+                    
+                    analysisItem.innerHTML = `
+                        <div class="d-flex align-items-center justify-content-between p-3 border-bottom border-secondary" style="cursor: pointer; border-color: rgba(255, 0, 0, 0.2) !important;" onclick="viewAnalysisDetails(${originalIndex})">
+                            <div class="flex-grow-1">
+                                <h5 class="text-white mb-0">
+                                    <i class="bi bi-file-text me-2" style="color: #ff0000;"></i>
+                                    ${analysis.video_info?.title || '제목 없음'}
+                                </h5>
+                            </div>
+                            <div class="text-white">
+                                ${formattedDate}
+                            </div>
+                        </div>
+                    `;
+
+                    analysesListDiv.appendChild(analysisItem);
+                });
+                
+                // 페이지네이션 생성
+                paginationNav.style.display = 'block';
+                renderPagination(totalPages, page);
+            }
+        }
+
+        // 페이지네이션 렌더링
+        function renderPagination(totalPages, currentPageNum) {
+            const paginationList = document.getElementById('paginationList');
+            paginationList.innerHTML = '';
+            
+            // 1페이지만 있으면 "1"만 표시 (이전/다음 버튼 없음)
+            if (totalPages === 1) {
+                const pageLi = document.createElement('li');
+                pageLi.className = 'page-item active';
+                pageLi.innerHTML = `<span class="page-link">1</span>`;
+                paginationList.appendChild(pageLi);
+                return;
+            }
+            
+            // 2페이지 이상일 때 이전/다음 버튼과 페이지 번호 표시
+            // 이전 버튼
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPageNum === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `
+                <a class="page-link" href="#" onclick="event.preventDefault(); loadAnalyses(${currentPageNum - 1}); return false;">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            `;
+            paginationList.appendChild(prevLi);
+            
+            // 페이지 번호 버튼
+            const maxButtons = 10;
+            let startPage = Math.max(1, currentPageNum - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            
+            if (endPage - startPage < maxButtons - 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
+            
+            if (startPage > 1) {
+                const firstLi = document.createElement('li');
+                firstLi.className = 'page-item';
+                firstLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadAnalyses(1); return false;">1</a>`;
+                paginationList.appendChild(firstLi);
+                
+                if (startPage > 2) {
+                    const ellipsisLi = document.createElement('li');
+                    ellipsisLi.className = 'page-item disabled';
+                    ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                    paginationList.appendChild(ellipsisLi);
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageLi = document.createElement('li');
+                pageLi.className = `page-item ${i === currentPageNum ? 'active' : ''}`;
+                pageLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadAnalyses(${i}); return false;">${i}</a>`;
+                paginationList.appendChild(pageLi);
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsisLi = document.createElement('li');
+                    ellipsisLi.className = 'page-item disabled';
+                    ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                    paginationList.appendChild(ellipsisLi);
+                }
+                
+                const lastLi = document.createElement('li');
+                lastLi.className = 'page-item';
+                lastLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadAnalyses(${totalPages}); return false;">${totalPages}</a>`;
+                paginationList.appendChild(lastLi);
+            }
+            
+            // 다음 버튼
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPageNum === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `
+                <a class="page-link" href="#" onclick="event.preventDefault(); loadAnalyses(${currentPageNum + 1}); return false;">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            `;
+            paginationList.appendChild(nextLi);
+        }
+
+        // 카테고리 이름 가져오기
+        function getCategoryName(categoryId) {
+            const categoryMap = {
+                '1': 'Film & Animation',
+                '2': 'Autos & Vehicles',
+                '10': 'Music',
+                '15': 'Pets & Animals',
+                '17': 'Sports',
+                '18': 'Short Movies',
+                '19': 'Travel & Events',
+                '20': 'Gaming',
+                '21': 'Videoblogging',
+                '22': 'People & Blogs',
+                '23': 'Comedy',
+                '24': 'Entertainment',
+                '25': 'News & Politics',
+                '26': 'Howto & Style'
+            };
+            return categoryMap[categoryId] || '기타';
+        }
+
+        // 저장된 분석 결과 조회
+        function getSavedAnalyses() {
+            return JSON.parse(localStorage.getItem('savedAnalyses') || '[]');
+        }
+
+        // 분석 결과 HTML 생성 (개선점 포함)
+        function generateAnalysisResultsHtml(analysis) {
+            // analysis_result가 없는 경우 처리
+            if (!analysis.analysis_result) {
+                return `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        저장된 분석 결과 데이터가 없습니다.
+                    </div>
+                `;
+            }
+            
+            const analysisResult = analysis.analysis_result;
+            
+            // 상세 권장사항에서 개선점 추출 (feedback_content에서 파싱)
+            let improvements = [];
+            
+            // feedback_content에서 상세 권장사항의 description 추출
+            if (analysis.feedback_content) {
+                try {
+                    console.log('feedback_content 확인:', analysis.feedback_content.substring(0, 500));
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = analysis.feedback_content;
+                    
+                    // 상세 권장사항 섹션 찾기
+                    const detailedRecommendationsDiv = tempDiv.querySelector('#detailedRecommendations');
+                    console.log('detailedRecommendationsDiv:', detailedRecommendationsDiv);
+                    
+                    if (detailedRecommendationsDiv) {
+                        // 각 권장사항 아이템 찾기
+                        const recommendationItems = detailedRecommendationsDiv.querySelectorAll('.recommendation-item');
+                        console.log('recommendationItems 개수:', recommendationItems.length);
+                        
+                        recommendationItems.forEach((item, index) => {
+                            console.log(`아이템 ${index} 처리 중`);
+                            
+                            // 제목 추출 (개선점: [title] 형식)
+                            const titleDiv = item.querySelector('.recommendation-title');
+                            let title = '';
+                            if (titleDiv) {
+                                title = titleDiv.textContent.trim();
+                                // "개선점: " 제거
+                                title = title.replace(/^개선점:\s*/, '');
+                                console.log(`제목 추출: ${title}`);
+                            }
+                            
+                            // "권장 사유 및 상세 설명" 텍스트를 포함하는 div 찾기
+                            let descriptionDiv = null;
+                            
+                            // 방법 1: style 속성으로 찾기
+                            const allDivs = item.querySelectorAll('div');
+                            allDivs.forEach(div => {
+                                const styleAttr = div.getAttribute('style') || '';
+                                if (styleAttr.includes('권장 사유') || div.textContent.includes('권장 사유 및 상세 설명')) {
+                                    if (!descriptionDiv) {
+                                        descriptionDiv = div;
+                                    }
+                                }
+                            });
+                            
+                            // 방법 2: 직접 텍스트로 찾기
+                            if (!descriptionDiv) {
+                                allDivs.forEach(div => {
+                                    if (div.textContent && div.textContent.includes('권장 사유')) {
+                                        descriptionDiv = div;
+                                    }
+                                });
+                            }
+                            
+                            console.log(`descriptionDiv 찾음: ${!!descriptionDiv}`);
+                            
+                            let descriptionText = '';
+                            if (descriptionDiv) {
+                                // description 내부의 텍스트 div 찾기 (color: #ffffff)
+                                const textDivs = descriptionDiv.querySelectorAll('div');
+                                let foundTextDiv = null;
+                                
+                                textDivs.forEach(textDiv => {
+                                    const style = textDiv.getAttribute('style') || '';
+                                    if ((style.includes('color: #ffffff') || style.includes('color:#ffffff')) && 
+                                        textDiv.textContent.trim() && 
+                                        !textDiv.textContent.includes('권장 사유')) {
+                                        foundTextDiv = textDiv;
+                                    }
+                                });
+                                
+                                if (foundTextDiv) {
+                                    descriptionText = foundTextDiv.textContent.trim();
+                                    console.log(`텍스트 div에서 추출: ${descriptionText.substring(0, 50)}...`);
+                                } else {
+                                    // 전체 텍스트에서 "권장 사유 및 상세 설명" 제거
+                                    const fullText = descriptionDiv.textContent || descriptionDiv.innerText || '';
+                                    descriptionText = fullText.replace(/권장 사유 및 상세 설명/g, '').trim();
+                                    console.log(`전체 텍스트에서 추출: ${descriptionText.substring(0, 50)}...`);
+                                }
+                            } else {
+                                // descriptionDiv를 찾지 못한 경우, 전체 아이템에서 추출 시도
+                                const fullText = item.textContent || item.innerText || '';
+                                if (fullText.includes('권장 사유')) {
+                                    descriptionText = fullText.replace(/개선점:.*?권장 사유 및 상세 설명/g, '').replace(/권장 사유 및 상세 설명/g, '').trim();
+                                }
+                            }
+                            
+                            // 제목과 설명을 합쳐서 개선점으로 추가
+                            if (title && descriptionText) {
+                                improvements.push(`${title}: ${descriptionText}`);
+                                console.log(`개선점 추가 (제목+설명): ${title}`);
+                            } else if (descriptionText) {
+                                improvements.push(descriptionText);
+                                console.log(`개선점 추가 (설명만): ${descriptionText.substring(0, 50)}...`);
+                            } else if (title) {
+                                improvements.push(title);
+                                console.log(`개선점 추가 (제목만): ${title}`);
+                            }
+                        });
+                    } else {
+                        console.warn('detailedRecommendationsDiv를 찾을 수 없습니다.');
+                    }
+                    
+                    console.log('추출된 improvements:', improvements.length);
+                    
+                    // 개선점이 없으면 기존 improvements 사용
+                    if (improvements.length === 0 && analysisResult.improvements && analysisResult.improvements.length > 0) {
+                        improvements = analysisResult.improvements;
+                        console.log('기존 improvements 사용:', improvements.length);
+                    }
+                } catch (e) {
+                    console.error('개선점 추출 오류:', e);
+                    console.error(e.stack);
+                    // 오류 발생 시 기존 improvements 사용
+                    if (analysisResult.improvements && analysisResult.improvements.length > 0) {
+                        improvements = analysisResult.improvements;
+                    }
+                }
+            } else {
+                console.warn('feedback_content가 없습니다.');
+                // feedback_content가 없으면 기존 improvements 사용
+                if (analysisResult.improvements && analysisResult.improvements.length > 0) {
+                    improvements = analysisResult.improvements;
+                }
+            }
+            
+            console.log('분석 결과:', analysisResult);
+            console.log('개선점:', improvements);
+            
+            let html = '<div class="analysis-results-container">';
+            
+            // 예측 결과 정보
+            if (analysisResult.predicted_views !== undefined || analysisResult.confidence !== undefined) {
+                html += `
+                    <div class="mb-4">
+                        <h6 class="text-white mb-3">예측 결과</h6>
+                        <div class="row g-3">
+                            ${analysisResult.predicted_views !== undefined ? `
+                            <div class="col-md-6">
+                                <div class="card bg-dark text-white border-danger">
+                                    <div class="card-body">
+                                        <div class="text-muted small">예상 조회수</div>
+                                        <div class="h4 mb-0 text-danger">${(analysisResult.predicted_views || 0).toLocaleString()}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+                            ${analysisResult.confidence !== undefined ? `
+                            <div class="col-md-6">
+                                <div class="card bg-dark text-white border-danger">
+                                    <div class="card-body">
+                                        <div class="text-muted small">예측 신뢰도</div>
+                                        <div class="h4 mb-0 text-danger">${analysisResult.confidence || 0}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+                            ${analysisResult.category_rank ? `
+                            <div class="col-md-6">
+                                <div class="card bg-dark text-white border-danger">
+                                    <div class="card-body">
+                                        <div class="text-muted small">카테고리 순위</div>
+                                        <div class="h4 mb-0 text-danger">${analysisResult.category_rank}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 개선점 섹션 (피드백 결과 페이지와 동일한 카드 형식)
+            if (improvements.length > 0) {
+                html += `
+                    <div class="mb-4">
+                        <h6 class="text-warning mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>개선점
+                        </h6>
+                        <div class="improvements-list">
+                            ${improvements.map((improvement, idx) => {
+                                // "제목: 설명" 형식을 파싱
+                                const parts = improvement.split(': ');
+                                const title = parts.length > 1 ? parts[0] : '';
+                                const description = parts.length > 1 ? parts.slice(1).join(': ') : improvement;
+                                
+                                return `
+                                    <div class="recommendation-item mb-3 p-4" style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.08) 0%, rgba(255, 193, 7, 0.12) 100%); border-radius: 15px; border-left: 4px solid #ffc107; transition: all 0.3s ease;">
+                                        ${title ? `
+                                        <div class="recommendation-title fw-bold mb-3" style="color: #ffc107; font-size: 1.2rem;">
+                                            개선점: ${title}
+                                        </div>
+                                        ` : ''}
+                                        <div class="mt-3 p-3" style="background: rgba(255, 255, 255, 0.05); border-radius: 10px; border-left: 3px solid #ffc107;">
+                                            <strong style="color: #ffc107; font-size: 1.05rem; display: block; margin-bottom: 8px;">권장 사유 및 상세 설명</strong>
+                                            <div style="color: #ffffff; line-height: 1.8; font-size: 0.95rem;">${description}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="mb-4">
+                        <h6 class="text-warning mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>개선점
+                        </h6>
+                        <div class="alert alert-secondary">
+                            <i class="bi bi-info-circle me-2"></i>개선점이 없습니다.
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        // 분석 결과 상세보기
+        function viewAnalysisDetails(index) {
+            const savedAnalyses = getSavedAnalyses();
+            console.log('저장된 분석 결과 개수:', savedAnalyses.length);
+            console.log('요청한 인덱스:', index);
+            
+            if (index >= 0 && index < savedAnalyses.length) {
+                currentAnalysisIndex = index;
+                const analysis = savedAnalyses[index];
+                console.log('선택된 분석 결과:', analysis);
+                
+                if (!analysis) {
+                    alert('분석 결과를 찾을 수 없습니다.');
+                    return;
+                }
+                
+                const modal = new bootstrap.Modal(document.getElementById('analysisDetailModal'));
+                const contentDiv = document.getElementById('analysisDetailContent');
+
+                // 추천 태그 생성 (안전하게)
+                const tagsHtml = (analysis.analysis_result && analysis.analysis_result.tags && analysis.analysis_result.tags.length > 0) ? 
+                    analysis.analysis_result.tags.map(tag => `<span class="badge bg-primary me-1 mb-1">#${tag}</span>`).join('') :
+                    '<span class="text-muted">추천 태그가 없습니다.</span>';
+
+                contentDiv.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-primary mb-3">영상 정보</h6>
+                            <p><strong>제목:</strong> ${analysis.video_info?.title || '제목 없음'}</p>
+                            <p><strong>카테고리:</strong> ${getCategoryName(analysis.video_info?.category)}</p>
+                            <p><strong>길이:</strong> ${analysis.video_info?.length || 0}분</p>
+                            <p><strong>업로드 예정:</strong> ${analysis.video_info?.upload_time || '미설정'}</p>
+                            <p><strong>설명:</strong> ${(analysis.video_info?.description || '없음').substring(0, 100)}${(analysis.video_info?.description || '').length > 100 ? '...' : ''}</p>
+                            
+                            <hr class="my-4">
+                            
+                            <h6 class="text-primary mb-3">추천 태그</h6>
+                            <div class="mb-3">
+                                ${tagsHtml}
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h6 class="text-primary mb-3">
+                                <i class="bi bi-graph-up-arrow me-2"></i>분석 결과
+                            </h6>
+                            ${generateAnalysisResultsHtml(analysis)}
+                        </div>
+                    </div>
+                `;
+
+                modal.show();
+            } else {
+                alert('유효하지 않은 인덱스입니다.');
+            }
+        }
+
+        // 현재 분석 결과 삭제 (상세보기 모달에서)
+        function deleteCurrentAnalysis() {
+            if (currentAnalysisIndex >= 0) {
+                pendingDeleteIndex = currentAnalysisIndex;
+                const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                deleteModal.show();
+            }
+        }
+
+        // 분석 결과 삭제 (목록에서)
+        function deleteAnalysis(index) {
+            pendingDeleteIndex = index;
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            deleteModal.show();
+        }
+
+        // 삭제 확인
+        function confirmDelete() {
+            if (pendingDeleteIndex >= 0) {
+                const savedAnalyses = getSavedAnalyses();
+                if (pendingDeleteIndex >= 0 && pendingDeleteIndex < savedAnalyses.length) {
+                    savedAnalyses.splice(pendingDeleteIndex, 1);
+                    localStorage.setItem('savedAnalyses', JSON.stringify(savedAnalyses));
+                    loadAnalyses(); // 목록 새로고침
+                    
+                    // 상세보기 모달이 열려있다면 닫기
+                    const detailModal = bootstrap.Modal.getInstance(document.getElementById('analysisDetailModal'));
+                    if (detailModal) {
+                        detailModal.hide();
+                    }
+                    
+                    // 삭제 확인 모달 닫기
+                    const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+                    if (deleteModal) {
+                        deleteModal.hide();
+                    }
+                    
+                    alert('분석 결과가 삭제되었습니다.');
+                }
+                pendingDeleteIndex = -1;
+            }
+        }
+
+        // 영상 상세보기
+        function viewVideoDetails(videoId) {
+            alert(`영상 ID: ${videoId}의 상세 정보를 보여줍니다.`);
+        }
+
+        // 영상 수정
+        function editVideo(videoId) {
+            alert(`영상 ID: ${videoId}를 수정합니다.`);
+        }
+
+        // 새로고침 함수들
+        function refreshVideoList() {
+            // loadVideoList(); // 영상 목록 기능 제거
+            loadAnalyses(); // 분석 결과만 새로고침
+        }
+
+        function refreshAnalyses() {
+            loadAnalyses();
+        }
+    </script>
+</body>
+</html>

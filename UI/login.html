@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - YouTube Analytics</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-color: #e74c3c;
+            --secondary-color: #2c3e50;
+            --accent-color: #f39c12;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --bg-light: #f8f9fa;
+            --gradient-primary: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            --gradient-secondary: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+        
+        body {
+            background: var(--gradient-primary);
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--gradient-primary);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .login-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+            background-color: white;
+        }
+        
+        .form-label {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .btn-login {
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(231, 76, 60, 0.4);
+            background: var(--gradient-primary);
+            color: white;
+        }
+        
+        .btn-login:disabled {
+            opacity: 0.6;
+            transform: none;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e9ecef;
+        }
+        
+        .divider span {
+            background: white;
+            padding: 0 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .signup-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .signup-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .signup-link a:hover {
+            color: var(--secondary-color);
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-success {
+            background-color: #d1edff;
+            color: #0c5460;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.show {
+            display: inline-block;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">
+        <i class="bi bi-arrow-left me-2"></i>홈으로 돌아가기
+    </a>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>
+                    <i class="bi bi-graph-up me-2" style="color: var(--primary-color);"></i>
+                    로그인
+                </h1>
+                <p>YouTube Analytics에 오신 것을 환영합니다</p>
+            </div>
+            
+            <div id="alertContainer"></div>
+            
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="email" class="form-label">
+                        <i class="bi bi-envelope me-2"></i>이메일
+                    </label>
+                    <input type="email" class="form-control" id="email" placeholder="이메일을 입력하세요" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label">
+                        <i class="bi bi-lock me-2"></i>비밀번호
+                    </label>
+                    <input type="password" class="form-control" id="password" placeholder="비밀번호를 입력하세요" required>
+                </div>
+                
+                <div class="mb-4 form-check">
+                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">
+                        로그인 상태 유지
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-login" id="loginBtn">
+                    <span class="loading spinner-border spinner-border-sm me-2" role="status"></span>
+                    <span class="btn-text">로그인</span>
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>또는</span>
+            </div>
+            
+            <div class="signup-link">
+                <p class="mb-0">계정이 없으신가요? 
+                    <a href="signup.html">회원가입</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Auth JavaScript -->
+    <script>
+        // 사용자 데이터베이스 (로컬 스토리지 기반)
+        class UserDB {
+            constructor() {
+                this.users = this.loadUsers();
+            }
+            
+            loadUsers() {
+                const users = localStorage.getItem('youtube_analytics_users');
+                return users ? JSON.parse(users) : [];
+            }
+            
+            saveUsers() {
+                localStorage.setItem('youtube_analytics_users', JSON.stringify(this.users));
+            }
+            
+            addUser(user) {
+                // 이메일 중복 체크
+                if (this.findUserByEmail(user.email)) {
+                    throw new Error('이미 존재하는 이메일입니다.');
+                }
+                
+                // 사용자 ID 생성
+                user.id = Date.now().toString();
+                user.createdAt = new Date().toISOString();
+                
+                this.users.push(user);
+                this.saveUsers();
+                return user;
+            }
+            
+            findUserByEmail(email) {
+                return this.users.find(user => user.email === email);
+            }
+            
+            authenticate(email, password) {
+                const user = this.findUserByEmail(email);
+                if (user && user.password === password) {
+                    return user;
+                }
+                return null;
+            }
+        }
+        
+        // 인증 관리자
+        class AuthManager {
+            constructor() {
+                this.userDB = new UserDB();
+                this.currentUser = this.loadCurrentUser();
+            }
+            
+            loadCurrentUser() {
+                const user = localStorage.getItem('youtube_analytics_current_user');
+                return user ? JSON.parse(user) : null;
+            }
+            
+            saveCurrentUser(user) {
+                if (user) {
+                    localStorage.setItem('youtube_analytics_current_user', JSON.stringify(user));
+                } else {
+                    localStorage.removeItem('youtube_analytics_current_user');
+                }
+                this.currentUser = user;
+            }
+            
+            login(email, password, rememberMe = false) {
+                const user = this.userDB.authenticate(email, password);
+                if (user) {
+                    // 비밀번호 제거하고 저장
+                    const userWithoutPassword = { ...user };
+                    delete userWithoutPassword.password;
+                    
+                    this.saveCurrentUser(userWithoutPassword);
+                    
+                    if (rememberMe) {
+                        localStorage.setItem('youtube_analytics_remember', 'true');
+                    }
+                    
+                    return userWithoutPassword;
+                }
+                return null;
+            }
+            
+            logout() {
+                this.saveCurrentUser(null);
+                localStorage.removeItem('youtube_analytics_remember');
+            }
+            
+            isLoggedIn() {
+                return this.currentUser !== null;
+            }
+            
+            getCurrentUser() {
+                return this.currentUser;
+            }
+        }
+        
+        // 전역 인증 관리자
+        const authManager = new AuthManager();
+        
+        // 로그인 폼 처리
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = loginBtn.querySelector('.btn-text');
+            const loading = loginBtn.querySelector('.loading');
+            
+            // 로딩 상태 표시
+            loginBtn.disabled = true;
+            loading.classList.add('show');
+            btnText.textContent = '로그인 중...';
+            
+            try {
+                // FastAPI 서버로 로그인 시도
+                const response = await fetch('http://localhost:8001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 로그인 성공
+                    localStorage.setItem('current_user', JSON.stringify(data.data.user));
+                    if (data.data.session_token) {
+                        localStorage.setItem('session_token', data.data.session_token);
+                    }
+                    showAlert('success', '로그인에 성공했습니다! 잠시 후 메인 페이지로 이동합니다.');
+                    
+                    // 1.5초 후 메인 페이지로 이동
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    showAlert('danger', data.message || '로그인에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('로그인 오류:', error);
+                showAlert('danger', '서버 연결에 실패했습니다. FastAPI 서버가 실행 중인지 확인하세요. (http://localhost:8001)');
+            } finally {
+                // 로딩 상태 해제
+                loginBtn.disabled = false;
+                loading.classList.remove('show');
+                btnText.textContent = '로그인';
+            }
+        });
+        
+        // 알림 표시 함수
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+            
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}" id="${alertId}" role="alert">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            // 5초 후 자동 제거
+            setTimeout(() => {
+                const alert = document.getElementById(alertId);
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+        
+        // 이미 로그인된 사용자는 메인 페이지로 리다이렉트
+        if (authManager.isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+        
+        // 데모 계정 생성 (처음 방문 시)
+        if (authManager.userDB.users.length === 0) {
+            try {
+                authManager.userDB.addUser({
+                    email: 'demo@youtubeanalytics.com',
+                    password: 'demo123',
+                    name: '데모 사용자',
+                    role: 'user'
+                });
+                console.log('데모 계정이 생성되었습니다. 이메일: demo@youtubeanalytics.com, 비밀번호: demo123');
+            } catch (error) {
+                console.log('데모 계정 생성 중 오류:', error.message);
+            }
+        }
+    </script>
+</body>
+</html>
