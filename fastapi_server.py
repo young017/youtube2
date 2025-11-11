@@ -24,7 +24,7 @@ if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
 from database import UserDatabase, db
-from tag_recommendation_model import TagRecommendationModel
+from tags.tag_recommendation_model import TagRecommendationModel
 from enrich_tags import run_pipeline
 from openai import OpenAI
 
