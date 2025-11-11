@@ -98,7 +98,7 @@ class ProfileUpdate(BaseModel):
 
 class TagRecommendRequest(BaseModel):
     title: str = Field(..., description="유튜브 영상 제목")
-    top_k: int = Field(default=10, ge=1, le=50, description="추천할 태그 개수")
+    top_k: int = Field(default=20, ge=1, le=50, description="추천할 태그 개수")
     method: str = Field(default="hybrid", description="추천 방법 (hybrid, sbert, similarity)")
 
 class TagRefineRequest(BaseModel):
