@@ -530,6 +530,209 @@
         .tab-btn {
             color: #cccccc;
         }
+        
+        /* 실시간 업데이트 UI 스타일 */
+        .update-status-bar {
+            background-color: #1a1a1a;
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .update-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .update-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+        
+        .update-time i {
+            color: #ff0000;
+        }
+        
+        .update-time .time-text {
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        .update-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .refresh-btn {
+            background-color: transparent;
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .refresh-btn:hover {
+            background-color: #ff0000;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .refresh-btn.loading {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .auto-refresh-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toggle-label {
+            color: #cccccc;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background-color: #333;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .toggle-switch.active {
+            background-color: #ff0000;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.live {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            border: 1px solid #ff0000;
+        }
+        
+        .status-badge.offline {
+            background-color: rgba(128, 128, 128, 0.2);
+            color: #888;
+            border: 1px solid #888;
+        }
+        
+        .status-badge .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ff0000;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+        
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 0, 0, 0.3);
+            border-top-color: #ff0000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading-text {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .update-interval-info {
+            color: #888;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -586,6 +789,31 @@
 
     <!-- Main Content -->
     <div class="container" style="padding-bottom: 50px;">
+        <!-- 실시간 업데이트 상태 바 -->
+        <div class="update-status-bar">
+            <div class="update-info">
+                <div class="update-time">
+                    <i class="bi bi-clock"></i>
+                    <span>최근 업데이트:</span>
+                    <span class="time-text" id="lastUpdateTime">--:--:--</span>
+                </div>
+                <div class="status-badge live" id="statusBadge">
+                    <span class="pulse"></span>
+                    <span>실시간</span>
+                </div>
+            </div>
+            <div class="update-actions">
+                <div class="auto-refresh-toggle">
+                    <span class="toggle-label">자동 새로고침</span>
+                    <div class="toggle-switch" id="autoRefreshToggle"></div>
+                </div>
+                <button class="refresh-btn" id="refreshBtn">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>새로고침</span>
+                </button>
+            </div>
+        </div>
+        
         <!-- Monthly Trend Ranking -->
         <div class="trend-ranking-container">
             <!-- Tab Navigation -->
@@ -772,12 +1000,119 @@
             </div>
         </div>
     
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">데이터를 불러오는 중...</div>
+    </div>
+    
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Tab Functionality -->
+    <!-- Tab Functionality & Real-time Update -->
     <script>
+        // 전역 변수
+        let autoRefreshInterval = null;
+        let autoRefreshEnabled = false;
+        const AUTO_REFRESH_INTERVAL = 30000; // 30초
+        
+        // 시간 포맷 함수
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 날짜와 시간 포맷 함수
+        function formatDateTime(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const time = formatTime(date);
+            return `${year}-${month}-${day} ${time}`;
+        }
+        
+        // 최근 업데이트 시간 업데이트
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('lastUpdateTime');
+            timeElement.textContent = formatTime(now);
+            timeElement.setAttribute('title', formatDateTime(now));
+        }
+        
+        // 데이터 새로고침 함수 (실제 API 호출로 대체 예정)
+        async function refreshData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // 버튼 비활성화 및 로딩 표시
+            refreshBtn.disabled = true;
+            refreshBtn.querySelector('i').classList.add('loading');
+            loadingOverlay.classList.add('active');
+            
+            try {
+                // TODO: 실제 API 호출로 대체
+                // const response = await fetch('/api/trends/latest');
+                // const data = await response.json();
+                
+                // 시뮬레이션: 1-2초 대기
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // 데이터 업데이트 (실제로는 API 응답 데이터로 업데이트)
+                // updateTrendData(data);
+                
+                // 업데이트 시간 갱신
+                updateLastUpdateTime();
+                
+                // 성공 메시지 (선택사항)
+                console.log('데이터가 성공적으로 업데이트되었습니다.');
+                
+            } catch (error) {
+                console.error('데이터 새로고침 실패:', error);
+                alert('데이터를 불러오는 중 오류가 발생했습니다.');
+            } finally {
+                // 버튼 활성화 및 로딩 제거
+                refreshBtn.disabled = false;
+                refreshBtn.querySelector('i').classList.remove('loading');
+                loadingOverlay.classList.remove('active');
+            }
+        }
+        
+        // 자동 새로고침 토글
+        function toggleAutoRefresh() {
+            const toggle = document.getElementById('autoRefreshToggle');
+            const statusBadge = document.getElementById('statusBadge');
+            
+            autoRefreshEnabled = !autoRefreshEnabled;
+            toggle.classList.toggle('active', autoRefreshEnabled);
+            
+            if (autoRefreshEnabled) {
+                // 자동 새로고침 시작
+                autoRefreshInterval = setInterval(() => {
+                    refreshData();
+                }, AUTO_REFRESH_INTERVAL);
+                
+                statusBadge.className = 'status-badge live';
+                statusBadge.innerHTML = '<span class="pulse"></span><span>실시간</span>';
+                
+                // 즉시 한 번 실행
+                refreshData();
+            } else {
+                // 자동 새로고침 중지
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+                
+                statusBadge.className = 'status-badge offline';
+                statusBadge.innerHTML = '<span>오프라인</span>';
+            }
+        }
+        
+        // 초기화
         document.addEventListener('DOMContentLoaded', function() {
+            // 탭 기능
             const tabBtns = document.querySelectorAll('.tab-btn');
             const tabPanels = document.querySelectorAll('.tab-panel');
             
@@ -800,6 +1135,35 @@
             moreBtn.addEventListener('click', function() {
                 alert('더 많은 월별 트렌드 데이터를 보려면 구독하세요!');
             });
+            
+            // 새로고침 버튼 이벤트
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.addEventListener('click', refreshData);
+            
+            // 자동 새로고침 토글 이벤트
+            const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+            autoRefreshToggle.addEventListener('click', toggleAutoRefresh);
+            
+            // 초기 업데이트 시간 설정
+            updateLastUpdateTime();
+            
+            // 매 초마다 시간 업데이트 (시각적 효과)
+            setInterval(() => {
+                const timeElement = document.getElementById('lastUpdateTime');
+                const currentText = timeElement.textContent;
+                if (currentText !== '--:--:--') {
+                    // 시간만 업데이트 (초 단위)
+                    const now = new Date();
+                    timeElement.textContent = formatTime(now);
+                }
+            }, 1000);
+        });
+        
+        // 페이지 언로드 시 자동 새로고침 정리
+        window.addEventListener('beforeunload', function() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
         });
     </script>
 </body>
