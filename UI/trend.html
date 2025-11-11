@@ -9,8 +9,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js (소스맵 경고 방지를 위해 소스맵 비활성화) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Chart.js 소스맵 경고 방지
+        if (typeof window !== 'undefined') {
+            window.chartJsSourceMapWarning = false;
+        }
+    </script>
     
     <style>
         :root {
@@ -530,209 +536,6 @@
         .tab-btn {
             color: #cccccc;
         }
-        
-        /* 실시간 업데이트 UI 스타일 */
-        .update-status-bar {
-            background-color: #1a1a1a;
-            border: 2px solid rgba(255, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px 20px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .update-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .update-time {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #cccccc;
-            font-size: 0.9rem;
-        }
-        
-        .update-time i {
-            color: #ff0000;
-        }
-        
-        .update-time .time-text {
-            color: #ffffff;
-            font-weight: 600;
-        }
-        
-        .update-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .refresh-btn {
-            background-color: transparent;
-            border: 2px solid #ff0000;
-            color: #ff0000;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .refresh-btn:hover {
-            background-color: #ff0000;
-            color: #ffffff;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
-        }
-        
-        .refresh-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .refresh-btn.loading {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .auto-refresh-toggle {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .toggle-label {
-            color: #cccccc;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 26px;
-            background-color: #333;
-            border-radius: 13px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        .toggle-switch.active {
-            background-color: #ff0000;
-        }
-        
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: #ffffff;
-            top: 3px;
-            left: 3px;
-            transition: transform 0.3s ease;
-        }
-        
-        .toggle-switch.active::after {
-            transform: translateX(24px);
-        }
-        
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        
-        .status-badge.live {
-            background-color: rgba(255, 0, 0, 0.2);
-            color: #ff0000;
-            border: 1px solid #ff0000;
-        }
-        
-        .status-badge.offline {
-            background-color: rgba(128, 128, 128, 0.2);
-            color: #888;
-            border: 1px solid #888;
-        }
-        
-        .status-badge .pulse {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #ff0000;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.5;
-                transform: scale(1.2);
-            }
-        }
-        
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .loading-overlay.active {
-            display: flex;
-        }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 0, 0, 0.3);
-            border-top-color: #ff0000;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        .loading-text {
-            color: #ffffff;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        .update-interval-info {
-            color: #888;
-            font-size: 0.8rem;
-            margin-top: 5px;
-        }
     </style>
 </head>
 <body>
@@ -741,7 +544,7 @@
         <div class="container">
             <a class="navbar-brand" href="index.html">
                 <i class="bi bi-graph-up me-2"></i>
-                YouTube Analytics
+                1등 유튜버 되기
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -750,18 +553,12 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">홈</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#features">기능</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="trend.html">트렌드</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="feedback.html">피드백</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html">홈</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#features">주요 기능</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#how-it-works">사용 방법</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#key-features">핵심 특징</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="trend.html">트렌드</a></li>
+                    <li class="nav-item"><a class="nav-link" href="feedback.html">피드백</a></li>
                 </ul>
             </div>
         </div>
@@ -775,8 +572,8 @@
                     <a href="index.html" class="back-btn mb-4 d-inline-block">
                         <i class="bi bi-arrow-left me-2"></i>뒤로 가기
                     </a>
-                    <h1 class="display-4 fw-bold mb-4">월별 트렌드 분석</h1>
-                    <p class="lead mb-4">4월~6월 데이터를 분석하여 각 월별로 어떤 카테고리가 인기였는지 확인해보세요.</p>
+                    <h1 class="display-4 fw-bold mb-4" style="font-size: 3rem;">월별 트렌드 분석</h1>
+                    <p class="lead mb-4" style="font-size: 1.25rem; font-weight: 400; line-height: 1.8;">각 월별로 어떤 카테고리가 인기였는지 확인해보세요.</p>
                 </div>
                 <div class="col-lg-4 text-center">
                     <i class="bi bi-graph-up-arrow feature-icon"></i>
@@ -789,330 +586,47 @@
 
     <!-- Main Content -->
     <div class="container" style="padding-bottom: 50px;">
-        <!-- 실시간 업데이트 상태 바 -->
-        <div class="update-status-bar">
-            <div class="update-info">
-                <div class="update-time">
-                    <i class="bi bi-clock"></i>
-                    <span>최근 업데이트:</span>
-                    <span class="time-text" id="lastUpdateTime">--:--:--</span>
-                </div>
-                <div class="status-badge live" id="statusBadge">
-                    <span class="pulse"></span>
-                    <span>실시간</span>
-                </div>
-            </div>
-            <div class="update-actions">
-                <div class="auto-refresh-toggle">
-                    <span class="toggle-label">자동 새로고침</span>
-                    <div class="toggle-switch" id="autoRefreshToggle"></div>
-                </div>
-                <button class="refresh-btn" id="refreshBtn">
-                    <i class="bi bi-arrow-clockwise"></i>
-                    <span>새로고침</span>
-                </button>
-            </div>
-        </div>
-        
         <!-- Monthly Trend Ranking -->
         <div class="trend-ranking-container">
             <!-- Tab Navigation -->
-            <div class="tab-navigation">
-                <button class="tab-btn active" data-month="april">4월 트렌드 TOP5</button>
-                <button class="tab-btn" data-month="may">5월 트렌드 TOP5</button>
-                <button class="tab-btn" data-month="june">6월 트렌드 TOP5</button>
+            <div class="tab-navigation" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="tab-btn active" data-month="january">1월</button>
+                    <button class="tab-btn" data-month="february">2월</button>
+                    <button class="tab-btn" data-month="march">3월</button>
+                    <button class="tab-btn" data-month="april">4월</button>
+                    <button class="tab-btn" data-month="may">5월</button>
+                    <button class="tab-btn" data-month="june">6월</button>
+                    <button class="tab-btn" data-month="july">7월</button>
+                    <button class="tab-btn" data-month="august">8월</button>
+                    <button class="tab-btn" data-month="september">9월</button>
+                    <button class="tab-btn" data-month="october">10월</button>
+                    <button class="tab-btn" data-month="november">11월</button>
+                    <button class="tab-btn" data-month="december">12월</button>
+                </div>
+                <button class="btn btn-primary" id="updateTrendsBtn" onclick="updateTrends()" style="background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); border: none; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                    <i class="bi bi-arrow-clockwise me-2"></i>트렌드 업데이트
+                </button>
             </div>
 
             <!-- Tab Content -->
-            <div class="tab-content">
-                <!-- 4월 트렌드 -->
-                <div class="tab-panel active" id="april">
-                    <div class="ranking-cards">
-                        <div class="ranking-card rank-1">
-                            <div class="rank-badge">1위</div>
-                            <div class="card-icon">🎬</div>
-                            <div class="card-info">
-                                <h5>Entertainment</h5>
-                                <p>엔터테인먼트</p>
-                            </div>
-                            <div class="card-count">45개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-2">
-                            <div class="rank-badge">2위</div>
-                            <div class="card-icon">🎵</div>
-                            <div class="card-info">
-                                <h5>Music</h5>
-                                <p>음악</p>
-                            </div>
-                            <div class="card-count">23개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-3">
-                            <div class="rank-badge">3위</div>
-                            <div class="card-icon">👥</div>
-                            <div class="card-info">
-                                <h5>People & Blogs</h5>
-                                <p>인물 및 블로그</p>
-                            </div>
-                            <div class="card-count">19개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-4">
-                            <div class="rank-badge">4위</div>
-                            <div class="card-icon">😂</div>
-                            <div class="card-info">
-                                <h5>Comedy</h5>
-                                <p>코미디</p>
-                            </div>
-                            <div class="card-count">15개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-5">
-                            <div class="rank-badge">5위</div>
-                            <div class="card-icon">⚽</div>
-                            <div class="card-info">
-                                <h5>Sports</h5>
-                                <p>스포츠</p>
-                            </div>
-                            <div class="card-count">9개</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 5월 트렌드 -->
-                <div class="tab-panel" id="may">
-                    <div class="ranking-cards">
-                        <div class="ranking-card rank-1">
-                            <div class="rank-badge">1위</div>
-                            <div class="card-icon">🎬</div>
-                            <div class="card-info">
-                                <h5>Entertainment</h5>
-                                <p>엔터테인먼트</p>
-                            </div>
-                            <div class="card-count">38개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-2">
-                            <div class="rank-badge">2위</div>
-                            <div class="card-icon">👥</div>
-                            <div class="card-info">
-                                <h5>People & Blogs</h5>
-                                <p>인물 및 블로그</p>
-                            </div>
-                            <div class="card-count">26개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-3">
-                            <div class="rank-badge">3위</div>
-                            <div class="card-icon">🎵</div>
-                            <div class="card-info">
-                                <h5>Music</h5>
-                                <p>음악</p>
-                            </div>
-                            <div class="card-count">25개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-4">
-                            <div class="rank-badge">4위</div>
-                            <div class="card-icon">😂</div>
-                            <div class="card-info">
-                                <h5>Comedy</h5>
-                                <p>코미디</p>
-                            </div>
-                            <div class="card-count">13개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-5">
-                            <div class="rank-badge">5위</div>
-                            <div class="card-icon">✈️</div>
-                            <div class="card-info">
-                                <h5>Travel & Events</h5>
-                                <p>여행 및 이벤트</p>
-                            </div>
-                            <div class="card-count">9개</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 6월 트렌드 -->
-                <div class="tab-panel" id="june">
-                    <div class="ranking-cards">
-                        <div class="ranking-card rank-1">
-                            <div class="rank-badge">1위</div>
-                            <div class="card-icon">🎬</div>
-                            <div class="card-info">
-                                <h5>Entertainment</h5>
-                                <p>엔터테인먼트</p>
-                            </div>
-                            <div class="card-count">42개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-2">
-                            <div class="rank-badge">2위</div>
-                            <div class="card-icon">🎵</div>
-                            <div class="card-info">
-                                <h5>Music</h5>
-                                <p>음악</p>
-                            </div>
-                            <div class="card-count">26개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-3">
-                            <div class="rank-badge">3위</div>
-                            <div class="card-icon">👥</div>
-                            <div class="card-info">
-                                <h5>People & Blogs</h5>
-                                <p>인물 및 블로그</p>
-                            </div>
-                            <div class="card-count">15개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-4">
-                            <div class="rank-badge">4위</div>
-                            <div class="card-icon">😂</div>
-                            <div class="card-info">
-                                <h5>Comedy</h5>
-                                <p>코미디</p>
-                            </div>
-                            <div class="card-count">14개</div>
-                        </div>
-                        
-                        <div class="ranking-card rank-5">
-                            <div class="rank-badge">5위</div>
-                            <div class="card-icon">⚽</div>
-                            <div class="card-info">
-                                <h5>Sports</h5>
-                                <p>스포츠</p>
-                            </div>
-                            <div class="card-count">13개</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="tab-content" id="tabContent">
+                <!-- 탭 패널은 JavaScript로 동적으로 생성됩니다 -->
             </div>
 
-            <!-- More Button -->
-            <div class="more-button-container">
-                <button class="more-btn">
-                    <span>월별 트렌드 더보기</span>
-                    <i class="bi bi-arrow-right"></i>
-                </button>
-            </div>
         </div>
-    
-    <!-- 로딩 오버레이 -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">데이터를 불러오는 중...</div>
-    </div>
     
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Tab Functionality & Real-time Update -->
+    <!-- Tab Functionality -->
     <script>
-        // 전역 변수
-        let autoRefreshInterval = null;
-        let autoRefreshEnabled = false;
-        const AUTO_REFRESH_INTERVAL = 30000; // 30초
-        
-        // 시간 포맷 함수
-        function formatTime(date) {
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${hours}:${minutes}:${seconds}`;
-        }
-        
-        // 날짜와 시간 포맷 함수
-        function formatDateTime(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const time = formatTime(date);
-            return `${year}-${month}-${day} ${time}`;
-        }
-        
-        // 최근 업데이트 시간 업데이트
-        function updateLastUpdateTime() {
-            const now = new Date();
-            const timeElement = document.getElementById('lastUpdateTime');
-            timeElement.textContent = formatTime(now);
-            timeElement.setAttribute('title', formatDateTime(now));
-        }
-        
-        // 데이터 새로고침 함수 (실제 API 호출로 대체 예정)
-        async function refreshData() {
-            const refreshBtn = document.getElementById('refreshBtn');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            
-            // 버튼 비활성화 및 로딩 표시
-            refreshBtn.disabled = true;
-            refreshBtn.querySelector('i').classList.add('loading');
-            loadingOverlay.classList.add('active');
-            
-            try {
-                // TODO: 실제 API 호출로 대체
-                // const response = await fetch('/api/trends/latest');
-                // const data = await response.json();
-                
-                // 시뮬레이션: 1-2초 대기
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // 데이터 업데이트 (실제로는 API 응답 데이터로 업데이트)
-                // updateTrendData(data);
-                
-                // 업데이트 시간 갱신
-                updateLastUpdateTime();
-                
-                // 성공 메시지 (선택사항)
-                console.log('데이터가 성공적으로 업데이트되었습니다.');
-                
-            } catch (error) {
-                console.error('데이터 새로고침 실패:', error);
-                alert('데이터를 불러오는 중 오류가 발생했습니다.');
-            } finally {
-                // 버튼 활성화 및 로딩 제거
-                refreshBtn.disabled = false;
-                refreshBtn.querySelector('i').classList.remove('loading');
-                loadingOverlay.classList.remove('active');
-            }
-        }
-        
-        // 자동 새로고침 토글
-        function toggleAutoRefresh() {
-            const toggle = document.getElementById('autoRefreshToggle');
-            const statusBadge = document.getElementById('statusBadge');
-            
-            autoRefreshEnabled = !autoRefreshEnabled;
-            toggle.classList.toggle('active', autoRefreshEnabled);
-            
-            if (autoRefreshEnabled) {
-                // 자동 새로고침 시작
-                autoRefreshInterval = setInterval(() => {
-                    refreshData();
-                }, AUTO_REFRESH_INTERVAL);
-                
-                statusBadge.className = 'status-badge live';
-                statusBadge.innerHTML = '<span class="pulse"></span><span>실시간</span>';
-                
-                // 즉시 한 번 실행
-                refreshData();
-            } else {
-                // 자동 새로고침 중지
-                if (autoRefreshInterval) {
-                    clearInterval(autoRefreshInterval);
-                    autoRefreshInterval = null;
-                }
-                
-                statusBadge.className = 'status-badge offline';
-                statusBadge.innerHTML = '<span>오프라인</span>';
-            }
-        }
-        
-        // 초기화
         document.addEventListener('DOMContentLoaded', function() {
-            // 탭 기능
+            // 탭 패널 초기화 (이미 정의된 함수 호출)
+            if (typeof initializeMonthPanels === 'function') {
+                initializeMonthPanels();
+            }
+            
             const tabBtns = document.querySelectorAll('.tab-btn');
             const tabPanels = document.querySelectorAll('.tab-panel');
             
@@ -1126,7 +640,12 @@
                     
                     // Add active class to clicked tab and corresponding panel
                     this.classList.add('active');
-                    document.getElementById(targetMonth).classList.add('active');
+                    const targetPanel = document.getElementById(targetMonth);
+                    if (targetPanel) {
+                        targetPanel.classList.add('active');
+                    } else {
+                        console.warn(`탭 패널을 찾을 수 없습니다: ${targetMonth}`);
+                    }
                 });
             });
             
@@ -1135,36 +654,383 @@
             moreBtn.addEventListener('click', function() {
                 alert('더 많은 월별 트렌드 데이터를 보려면 구독하세요!');
             });
-            
-            // 새로고침 버튼 이벤트
-            const refreshBtn = document.getElementById('refreshBtn');
-            refreshBtn.addEventListener('click', refreshData);
-            
-            // 자동 새로고침 토글 이벤트
-            const autoRefreshToggle = document.getElementById('autoRefreshToggle');
-            autoRefreshToggle.addEventListener('click', toggleAutoRefresh);
-            
-            // 초기 업데이트 시간 설정
-            updateLastUpdateTime();
-            
-            // 매 초마다 시간 업데이트 (시각적 효과)
-            setInterval(() => {
-                const timeElement = document.getElementById('lastUpdateTime');
-                const currentText = timeElement.textContent;
-                if (currentText !== '--:--:--') {
-                    // 시간만 업데이트 (초 단위)
-                    const now = new Date();
-                    timeElement.textContent = formatTime(now);
-                }
-            }, 1000);
         });
         
-        // 페이지 언로드 시 자동 새로고침 정리
-        window.addEventListener('beforeunload', function() {
-            if (autoRefreshInterval) {
-                clearInterval(autoRefreshInterval);
+        // 카테고리 이름 매핑
+        const categoryMap = {
+            '1': 'Film & Animation',
+            '2': 'Autos & Vehicles',
+            '10': 'Music',
+            '15': 'Pets & Animals',
+            '17': 'Sports',
+            '18': 'Short Movies',
+            '19': 'Travel & Events',
+            '20': 'Gaming',
+            '21': 'Videoblogging',
+            '22': 'People & Blogs',
+            '23': 'Comedy',
+            '24': 'Entertainment',
+            '25': 'News & Politics',
+            '26': 'Howto & Style'
+        };
+        
+        // 카테고리 아이콘 매핑
+        const categoryIcons = {
+            '24': '🎬',
+            '10': '🎵',
+            '22': '👥',
+            '23': '😄',
+            '17': '⚽',
+            '19': '✈️',
+            '26': '💅',
+            '20': '🎮',
+            '1': '🎞️',
+            '15': '🐾'
+        };
+        
+        // 카테고리 한글 이름 매핑
+        const categoryNamesKo = {
+            '24': '엔터테인먼트',
+            '10': '음악',
+            '22': '인물 및 블로그',
+            '23': '코미디',
+            '17': '스포츠',
+            '19': '여행 및 이벤트',
+            '26': '하우투 및 스타일',
+            '20': '게임',
+            '1': '영화 및 애니메이션',
+            '15': '반려동물 및 동물'
+        };
+        
+        // 트렌드 업데이트 함수 (월별 순차 처리)
+        async function updateTrends() {
+            const updateBtn = document.getElementById('updateTrendsBtn');
+            const originalText = updateBtn.innerHTML;
+            
+            try {
+                // 버튼 비활성화 및 로딩 표시
+                updateBtn.disabled = true;
+                updateBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>업데이트 중...';
+                
+                // API 기본 URL 설정
+                let API_BASE_URL = 'http://localhost:8001';
+                if (window.location.hostname && 
+                    window.location.hostname !== 'localhost' && 
+                    window.location.hostname !== '127.0.0.1' &&
+                    window.location.protocol !== 'file:') {
+                    API_BASE_URL = 'https://youtube-analytics-production.up.railway.app';
+                }
+                
+                // 전체 트렌드 결과 저장
+                const allTrends = {};
+                
+                // 이미 있는 월 데이터 확인 (localStorage 또는 화면에서)
+                const existingTrendData = JSON.parse(localStorage.getItem('trendData') || '{}');
+                const existingMonths = Object.keys(existingTrendData).filter(key => 
+                    key !== 'updated_at' && existingTrendData[key] && existingTrendData[key].length > 0
+                );
+                
+                console.log(`📊 이미 있는 월 데이터: ${existingMonths.join(', ')}`);
+                
+                // 1월부터 12월까지 순차적으로 처리 (없는 월만)
+                for (let month = 1; month <= 12; month++) {
+                    const monthKey = `${month}월`;
+                    
+                    // 이미 데이터가 있으면 스킵
+                    if (existingMonths.includes(monthKey)) {
+                        console.log(`⏭️ ${monthKey}는 이미 데이터가 있어 스킵합니다.`);
+                        continue;
+                    }
+                    try {
+                        // 버튼에 현재 진행 상황 표시
+                        updateBtn.innerHTML = `<i class="bi bi-hourglass-split me-2"></i>${month}월 분석 중...`;
+                        
+                        // 월별 API 호출
+                        const response = await fetch(`${API_BASE_URL}/api/trends/update-month?month=${month}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            console.warn(`${month}월 분석 실패:`, errorData.detail || `HTTP ${response.status}`);
+                            // 해당 월이 없어도 계속 진행
+                            continue;
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.success && data.data && data.data.trends) {
+                            // 해당 월의 트렌드 결과를 전체 결과에 추가
+                            Object.assign(allTrends, data.data.trends);
+                            
+                            // 즉시 화면에 업데이트 (데이터가 없어도 표시)
+                            updateTrendDisplay(data.data.trends);
+                            
+                            // localStorage에도 업데이트
+                            updateCategoryRankStatus(data.data.trends);
+                            
+                            // 데이터가 있는지 확인
+                            const monthKey = `${month}월`;
+                            const monthTrend = data.data.trends[monthKey];
+                            if (monthTrend && monthTrend.top5 && monthTrend.top5.length > 0) {
+                                console.log(`✅ ${month}월 분석 완료`);
+                            } else {
+                                console.log(`⚠️ ${month}월 데이터가 없습니다.`);
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`${month}월 분석 중 오류:`, error.message);
+                        // 해당 월 실패해도 다음 월 계속 진행
+                    }
+                }
+                
+                // 최종 결과를 localStorage에 저장
+                if (Object.keys(allTrends).length > 0) {
+                    updateCategoryRankStatus(allTrends);
+                    alert(`✅ 트렌드 분석이 완료되었습니다!`);
+                } else {
+                    alert('⚠️ 분석된 데이터가 없습니다.');
+                }
+                
+            } catch (error) {
+                console.error('트렌드 업데이트 실패:', error);
+                alert(`❌ 트렌드 업데이트 실패: ${error.message}`);
+            } finally {
+                // 버튼 복원
+                updateBtn.disabled = false;
+                updateBtn.innerHTML = originalText;
             }
-        });
+        }
+        
+        // 월별 ID 매핑 (1~12월)
+        const monthMapping = {
+            '1월': 'january',
+            '2월': 'february',
+            '3월': 'march',
+            '4월': 'april',
+            '5월': 'may',
+            '6월': 'june',
+            '7월': 'july',
+            '8월': 'august',
+            '9월': 'september',
+            '10월': 'october',
+            '11월': 'november',
+            '12월': 'december'
+        };
+        
+        // 기본 트렌드 데이터 (사용자 제공 데이터)
+        const defaultTrendData = {
+            '1월': {
+                top5: [
+                    { rank: 1, category_id: '24', count: 2029 },
+                    { rank: 2, category_id: '22', count: 1910 },
+                    { rank: 3, category_id: '23', count: 515 },
+                    { rank: 4, category_id: '19', count: 418 },
+                    { rank: 5, category_id: '10', count: 398 }
+                ]
+            },
+            '2월': {
+                top5: [
+                    { rank: 1, category_id: '24', count: 2048 },
+                    { rank: 2, category_id: '22', count: 1665 },
+                    { rank: 3, category_id: '26', count: 520 },
+                    { rank: 4, category_id: '19', count: 468 },
+                    { rank: 5, category_id: '10', count: 459 }
+                ]
+            },
+            '3월': {
+                top5: [
+                    { rank: 1, category_id: '22', count: 2065 },
+                    { rank: 2, category_id: '24', count: 1739 },
+                    { rank: 3, category_id: '23', count: 749 },
+                    { rank: 4, category_id: '10', count: 635 },
+                    { rank: 5, category_id: '26', count: 471 }
+                ]
+            },
+            '4월': {
+                top5: [
+                    { rank: 1, category_id: '22', count: 2134 },
+                    { rank: 2, category_id: '24', count: 1952 },
+                    { rank: 3, category_id: '10', count: 690 },
+                    { rank: 4, category_id: '23', count: 603 },
+                    { rank: 5, category_id: '26', count: 406 }
+                ]
+            },
+            '5월': {
+                top5: [
+                    { rank: 1, category_id: '24', count: 1951 },
+                    { rank: 2, category_id: '22', count: 1931 },
+                    { rank: 3, category_id: '10', count: 902 },
+                    { rank: 4, category_id: '19', count: 501 },
+                    { rank: 5, category_id: '23', count: 425 }
+                ]
+            },
+            '6월': {
+                top5: [
+                    { rank: 1, category_id: '22', count: 1755 },
+                    { rank: 2, category_id: '24', count: 1419 },
+                    { rank: 3, category_id: '10', count: 605 },
+                    { rank: 4, category_id: '23', count: 513 },
+                    { rank: 5, category_id: '26', count: 423 }
+                ]
+            },
+            '7월': {
+                top5: [
+                    { rank: 1, category_id: '24', count: 1315 },
+                    { rank: 2, category_id: '10', count: 1125 },
+                    { rank: 3, category_id: '22', count: 949 },
+                    { rank: 4, category_id: '20', count: 318 },
+                    { rank: 5, category_id: '26', count: 309 }
+                ]
+            },
+            '8월': {
+                top5: [
+                    { rank: 1, category_id: '10', count: 2041 },
+                    { rank: 2, category_id: '20', count: 1081 },
+                    { rank: 3, category_id: '24', count: 179 },
+                    { rank: 4, category_id: '1', count: 131 },
+                    { rank: 5, category_id: '22', count: 44 }
+                ]
+            },
+            '9월': {
+                top5: [
+                    { rank: 1, category_id: '10', count: 2157 },
+                    { rank: 2, category_id: '20', count: 1043 },
+                    { rank: 3, category_id: '24', count: 156 },
+                    { rank: 4, category_id: '1', count: 85 },
+                    { rank: 5, category_id: '22', count: 69 }
+                ]
+            },
+            '10월': {
+                top5: [
+                    { rank: 1, category_id: '10', count: 2206 },
+                    { rank: 2, category_id: '20', count: 1000 },
+                    { rank: 3, category_id: '24', count: 157 },
+                    { rank: 4, category_id: '1', count: 103 },
+                    { rank: 5, category_id: '22', count: 97 }
+                ]
+            }
+        };
+        
+        // 페이지 로드 시 탭 패널 생성
+        function initializeMonthPanels() {
+            const tabContent = document.getElementById('tabContent');
+            if (!tabContent) return;
+            
+            const monthNames = [
+                { key: '1월', id: 'january' },
+                { key: '2월', id: 'february' },
+                { key: '3월', id: 'march' },
+                { key: '4월', id: 'april' },
+                { key: '5월', id: 'may' },
+                { key: '6월', id: 'june' },
+                { key: '7월', id: 'july' },
+                { key: '8월', id: 'august' },
+                { key: '9월', id: 'september' },
+                { key: '10월', id: 'october' },
+                { key: '11월', id: 'november' },
+                { key: '12월', id: 'december' }
+            ];
+            
+            monthNames.forEach((month, index) => {
+                const panel = document.createElement('div');
+                panel.className = `tab-panel ${index === 3 ? 'active' : ''}`; // 4월이 기본 active
+                panel.id = month.id;
+                panel.innerHTML = `
+                    <div class="ranking-cards" style="display: flex; justify-content: center; align-items: center; min-height: 400px;">
+                        <div style="text-align: center; padding: 40px; color: #cccccc;">
+                            <i class="bi bi-hourglass-split" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                            <p>트렌드 업데이트 버튼을 클릭하여 ${month.key} 트렌드 데이터를 불러오세요.</p>
+                        </div>
+                    </div>
+                `;
+                tabContent.appendChild(panel);
+            });
+            
+            // 기본 트렌드 데이터 표시 (1~10월)
+            updateTrendDisplay(defaultTrendData);
+            
+            // localStorage에도 기본 데이터 저장
+            updateCategoryRankStatus(defaultTrendData);
+        }
+        
+        // 트렌드 결과를 화면에 반영하는 함수
+        function updateTrendDisplay(trends) {
+            
+            for (const [monthKey, monthData] of Object.entries(trends)) {
+                const monthId = monthMapping[monthKey];
+                if (!monthId) continue;
+                
+                const panel = document.getElementById(monthId);
+                if (!panel) continue;
+                
+                const rankingCards = panel.querySelector('.ranking-cards');
+                if (!rankingCards) continue;
+                
+                // 기존 카드 제거
+                rankingCards.innerHTML = '';
+                
+                // 데이터가 없는 경우 메시지 표시
+                if (!monthData.top5 || monthData.top5.length === 0) {
+                    rankingCards.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #cccccc; width: 100%;">
+                            <i class="bi bi-hourglass-split" style="font-size: 3rem; margin-bottom: 20px; display: block; color: #ffa500;"></i>
+                            <p style="font-size: 1.2rem; margin: 0;">${monthKey} 데이터는 아직 집계되지 않았습니다.</p>
+                        </div>
+                    `;
+                    continue;
+                }
+                
+                // TOP 5 카테고리 표시
+                monthData.top5.forEach((item, index) => {
+                    const categoryId = item.category_id;
+                    const categoryName = categoryMap[categoryId] || '기타';
+                    const categoryNameKo = categoryNamesKo[categoryId] || categoryName;
+                    const icon = categoryIcons[categoryId] || '📺';
+                    const rank = index + 1;
+                    
+                    const rankClass = `rank-${rank}`;
+                    const card = document.createElement('div');
+                    card.className = `ranking-card ${rankClass}`;
+                    card.innerHTML = `
+                        <div class="rank-badge">${rank}위</div>
+                        <div class="card-icon">${icon}</div>
+                        <div class="card-info">
+                            <h5>${categoryName}</h5>
+                            <p>${categoryNameKo}</p>
+                        </div>
+                        <div class="card-count">${item.count}개</div>
+                    `;
+                    rankingCards.appendChild(card);
+                });
+            }
+        }
+        
+        // feedback-result.html의 getCategoryRankStatus 함수 업데이트
+        function updateCategoryRankStatus(trends) {
+            // localStorage에 저장하여 feedback-result.html에서 사용할 수 있도록 함
+            const trendData = {
+                '1월': trends['1월']?.top5.map(item => item.category_id) || [],
+                '2월': trends['2월']?.top5.map(item => item.category_id) || [],
+                '3월': trends['3월']?.top5.map(item => item.category_id) || [],
+                '4월': trends['4월']?.top5.map(item => item.category_id) || [],
+                '5월': trends['5월']?.top5.map(item => item.category_id) || [],
+                '6월': trends['6월']?.top5.map(item => item.category_id) || [],
+                '7월': trends['7월']?.top5.map(item => item.category_id) || [],
+                '8월': trends['8월']?.top5.map(item => item.category_id) || [],
+                '9월': trends['9월']?.top5.map(item => item.category_id) || [],
+                '10월': trends['10월']?.top5.map(item => item.category_id) || [],
+                '11월': trends['11월']?.top5.map(item => item.category_id) || [],
+                '12월': trends['12월']?.top5.map(item => item.category_id) || [],
+                updated_at: new Date().toISOString()
+            };
+            
+            localStorage.setItem('trendData', JSON.stringify(trendData));
+            console.log('✅ 트렌드 데이터가 localStorage에 저장되었습니다:', trendData);
+        }
     </script>
 </body>
 </html>
