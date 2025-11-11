@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>피드백 결과 - YouTube Analytics</title>
+    <title>피드백 결과 - 1등 유튜버 되기</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -108,24 +108,28 @@
         }
         
         .prediction-number {
-            font-size: 3rem;
-            font-weight: bold;
+            font-size: 3.5rem;
+            font-weight: 800;
             background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 10px;
+            letter-spacing: -0.02em;
         }
         
         #categoryRank {
-            font-size: 3rem;
-            font-weight: bold;
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #ff0000;
+            letter-spacing: -0.02em;
         }
         
         .prediction-label {
             color: #cccccc;
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 8px;
         }
         
         .btn-custom {
@@ -526,7 +530,7 @@
         <div class="container">
             <a class="navbar-brand" href="index.html">
                 <i class="bi bi-graph-up me-2"></i>
-                YouTube Analytics
+                1등 유튜버 되기
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -560,8 +564,8 @@
                     <a href="feedback.html" class="back-btn mb-4 d-inline-block">
                         <i class="bi bi-arrow-left me-2"></i>뒤로 가기
                     </a>
-                    <h1 class="display-4 fw-bold mb-4">피드백 결과</h1>
-                    <p class="lead mb-4">AI가 분석한 영상 조회수 예측과 개선 방향을 확인해보세요.</p>
+                    <h1 class="display-4 fw-bold mb-4" style="font-size: 3rem;">피드백 결과</h1>
+                    <p class="lead mb-4" style="font-size: 1.25rem; font-weight: 400; line-height: 1.8;">구상한 영상 제작 기획안를 입력하면 AI가 조회수 예측과 개선 방향을 제안해드립니다.</p>
                 </div>
                 <div class="col-lg-4 text-center">
                     <i class="bi bi-graph-up-arrow feature-icon"></i>
@@ -576,7 +580,7 @@
         <div class="step-indicator">
             <div class="step">
                 <div class="step-number completed">1</div>
-                <div class="step-text">영상 정보 입력</div>
+                <div class="step-text">구상한 영상 제작 기획안 입력</div>
             </div>
             <div class="step-line"></div>
             <div class="step">
@@ -590,7 +594,7 @@
             <div class="video-info-header" onclick="toggleVideoInfo()">
                 <h4>
                     <i class="bi bi-info-circle"></i>
-                    입력하신 영상 정보
+                    입력하신 구상한 영상 제작 기획안
                 </h4>
                 <i class="bi bi-chevron-down video-info-toggle" id="videoInfoToggle"></i>
             </div>
@@ -627,20 +631,20 @@
                 <div class="feedback-card" style="border: 2px solid rgba(255, 193, 7, 0.5); background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.1) 100%);">
                     <div class="row align-items-center">
                         <div class="col-md-6 text-center">
-                            <h4 class="mb-3" style="color: #ffc107; font-size: 1.2rem;">
+                            <h4 class="mb-3" style="color: #ffc107; font-size: 1.5rem; font-weight: 700;">
                                 <i class="bi bi-lightbulb-fill me-2"></i>권장사항 적용 시 예상 조회수
                             </h4>
-                            <div class="prediction-number" id="recommendedViews" style="color: #ffc107;">계산 중...</div>
+                            <div class="prediction-number" id="recommendedViews" style="color: #ffc107; font-size: 3.5rem; font-weight: 800;">계산 중...</div>
                         </div>
                         <div class="col-md-6">
                             <div id="improvementStats" style="padding: 20px;">
                                 <div class="mb-2">
-                                    <strong style="color: #28a745;">조회수 증가율:</strong>
-                                    <span id="improvementPercent" style="color: #28a745; font-size: 1.5rem; font-weight: bold;">-</span>
+                                    <strong style="color: #28a745; font-size: 1.1rem;">조회수 증가율:</strong>
+                                    <span id="improvementPercent" style="color: #28a745; font-size: 1.75rem; font-weight: 700;">-</span>
                                 </div>
                                 <div class="mb-2">
-                                    <strong style="color: #ffc107;">예상 증가량:</strong>
-                                    <span id="improvementAmount" style="color: #ffc107; font-size: 1.2rem; font-weight: bold;">-</span>
+                                    <strong style="color: #ffc107; font-size: 1.1rem;">예상 증가량:</strong>
+                                    <span id="improvementAmount" style="color: #ffc107; font-size: 1.5rem; font-weight: 700;">-</span>
                                 </div>
                                 <p class="text-muted small mt-3">
                                     <i class="bi bi-info-circle me-1"></i>
@@ -655,12 +659,12 @@
 
         <!-- Recommendations -->
         <div class="feedback-card">
-            <h3 class="mb-4" style="color: #ff0000; font-size: 1.5rem; font-weight: bold;">상세 권장사항</h3>
+            <h3 class="mb-4" style="color: #ff0000; font-size: 1.75rem; font-weight: 700;">상세 권장사항</h3>
             
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="alert alert-success" style="background: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40, 167, 69, 0.3); border-radius: 15px; padding: 20px;">
-                        <h5 class="mb-3 d-flex align-items-center" style="color: #28a745;">
+                        <h5 class="mb-3 d-flex align-items-center" style="color: #28a745; font-size: 1.3rem; font-weight: 700;">
                             <i class="bi bi-check-circle-fill me-2"></i>잘한 점
                         </h5>
                         <ul class="mb-0 ps-0" id="strengths" style="max-height: 400px; overflow-y: auto;">
@@ -673,7 +677,7 @@
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="alert alert-warning" style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 15px; padding: 20px;">
-                        <h5 class="mb-3 d-flex align-items-center" style="color: #ffc107;">
+                        <h5 class="mb-3 d-flex align-items-center" style="color: #ffc107; font-size: 1.3rem; font-weight: 700;">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>개선점
                         </h5>
                         <div class="mb-4">
@@ -688,10 +692,10 @@
 
         <!-- 제목 추천 섹션 -->
         <div class="feedback-card mt-5">
-            <h3 class="mb-4" style="color: #ff0000; font-size: 1.5rem; font-weight: bold;">
+            <h3 class="mb-4" style="color: #ff0000; font-size: 1.75rem; font-weight: 700;">
                 <i class="bi bi-pencil-square me-2"></i>제목 추천
             </h3>
-            <p class="text-muted mb-4">영상 정보를 바탕으로 AI가 최적의 제목을 제안해드립니다</p>
+            <p class="text-muted mb-4">구상한 영상 제작 기획안을 바탕으로 AI가 최적의 제목을 제안해드립니다.</p>
             <div class="card-body">
                 <div id="titleLoading" class="text-center mt-4" style="display: none;">
                     <div class="spinner-border" style="color: #ff0000;" role="status">
@@ -715,10 +719,10 @@
 
         <!-- 태그 추천 섹션 -->
         <div class="feedback-card mt-5">
-            <h3 class="mb-4" style="color: #ff0000; font-size: 1.5rem; font-weight: bold;">
+            <h3 class="mb-4" style="color: #ff0000; font-size: 1.75rem; font-weight: 700;">
                 <i class="bi bi-tags me-2"></i>태그 추천
             </h3>
-            <p class="text-muted mb-4">영상 제목을 바탕으로 AI가 최적의 태그를 추천해드립니다</p>
+            <p class="text-muted mb-4">영상 제목을 바탕으로 AI가 최적의 태그를 추천해드립니다.</p>
             <div class="card-body">
                 <!-- 현재 제목과 설명 표시 -->
                 <div class="alert alert-info mb-4" style="background-color: rgba(0, 150, 255, 0.1); border-color: rgba(0, 150, 255, 0.3);">
@@ -813,7 +817,7 @@
                     <button class="btn btn-custom" onclick="generateTags()">
                         <i class="bi bi-magic me-2"></i>태그 추천받기
                     </button>
-                    <p class="text-muted mt-2 small">제목을 바탕으로 AI가 최적의 태그를 추천해드립니다</p>
+                    <p class="text-muted mt-2 small">제목을 바탕으로 AI가 최적의 태그를 추천해드립니다.</p>
                 </div>
             </div>
         </div>
@@ -837,7 +841,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; 2024 YouTube Analytics. All rights reserved.</p>
+                    <p class="mb-0">&copy; 2024 1등 유튜버 되기. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <a href="#" class="text-light text-decoration-none me-3">개인정보처리방침</a>
@@ -1467,41 +1471,79 @@
             }
         }
         
-        // 카테고리 순위 상태 확인 함수 (4,5,6월 트렌드 기준)
+        // 카테고리 순위 상태 확인 함수 (1-10월 기본값 + 11-12월 Kaggle 데이터)
         function getCategoryRankStatus(categoryId) {
-            // 4월 트렌드 TOP 5: Entertainment(24) 1위, Music(10) 2위, People & Blogs(22) 3위, Comedy(23) 4위, Sports(17) 5위
-            // 5월 트렌드 TOP 5: Entertainment(24) 1위, People & Blogs(22) 2위, Music(10) 3위, Comedy(23) 4위, Travel & Events(19) 5위
-            // 6월 트렌드 TOP 5: Entertainment(24) 1위, Music(10) 2위, People & Blogs(22) 3위, Comedy(23) 4위, Sports(17) 5위
+            // localStorage에서 최신 트렌드 데이터 가져오기
+            let trendData = null;
+            try {
+                const storedTrendData = localStorage.getItem('trendData');
+                if (storedTrendData) {
+                    trendData = JSON.parse(storedTrendData);
+                }
+            } catch (e) {
+                console.error('트렌드 데이터 파싱 실패:', e);
+            }
             
-            const aprilTop5 = ['24', '10', '22', '23', '17']; // Entertainment, Music, People & Blogs, Comedy, Sports
-            const mayTop5 = ['24', '22', '10', '23', '19'];   // Entertainment, People & Blogs, Music, Comedy, Travel & Events
-            const juneTop5 = ['24', '10', '22', '23', '17'];  // Entertainment, Music, People & Blogs, Comedy, Sports
+            // 기본값 (1-10월 하드코딩된 TOP 5) - 업데이트 버튼이 안 눌렸을 때 사용
+            const defaultTop5 = {
+                '1월': ['24', '22', '23', '19', '10'],
+                '2월': ['24', '22', '26', '19', '10'],
+                '3월': ['22', '24', '23', '10', '26'],
+                '4월': ['22', '24', '10', '23', '26'],
+                '5월': ['24', '22', '10', '19', '23'],
+                '6월': ['22', '24', '10', '23', '26'],
+                '7월': ['24', '10', '22', '20', '26'],
+                '8월': ['10', '20', '24', '1', '22'],
+                '9월': ['10', '20', '24', '1', '22'],
+                '10월': ['10', '20', '24', '1', '22']
+            };
+            
+            // 1-10월은 기본값 사용, 11-12월은 Kaggle 데이터 사용
+            const monthTop5 = {};
+            const defaultMonths = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월'];
+            const kaggleMonths = ['11월', '12월'];
+            const allMonths = [...defaultMonths, ...kaggleMonths];
+            
+            // 1-10월: 기본값 사용 (이미 있으니까)
+            defaultMonths.forEach(month => {
+                monthTop5[month] = defaultTop5[month] || [];
+            });
+            
+            // 11-12월: Kaggle에서 가져온 데이터 사용
+            kaggleMonths.forEach(month => {
+                if (trendData && trendData[month] && Array.isArray(trendData[month]) && trendData[month].length > 0) {
+                    // localStorage에 Kaggle 데이터가 있으면 사용
+                    monthTop5[month] = trendData[month].map(id => String(id));
+                } else {
+                    // Kaggle 데이터가 없으면 빈 배열
+                    monthTop5[month] = [];
+                }
+            });
             
             // 각 월에서 카테고리의 순위 찾기 (없으면 0)
-            const aprilRank = aprilTop5.indexOf(categoryId) + 1; // 1-5 또는 0 (없으면)
-            const mayRank = mayTop5.indexOf(categoryId) + 1;
-            const juneRank = juneTop5.indexOf(categoryId) + 1;
-            
-            // 포함된 달들의 순위를 배열로 수집
             const ranks = [];
-            if (aprilRank > 0) ranks.push(aprilRank);
-            if (mayRank > 0) ranks.push(mayRank);
-            if (juneRank > 0) ranks.push(juneRank);
+            allMonths.forEach(month => {
+                if (monthTop5[month].length > 0) { // 데이터가 있는 월만 체크
+                    const rank = monthTop5[month].indexOf(String(categoryId)) + 1; // 1-5 또는 0 (없으면)
+                    if (rank > 0) {
+                        ranks.push(rank);
+                    }
+                }
+            });
             
             // 한 달이라도 TOP 5에 포함되어 있으면 평균 순위 계산
             if (ranks.length > 0) {
                 const averageRank = (ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length).toFixed(1);
-                const isFullTrend = ranks.length === 3; // 4, 5, 6월 모두 포함된 경우
                 return {
                     display: averageRank + '위',
-                    desc: isFullTrend ? '' : `(${ranks.length}개월 TOP 5 포함)`,
+                    desc: '',
                     inTop5: true
                 };
             } else {
                 // 모든 달에서 TOP 5에 포함되지 않음
                 return {
                     display: 'X',
-                    desc: '2025년 상반기 상위 30% 인기 카테고리 아님',
+                    desc: '2025년 1-12월 상위 30% 인기 카테고리 아님',
                     inTop5: false
                 };
             }
@@ -1510,12 +1552,12 @@
         // 구독자 수와 트렌드/비트렌드 카테고리에 따라 예측 조회수 조정 함수
         function adjustPredictedViews(predictedViews, subscriberCount, isTrendCategory) {
             // 구독자 수 범위 확인
-            if (subscriberCount <= 50) {
-                // 50 이하
-                return Math.round(predictedViews * (isTrendCategory ? 0.1 : 0.05));
+            if (subscriberCount <= 100) {
+                // 100 이하
+                return Math.round(predictedViews * (isTrendCategory ? 0.005 : 0.001));
             } else if (subscriberCount >= 100 && subscriberCount <= 999) {
                 // 백 단위 (100~999)
-                return Math.round(predictedViews * (isTrendCategory ? 0.2 : 0.1));
+                return Math.round(predictedViews * (isTrendCategory ? 0.05 : 0.01));
             } else if (subscriberCount >= 1000 && subscriberCount <= 9999) {
                 // 천 단위 (1,000~9,999)
                 return Math.round(predictedViews * (isTrendCategory ? 0.4 : 0.2));
@@ -1523,7 +1565,7 @@
                 // 만 단위 (10,000~99,999)
                 return Math.round(predictedViews * (isTrendCategory ? 0.5 : 0.25));
             } else {
-                // 그 외의 경우 원래 값 그대로
+                // 그 외의 경우 (100,000 이상) 원래 값 그대로
                 return predictedViews;
             }
         }
@@ -2087,22 +2129,37 @@
         // 권장사항 적용 시 예상 조회수 계산 (90% 위치 값만)
         async function calculateRecommendedPrediction(data, categoryFeedback, currentPredictionResult) {
             try {
+                console.log('🔍 권장사항 적용 시 예상 조회수 계산 시작');
+                
                 // 권장사항이 없는 경우 표시하지 않음
                 if (!categoryFeedback.detailedRecommendations || categoryFeedback.detailedRecommendations.length === 0) {
+                    console.log('⚠️ 권장사항이 없어 계산을 건너뜁니다.');
                     return;
                 }
                 
                 // 최적화된 데이터 생성 (90% 위치 값)
                 const optimizedData = createOptimizedData(data, categoryFeedback, 0.9);
+                console.log('📊 최적화된 데이터:', optimizedData);
                 
                 if (!optimizedData) {
-                    console.log('카테고리별 추천 기준이 없어 권장사항 조회수 계산을 건너뜁니다.');
+                    console.log('⚠️ 카테고리별 추천 기준이 없어 권장사항 조회수 계산을 건너뜁니다.');
+                    const recommendedSection = document.getElementById('recommendedPredictionSection');
+                    if (recommendedSection) {
+                        recommendedSection.style.display = 'none';
+                    }
                     return;
                 }
                 
                 // UI 표시
-                document.getElementById('recommendedPredictionSection').style.display = 'block';
-                document.getElementById('recommendedViews').textContent = '계산 중...';
+                const recommendedSection = document.getElementById('recommendedPredictionSection');
+                const recommendedViewsElement = document.getElementById('recommendedViews');
+                if (!recommendedSection || !recommendedViewsElement) {
+                    console.error('❌ 권장사항 섹션 요소를 찾을 수 없습니다.');
+                    return;
+                }
+                
+                recommendedSection.style.display = 'block';
+                recommendedViewsElement.textContent = '계산 중...';
                 
                 // API 호출하여 예측 조회수 계산
                 const sessionToken = localStorage.getItem('session_token');
@@ -2131,6 +2188,8 @@
                     subscriber_count: optimizedData.subscriberCount || data.subscriberCount || 0
                 };
                 
+                console.log('📤 API 요청:', url, requestBody);
+                
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
@@ -2139,17 +2198,49 @@
                     body: JSON.stringify(requestBody)
                 });
                 
+                console.log('📥 API 응답 상태:', response.status, response.statusText);
+                
                 if (response.ok) {
                     const saveData = await response.json();
+                    console.log('📥 API 응답 데이터:', saveData);
                     
                     if (saveData.success && saveData.data && saveData.data.prediction) {
-                        const recommendedViews = saveData.data.prediction.predicted_views;
-                        const currentViews = currentPredictionResult.predicted_views;
+                        const recommendedViewsRaw = saveData.data.prediction.predicted_views;
+                        console.log('📊 원본 예상 조회수:', recommendedViewsRaw);
+                        
+                        // 권장사항 적용 시 예상 조회수도 조정 (구독자 수와 트렌드 카테고리 기준)
+                        const videoData = JSON.parse(localStorage.getItem('videoData') || '{}');
+                        const categoryRankInfo = getCategoryRankStatus(data.category);
+                        const isTrendCategory = categoryRankInfo.inTop5;
+                        const subscriberCount = (videoData && videoData.subscriberCount) ? videoData.subscriberCount : (data.subscriberCount || 0);
+                        const recommendedViews = adjustPredictedViews(recommendedViewsRaw, subscriberCount, isTrendCategory);
+                        console.log('📊 조정된 예상 조회수:', recommendedViews);
+                        
+                        // 현재 화면에 표시된 조정된 조회수 가져오기 (뒤로 가기 후 재예측 시 최신 값 반영)
+                        const currentViewsElement = document.getElementById('predictedViews');
+                        let currentViews = null;
+                        
+                        if (currentViewsElement) {
+                            // 화면에 표시된 숫자에서 쉼표 제거하고 숫자로 변환
+                            const displayedText = currentViewsElement.textContent.trim();
+                            const displayedNumber = parseInt(displayedText.replace(/,/g, '').replace(/[^0-9]/g, ''));
+                            if (!isNaN(displayedNumber) && displayedNumber > 0) {
+                                currentViews = displayedNumber;
+                            }
+                        }
+                        
+                        // 화면에서 값을 가져오지 못한 경우, 조정된 값을 직접 계산
+                        if (currentViews === null) {
+                            const originalViews = currentPredictionResult.predicted_views;
+                            currentViews = adjustPredictedViews(originalViews, subscriberCount, isTrendCategory);
+                        }
+                        
+                        console.log('📊 현재 조회수:', currentViews);
                         
                         // 결과 표시
                         animateNumber('recommendedViews', recommendedViews, '');
                         
-                        // 증가율 계산
+                        // 증가율 계산 (현재 화면에 표시된 조정된 조회수와 비교)
                         const improvement = ((recommendedViews - currentViews) / currentViews) * 100;
                         const improvementAmount = recommendedViews - currentViews;
                         
@@ -2157,15 +2248,24 @@
                             improvement > 0 ? `+${improvement.toFixed(1)}%` : `${improvement.toFixed(1)}%`;
                         document.getElementById('improvementAmount').textContent = 
                             `${improvementAmount > 0 ? '+' : ''}${improvementAmount.toLocaleString()}회`;
+                        
+                        console.log('✅ 권장사항 적용 시 예상 조회수 계산 완료');
                     } else {
-                        document.getElementById('recommendedViews').textContent = '계산 실패';
+                        console.error('❌ API 응답에 예측 데이터가 없습니다:', saveData);
+                        recommendedViewsElement.textContent = '계산 실패 (데이터 없음)';
                     }
                 } else {
-                    document.getElementById('recommendedViews').textContent = '계산 실패';
+                    const errorText = await response.text().catch(() => '알 수 없는 오류');
+                    console.error('❌ API 호출 실패:', response.status, errorText);
+                    recommendedViewsElement.textContent = `계산 실패 (${response.status})`;
                 }
             } catch (error) {
-                console.error('권장사항 적용 조회수 계산 실패:', error);
-                document.getElementById('recommendedViews').textContent = '계산 실패';
+                console.error('❌ 권장사항 적용 조회수 계산 실패:', error);
+                console.error('❌ 에러 스택:', error.stack);
+                const recommendedViewsElement = document.getElementById('recommendedViews');
+                if (recommendedViewsElement) {
+                    recommendedViewsElement.textContent = `계산 실패: ${error.message}`;
+                }
             }
         }
         
