@@ -1,3 +1,4 @@
 # Git LFS 설정 - 큰 모델 파일들을 LFS로 관리
 *.pkl filter=lfs diff=lfs merge=lfs -text
 *.cbm filter=lfs diff=lfs merge=lfs -text
+tag_recommendation_model.pkl filter=lfs diff=lfs merge=lfs -text
