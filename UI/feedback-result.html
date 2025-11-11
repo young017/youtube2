@@ -2357,33 +2357,33 @@
                         const recommendedViews = adjustPredictedViews(recommendedViewsRaw, subscriberCount, isTrendCategory);
                         console.log('📊 조정된 예상 조회수:', recommendedViews);
                         
-                        // 현재 화면에 표시된 조정된 조회수 가져오기 (뒤로 가기 후 재예측 시 최신 값 반영)
-                        const currentViewsElement = document.getElementById('predictedViews');
-                        let currentViews = null;
+                        // 현재 조회수 계산: localStorage의 원본 값에 가중치를 적용한 값을 사용 (더 정확함)
+                        const savedPredictionResult = JSON.parse(localStorage.getItem('predictionResult') || '{}');
+                        const originalViews = savedPredictionResult.predicted_views || currentPredictionResult.predicted_views;
                         
+                        let currentViews = null;
+                        if (originalViews && originalViews > 0) {
+                            currentViews = adjustPredictedViews(originalViews, subscriberCount, isTrendCategory);
+                            console.log('📊 localStorage에서 계산한 현재 조회수:', currentViews, '(원본:', originalViews, ')');
+                        } else {
+                            // 최후의 수단: currentPredictionResult 사용
+                            currentViews = adjustPredictedViews(currentPredictionResult.predicted_views, subscriberCount, isTrendCategory);
+                            console.log('📊 currentPredictionResult에서 계산한 현재 조회수:', currentViews);
+                        }
+                        
+                        // 화면에 표시된 값과 비교하여 검증 (디버깅용)
+                        const currentViewsElement = document.getElementById('predictedViews');
                         if (currentViewsElement) {
-                            // 화면에 표시된 숫자에서 쉼표 제거하고 숫자로 변환
                             const displayedText = currentViewsElement.textContent.trim();
                             const displayedNumber = parseInt(displayedText.replace(/,/g, '').replace(/[^0-9]/g, ''));
                             if (!isNaN(displayedNumber) && displayedNumber > 0) {
-                                currentViews = displayedNumber;
-                                console.log('📊 화면에서 가져온 현재 조회수:', currentViews);
-                            }
-                        }
-                        
-                        // 화면에서 값을 가져오지 못한 경우, localStorage에서 최신 예측 결과를 가져와서 조정된 값을 계산
-                        if (currentViews === null) {
-                            // localStorage에서 최신 예측 결과 가져오기
-                            const savedPredictionResult = JSON.parse(localStorage.getItem('predictionResult') || '{}');
-                            const originalViews = savedPredictionResult.predicted_views || currentPredictionResult.predicted_views;
-                            
-                            if (originalViews && originalViews > 0) {
-                                currentViews = adjustPredictedViews(originalViews, subscriberCount, isTrendCategory);
-                                console.log('📊 localStorage에서 계산한 현재 조회수:', currentViews, '(원본:', originalViews, ')');
-                            } else {
-                                // 최후의 수단: currentPredictionResult 사용
-                                currentViews = adjustPredictedViews(currentPredictionResult.predicted_views, subscriberCount, isTrendCategory);
-                                console.log('📊 currentPredictionResult에서 계산한 현재 조회수:', currentViews);
+                                const diff = Math.abs(displayedNumber - currentViews);
+                                const diffPercent = (diff / currentViews) * 100;
+                                if (diffPercent > 5) { // 5% 이상 차이나면 경고
+                                    console.warn('⚠️ 화면 값과 계산 값이 다릅니다. 화면:', displayedNumber, '계산:', currentViews, '차이:', diffPercent.toFixed(1) + '%');
+                                } else {
+                                    console.log('✅ 화면 값과 계산 값이 일치합니다:', displayedNumber);
+                                }
                             }
                         }
                         
@@ -2397,12 +2397,22 @@
                             const improvement = ((recommendedViews - currentViews) / currentViews) * 100;
                             const improvementAmount = recommendedViews - currentViews;
                             
+                            // 비정상적인 계산 결과 검증
+                            if (Math.abs(improvement) > 1000) {
+                                console.error('❌ 비정상적인 증가율 감지:', improvement.toFixed(1) + '%');
+                                console.error('   현재 조회수:', currentViews);
+                                console.error('   권장사항 적용 시 예상 조회수:', recommendedViews);
+                                console.error('   원본 예상 조회수:', originalViews);
+                                console.error('   권장사항 원본 예상 조회수:', recommendedViewsRaw);
+                            }
+                            
                             document.getElementById('improvementPercent').textContent = 
                                 improvement > 0 ? `+${improvement.toFixed(1)}%` : `${improvement.toFixed(1)}%`;
                             document.getElementById('improvementAmount').textContent = 
                                 `${improvementAmount > 0 ? '+' : ''}${Math.floor(improvementAmount).toLocaleString()}회`;
                             
                             console.log('📊 증가율:', improvement.toFixed(1) + '%', '증가량:', Math.floor(improvementAmount).toLocaleString() + '회');
+                            console.log('📊 비교 값 - 현재:', currentViews, '권장:', recommendedViews);
                         } else {
                             console.error('❌ 현재 조회수가 0이거나 유효하지 않습니다:', currentViews);
                             document.getElementById('improvementPercent').textContent = '-';
