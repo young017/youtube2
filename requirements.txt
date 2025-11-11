@@ -3,6 +3,12 @@ fastapi==0.104.1
 uvicorn[standard]==0.24.0
 pydantic>=2.5.0
 
+# Kaggle API (트렌드 기능용)
+kaggle>=1.5.12
+
+# YouTube API (트렌드 기능용)
+google-api-python-client>=2.0.0
+
 # OpenAI
 openai==1.3.0
 
