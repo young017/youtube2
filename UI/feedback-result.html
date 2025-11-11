@@ -63,6 +63,24 @@
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 0, 0, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
         
+        .btn-outline-light {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-light:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
+        }
+        
         .feedback-card {
             background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
             border: 1px solid rgba(255, 0, 0, 0.3);
@@ -539,18 +557,12 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">홈</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#features">기능</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="trend.html">트렌드</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="feedback.html">피드백</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html">홈</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#features">주요 기능</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#how-it-works">사용 방법</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#key-features">핵심 특징</a></li>
+                    <li class="nav-item"><a class="nav-link" href="trend.html">트렌드</a></li>
+                    <li class="nav-item"><a class="nav-link" href="feedback.html">피드백</a></li>
                 </ul>
             </div>
         </div>
@@ -580,7 +592,7 @@
         <div class="step-indicator">
             <div class="step">
                 <div class="step-number completed">1</div>
-                <div class="step-text">구상한 영상 제작 기획안 입력</div>
+                <div class="step-text">영상 제작 기획안 입력</div>
             </div>
             <div class="step-line"></div>
             <div class="step">
@@ -594,7 +606,7 @@
             <div class="video-info-header" onclick="toggleVideoInfo()">
                 <h4>
                     <i class="bi bi-info-circle"></i>
-                    입력하신 구상한 영상 제작 기획안
+                    입력하신 영상 제작 기획안
                 </h4>
                 <i class="bi bi-chevron-down video-info-toggle" id="videoInfoToggle"></i>
             </div>
@@ -1653,7 +1665,7 @@
             const timer = setInterval(() => {
                 currentValue += increment;
                 if (currentValue >= targetValue) {
-                    element.textContent = targetValue.toLocaleString() + suffix;
+                    element.textContent = Math.floor(targetValue).toLocaleString() + suffix;
                     clearInterval(timer);
                 } else {
                     element.textContent = Math.floor(currentValue).toLocaleString() + suffix;
@@ -2131,9 +2143,74 @@
             try {
                 console.log('🔍 권장사항 적용 시 예상 조회수 계산 시작');
                 
-                // 권장사항이 없는 경우 표시하지 않음
+                // 권장사항이 없는 경우 (모든 항목이 최적 범위에 있는 경우)
                 if (!categoryFeedback.detailedRecommendations || categoryFeedback.detailedRecommendations.length === 0) {
-                    console.log('⚠️ 권장사항이 없어 계산을 건너뜁니다.');
+                    console.log('✅ 모든 항목이 최적 범위에 있어 추가 권장사항이 없습니다.');
+                    
+                    // UI에 긍정적인 메시지 표시
+                    const recommendedSection = document.getElementById('recommendedPredictionSection');
+                    const recommendedViewsElement = document.getElementById('recommendedViews');
+                    const improvementPercent = document.getElementById('improvementPercent');
+                    const improvementAmount = document.getElementById('improvementAmount');
+                    
+                    if (recommendedSection && recommendedViewsElement) {
+                        recommendedSection.style.display = 'block';
+                        
+                        // 카드 스타일을 초록색 계열로 변경 (최적화 상태)
+                        const feedbackCard = recommendedSection.querySelector('.feedback-card');
+                        if (feedbackCard) {
+                            feedbackCard.style.border = '2px solid rgba(40, 167, 69, 0.5)';
+                            feedbackCard.style.background = 'linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(40, 167, 69, 0.1) 100%)';
+                        }
+                        
+                        // 숫자와 통계 부분 숨기기
+                        const colMd6First = recommendedSection.querySelector('.col-md-6:first-child');
+                        if (colMd6First) {
+                            colMd6First.style.display = 'none';
+                        }
+                        
+                        // 개선율 표시 숨기기
+                        const improvementStats = recommendedSection.querySelector('#improvementStats');
+                        if (improvementStats) {
+                            improvementStats.style.display = 'none';
+                        }
+                        
+                        // 제목 변경 (다른 섹션과 일관성 있게)
+                        const sectionTitle = recommendedSection.querySelector('h4');
+                        if (sectionTitle) {
+                            sectionTitle.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>이미 최적화된 설정입니다!';
+                            sectionTitle.style.color = '#28a745';
+                            sectionTitle.style.textAlign = 'center';
+                            sectionTitle.style.width = '100%';
+                            sectionTitle.style.fontSize = '1.75rem';
+                            sectionTitle.style.fontWeight = '700';
+                            sectionTitle.style.marginBottom = '20px';
+                        }
+                        
+                        // 설명 부분을 좌우로 나누기
+                        const rowElement = recommendedSection.querySelector('.row.align-items-center');
+                        if (rowElement) {
+                            rowElement.innerHTML = `
+                                <div class="col-md-6">
+                                    <div class="text-center p-4" style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                        <i class="bi bi-check-circle-fill" style="font-size: 4rem; color: #28a745;"></i>
+                                        <h5 class="mt-3 mb-0" style="color: #28a745; font-size: 1.5rem; font-weight: 700;">
+                                            완벽합니다! 🎉
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-4" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                                        <p style="color: #ffffff; line-height: 1.8; font-size: 1.05rem; margin: 0;">
+                                            입력하신 모든 설정이 이 카테고리의 최적 범위에 있습니다.<br><br>
+                                            영상 길이, 자막 제공 여부, 해상도 품질, 업로드 예정 시간 등이 모두 최적화되어 있어,<br><br>
+                                            <strong style="color: #28a745;">현재 설정 그대로 업로드하시면 좋은 결과를 기대할 수 있습니다!</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
                     return;
                 }
                 
@@ -2143,9 +2220,60 @@
                 
                 if (!optimizedData) {
                     console.log('⚠️ 카테고리별 추천 기준이 없어 권장사항 조회수 계산을 건너뜁니다.');
+                    
+                    // 사용자에게 안내 메시지 표시
                     const recommendedSection = document.getElementById('recommendedPredictionSection');
-                    if (recommendedSection) {
-                        recommendedSection.style.display = 'none';
+                    const recommendedViewsElement = document.getElementById('recommendedViews');
+                    const improvementPercent = document.getElementById('improvementPercent');
+                    const improvementAmount = document.getElementById('improvementAmount');
+                    
+                    if (recommendedSection && recommendedViewsElement) {
+                        recommendedSection.style.display = 'block';
+                        
+                        // 카드 스타일을 정보성으로 변경
+                        const feedbackCard = recommendedSection.querySelector('.feedback-card');
+                        if (feedbackCard) {
+                            feedbackCard.style.border = '2px solid rgba(108, 117, 125, 0.5)';
+                            feedbackCard.style.background = 'linear-gradient(135deg, rgba(108, 117, 125, 0.05) 0%, rgba(108, 117, 125, 0.1) 100%)';
+                        }
+                        
+                        // 현재 예상 조회수 표시
+                        const currentViews = currentPredictionResult.predicted_views || 0;
+                        recommendedViewsElement.textContent = Math.floor(currentViews).toLocaleString();
+                        recommendedViewsElement.style.color = '#6c757d';
+                        
+                        // 제목 변경
+                        const sectionTitle = recommendedSection.querySelector('h4');
+                        if (sectionTitle) {
+                            sectionTitle.innerHTML = '<i class="bi bi-info-circle-fill me-2"></i>권장사항 계산 불가';
+                            sectionTitle.style.color = '#6c757d';
+                        }
+                        
+                        // 개선율 표시 숨기기
+                        if (improvementPercent) {
+                            improvementPercent.textContent = '-';
+                            improvementPercent.style.color = '#6c757d';
+                        }
+                        if (improvementAmount) {
+                            improvementAmount.textContent = '-';
+                            improvementAmount.style.color = '#6c757d';
+                        }
+                        
+                        // 설명 추가
+                        const descriptionArea = recommendedSection.querySelector('.col-md-6:last-child');
+                        if (descriptionArea) {
+                            descriptionArea.innerHTML = `
+                                <div class="text-center p-4">
+                                    <i class="bi bi-info-circle-fill" style="font-size: 3rem; color: #6c757d;"></i>
+                                    <h5 class="mt-3 mb-3" style="color: #6c757d; font-weight: 700;">카테고리별 기준 정보 없음</h5>
+                                    <p style="color: #ffffff; line-height: 1.8; font-size: 1rem;">
+                                        이 카테고리에 대한 추천 기준 데이터가 아직 준비되지 않았습니다.<br>
+                                        현재 예상 조회수는 표시되지만, 권장사항 적용 시 예상 조회수는 계산할 수 없습니다.<br>
+                                        <strong style="color: #6c757d;">일반적인 권장사항을 참고하여 영상을 최적화해보세요.</strong>
+                                    </p>
+                                </div>
+                            `;
+                        }
                     }
                     return;
                 }
@@ -2226,13 +2354,24 @@
                             const displayedNumber = parseInt(displayedText.replace(/,/g, '').replace(/[^0-9]/g, ''));
                             if (!isNaN(displayedNumber) && displayedNumber > 0) {
                                 currentViews = displayedNumber;
+                                console.log('📊 화면에서 가져온 현재 조회수:', currentViews);
                             }
                         }
                         
-                        // 화면에서 값을 가져오지 못한 경우, 조정된 값을 직접 계산
+                        // 화면에서 값을 가져오지 못한 경우, localStorage에서 최신 예측 결과를 가져와서 조정된 값을 계산
                         if (currentViews === null) {
-                            const originalViews = currentPredictionResult.predicted_views;
-                            currentViews = adjustPredictedViews(originalViews, subscriberCount, isTrendCategory);
+                            // localStorage에서 최신 예측 결과 가져오기
+                            const savedPredictionResult = JSON.parse(localStorage.getItem('predictionResult') || '{}');
+                            const originalViews = savedPredictionResult.predicted_views || currentPredictionResult.predicted_views;
+                            
+                            if (originalViews && originalViews > 0) {
+                                currentViews = adjustPredictedViews(originalViews, subscriberCount, isTrendCategory);
+                                console.log('📊 localStorage에서 계산한 현재 조회수:', currentViews, '(원본:', originalViews, ')');
+                            } else {
+                                // 최후의 수단: currentPredictionResult 사용
+                                currentViews = adjustPredictedViews(currentPredictionResult.predicted_views, subscriberCount, isTrendCategory);
+                                console.log('📊 currentPredictionResult에서 계산한 현재 조회수:', currentViews);
+                            }
                         }
                         
                         console.log('📊 현재 조회수:', currentViews);
@@ -2241,13 +2380,21 @@
                         animateNumber('recommendedViews', recommendedViews, '');
                         
                         // 증가율 계산 (현재 화면에 표시된 조정된 조회수와 비교)
-                        const improvement = ((recommendedViews - currentViews) / currentViews) * 100;
-                        const improvementAmount = recommendedViews - currentViews;
-                        
-                        document.getElementById('improvementPercent').textContent = 
-                            improvement > 0 ? `+${improvement.toFixed(1)}%` : `${improvement.toFixed(1)}%`;
-                        document.getElementById('improvementAmount').textContent = 
-                            `${improvementAmount > 0 ? '+' : ''}${improvementAmount.toLocaleString()}회`;
+                        if (currentViews > 0) {
+                            const improvement = ((recommendedViews - currentViews) / currentViews) * 100;
+                            const improvementAmount = recommendedViews - currentViews;
+                            
+                            document.getElementById('improvementPercent').textContent = 
+                                improvement > 0 ? `+${improvement.toFixed(1)}%` : `${improvement.toFixed(1)}%`;
+                            document.getElementById('improvementAmount').textContent = 
+                                `${improvementAmount > 0 ? '+' : ''}${Math.floor(improvementAmount).toLocaleString()}회`;
+                            
+                            console.log('📊 증가율:', improvement.toFixed(1) + '%', '증가량:', Math.floor(improvementAmount).toLocaleString() + '회');
+                        } else {
+                            console.error('❌ 현재 조회수가 0이거나 유효하지 않습니다:', currentViews);
+                            document.getElementById('improvementPercent').textContent = '-';
+                            document.getElementById('improvementAmount').textContent = '-';
+                        }
                         
                         console.log('✅ 권장사항 적용 시 예상 조회수 계산 완료');
                     } else {
