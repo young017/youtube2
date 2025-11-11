@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>영상 피드백 - YouTube Analytics</title>
+    <title>영상 피드백 - 1등 유튜버 되기</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -457,7 +457,7 @@
         <div class="container">
             <a class="navbar-brand" href="index.html">
                 <i class="bi bi-graph-up me-2"></i>
-                YouTube Analytics
+                1등 유튜버 되기
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -466,18 +466,12 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">홈</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html#features">기능</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="trend.html">트렌드</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="feedback.html">피드백</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html">홈</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#features">주요 기능</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#how-it-works">사용 방법</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#key-features">핵심 특징</a></li>
+                    <li class="nav-item"><a class="nav-link" href="trend.html">트렌드</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="feedback.html">피드백</a></li>
                 </ul>
             </div>
         </div>
@@ -571,7 +565,7 @@
                                 <i class="bi bi-clock"></i>
                                 <span>영상 길이 (분)</span>
                             </label>
-                            <input type="number" class="form-control" id="videoLength" placeholder="예: 10" min="1" max="1440" required>
+                            <input type="number" class="form-control" id="videoLength" placeholder="예: 10 또는 2.35 (2분 35초) 또는 80.58 (80분 58초)" min="0.01" max="1440" step="0.01" required>
                         </div>
                         
                         <!-- 자막 제공 여부 -->
@@ -685,7 +679,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; 2024 YouTube Analytics. All rights reserved.</p>
+                    <p class="mb-0">&copy; 2024 1등 유튜버 되기. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <a href="#" class="text-light text-decoration-none me-3">개인정보처리방침</a>
@@ -700,6 +694,41 @@
     
     <!-- Custom JavaScript -->
     <script>
+        // 영상 길이 입력값 변환 함수 (2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
+        function parseLengthInput(lengthStr) {
+            if (!lengthStr) return 0;
+            
+            const num = parseFloat(lengthStr);
+            if (isNaN(num)) return 0;
+            
+            // 문자열로 변환하여 소수점 확인
+            const str = lengthStr.toString();
+            const parts = str.split('.');
+            
+            if (parts.length === 1) {
+                // 정수만 있으면 그대로 반환 (예: "10" → 10분)
+                return num;
+            }
+            
+            // 소수 부분이 있으면
+            const integerPart = parseInt(parts[0]) || 0;
+            const decimalPart = parts[1];
+            
+            if (decimalPart) {
+                const decimalInt = parseInt(decimalPart);
+                // 소수 부분이 60 미만이면 초로 해석
+                // 예: 2.35 → 2분 35초 → 2.583분
+                // 예: 80.58 → 80분 58초 → 80.967분 (1시간 20분 58초)
+                if (decimalInt < 60) {
+                    const seconds = decimalInt;
+                    return integerPart + seconds / 60;
+                }
+            }
+            
+            // 그 외에는 기존 방식 (예: 2.60 → 2.60분)
+            return num;
+        }
+        
         // Form submission
         console.log('폼 이벤트 리스너 등록');
         document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
@@ -735,10 +764,14 @@
                 
                 // DB에 영상 정보 저장
                 console.log('DB 저장 시작...');
+                // 영상 길이 변환 (2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
+                const convertedLength = parseLengthInput(formData.length);
+                console.log(`영상 길이 변환: ${formData.length} → ${convertedLength}분`);
+                
                 console.log('API 요청 전송:', {
                     title: formData.title,
                     category: formData.category,
-                    length: parseInt(formData.length),
+                    length: convertedLength,
                     upload_time: formData.uploadTime,
                     description: formData.description,
                     thumbnail_image: formData.thumbnailImage ? '있음' : '없음',
@@ -768,10 +801,14 @@
                 }
                 
                 console.log('API 요청 URL:', url);
+                // 영상 길이 변환 (2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
+                const convertedLength2 = parseLengthInput(formData.length);
+                console.log(`영상 길이 변환: ${formData.length} → ${convertedLength2}분`);
+                
                 console.log('요청 데이터:', {
                     title: formData.title,
                     category: formData.category,
-                    length: parseInt(formData.length),
+                    length: convertedLength2,
                     upload_time: formData.uploadTime,
                     description: formData.description,
                     thumbnail_image: formData.thumbnailImage ? '있음' : '없음',
@@ -794,7 +831,7 @@
                         body: JSON.stringify({
                             title: formData.title,
                             category: formData.category,
-                            length: parseInt(formData.length),
+                            length: convertedLength2,
                             upload_time: formData.uploadTime,
                             description: formData.description,
                             thumbnail_image: formData.thumbnailImage,
