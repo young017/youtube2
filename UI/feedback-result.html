@@ -2163,16 +2163,29 @@
                             feedbackCard.style.background = 'linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(40, 167, 69, 0.1) 100%)';
                         }
                         
-                        // 숫자와 통계 부분 숨기기
+                        // 현재 예상 조회수 표시 (가중치 적용하지 않은 원본 값)
+                        const originalViews = currentPredictionResult.predicted_views || 0;
+                        recommendedViewsElement.textContent = Math.floor(originalViews).toLocaleString();
+                        recommendedViewsElement.style.color = '#28a745';
+                        
+                        // 숫자와 통계 부분 표시
                         const colMd6First = recommendedSection.querySelector('.col-md-6:first-child');
                         if (colMd6First) {
-                            colMd6First.style.display = 'none';
+                            colMd6First.style.display = 'block';
                         }
                         
-                        // 개선율 표시 숨기기
+                        // 개선율 표시 (0%로 표시)
                         const improvementStats = recommendedSection.querySelector('#improvementStats');
                         if (improvementStats) {
-                            improvementStats.style.display = 'none';
+                            improvementStats.style.display = 'block';
+                        }
+                        if (improvementPercent) {
+                            improvementPercent.textContent = '0.0%';
+                            improvementPercent.style.color = '#28a745';
+                        }
+                        if (improvementAmount) {
+                            improvementAmount.textContent = '0회';
+                            improvementAmount.style.color = '#28a745';
                         }
                         
                         // 제목 변경 (다른 섹션과 일관성 있게)
