@@ -4,7 +4,7 @@ YouTube Analytics FastAPI 서버
 OpenAPI 스펙을 사용하여 REST API를 제공합니다.
 """
 
-from fastapi import FastAPI, HTTPException, Depends, status, Query
+from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
@@ -13,52 +13,25 @@ import os
 import json
 from datetime import datetime
 import sys
-import os
-import numpy as np
-import pandas as pd
-import re
 from dotenv import load_dotenv
 
-# .env 파일 로드
+# .env 파일에서 환경변수 로드
 load_dotenv()
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# 현재 스크립트와 같은 디렉토리에서 모듈 import
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
+
 from database import UserDatabase, db
-from tag_recommendation_model import TagRecommendationModel
+from tags.tag_recommendation_model import TagRecommendationModel
 from enrich_tags import run_pipeline
 from openai import OpenAI
 
-# ML 모델 라이브러리 import
-try:
-    from catboost import CatBoostClassifier, CatBoostRegressor
-    CATBOOST_AVAILABLE = True
-except ImportError:
-    CATBOOST_AVAILABLE = False
-    print("⚠️ CatBoost가 설치되지 않았습니다.")
-
-try:
-    import lightgbm as lgb
-    LIGHTGBM_AVAILABLE = True
-except ImportError:
-    LIGHTGBM_AVAILABLE = False
-    print("⚠️ LightGBM이 설치되지 않았습니다.")
-
-try:
-    import xgboost as xgb
-    import joblib
-    XGBOOST_AVAILABLE = True
-except ImportError:
-    XGBOOST_AVAILABLE = False
-    print("⚠️ XGBoost가 설치되지 않았습니다.")
-
-# OpenAI API 키 설정
-# 환경 변수에서만 키를 가져옵니다 (보안상 하드코딩하지 않음)
-openai_api_key = os.environ.get("OPENAI_API_KEY")
-if not openai_api_key:
-    print("⚠️ 경고: OPENAI_API_KEY 환경 변수가 설정되지 않았습니다.")
-    print("   환경 변수를 설정하세요: export OPENAI_API_KEY='your-api-key-here'")
-else:
-    print("✅ OpenAI API 키가 환경 변수에서 로드되었습니다.")
+# OpenAI API 키는 .env 파일에서 자동으로 로드됩니다
+# OPENAI_API_KEY 환경변수가 없으면 에러 발생
+if not os.getenv("OPENAI_API_KEY"):
+    print("⚠️ 경고: OPENAI_API_KEY 환경변수가 설정되지 않았습니다. .env 파일을 확인해주세요.")
 
 # FastAPI 앱 초기화
 app = FastAPI(
@@ -104,326 +77,6 @@ user_db = db
 
 # 태그 추천 모델 인스턴스
 tag_model = None
-
-# 조회수 예측 모델 캐시 (카테고리별)
-prediction_models = {}
-
-# 모델 파일 경로 설정
-MODEL_BASE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "모델")
-
-def load_prediction_models(category: str):
-    """카테고리별 분류/회귀 모델 로드"""
-    if category in prediction_models:
-        return prediction_models[category]
-    
-    category_int = int(category)
-    models = {}
-    
-    print(f"🔍 카테고리 {category} 모델 로드 시작")
-    print(f"🔍 MODEL_BASE_PATH: {MODEL_BASE_PATH}")
-    print(f"🔍 MODEL_BASE_PATH 존재 여부: {os.path.exists(MODEL_BASE_PATH)}")
-    
-    try:
-        # 카테고리별 모델 파일 경로 설정
-        if category_int in [1, 15, 19]:  # CatBoost
-            if not CATBOOST_AVAILABLE:
-                raise ImportError("CatBoost가 설치되지 않았습니다.")
-            cls_model_path = os.path.join(MODEL_BASE_PATH, f"catboost_model_{category_int}_class.cbm")
-            reg_model_path = os.path.join(MODEL_BASE_PATH, f"catboost_model_{category_int}.cbm")
-            print(f"🔍 CatBoost 모델 경로:")
-            print(f"   - 분류: {cls_model_path} (존재: {os.path.exists(cls_model_path)})")
-            print(f"   - 회귀: {reg_model_path} (존재: {os.path.exists(reg_model_path)})")
-            
-            if os.path.exists(cls_model_path) and os.path.exists(reg_model_path):
-                cls_model = CatBoostClassifier()
-                cls_model.load_model(cls_model_path)
-                reg_model = CatBoostRegressor()
-                reg_model.load_model(reg_model_path)
-                models = {
-                    'cls': cls_model,
-                    'reg': reg_model,
-                    'type': 'catboost'
-                }
-                
-        elif category_int in [10, 22, 24, 26]:  # LightGBM
-            if not LIGHTGBM_AVAILABLE:
-                raise ImportError("LightGBM이 설치되지 않았습니다.")
-            cls_model_path = os.path.join(MODEL_BASE_PATH, f"lgbm_model_{category_int}_class.pkl")
-            reg_model_path = os.path.join(MODEL_BASE_PATH, f"lgbm_model_{category_int}.pkl")
-            print(f"🔍 LightGBM 모델 경로:")
-            print(f"   - 분류: {cls_model_path} (존재: {os.path.exists(cls_model_path)})")
-            print(f"   - 회귀: {reg_model_path} (존재: {os.path.exists(reg_model_path)})")
-            
-            if os.path.exists(cls_model_path) and os.path.exists(reg_model_path):
-                print(f"📦 모델 파일 로딩 시작...")
-                cls_model = joblib.load(cls_model_path)
-                reg_model = joblib.load(reg_model_path)
-                models = {
-                    'cls': cls_model,
-                    'reg': reg_model,
-                    'type': 'lightgbm'
-                }
-                print(f"📦 모델 파일 로딩 완료")
-            else:
-                # 디렉토리 내용 확인
-                if os.path.exists(MODEL_BASE_PATH):
-                    print(f"📂 모델 디렉토리 내용:")
-                    for file in os.listdir(MODEL_BASE_PATH):
-                        if f"_{category_int}" in file:
-                            print(f"   - {file}")
-                
-        elif category_int in [17, 20, 23, 28]:  # XGBoost
-            if not XGBOOST_AVAILABLE:
-                raise ImportError("XGBoost가 설치되지 않았습니다.")
-            cls_model_path = os.path.join(MODEL_BASE_PATH, f"xgb_model_{category_int}_class.pkl")
-            reg_model_path = os.path.join(MODEL_BASE_PATH, f"xgb_model_{category_int}.pkl")
-            print(f"🔍 XGBoost 모델 경로:")
-            print(f"   - 분류: {cls_model_path} (존재: {os.path.exists(cls_model_path)})")
-            print(f"   - 회귀: {reg_model_path} (존재: {os.path.exists(reg_model_path)})")
-            
-            if os.path.exists(cls_model_path) and os.path.exists(reg_model_path):
-                cls_model = joblib.load(cls_model_path)
-                reg_model = joblib.load(reg_model_path)
-                models = {
-                    'cls': cls_model,
-                    'reg': reg_model,
-                    'type': 'xgboost'
-                }
-        
-        if models:
-            prediction_models[category] = models
-            print(f"✅ 카테고리 {category} 모델 로드 완료")
-        else:
-            print(f"⚠️ 카테고리 {category} 모델 파일을 찾을 수 없습니다.")
-            if os.path.exists(MODEL_BASE_PATH):
-                print(f"📂 모델 디렉토리 전체 내용:")
-                for file in os.listdir(MODEL_BASE_PATH):
-                    print(f"   - {file}")
-            
-    except Exception as e:
-        print(f"❌ 카테고리 {category} 모델 로드 실패: {str(e)}")
-        import traceback
-        print(f"❌ 상세 오류:\n{traceback.format_exc()}")
-    
-    return models
-
-def predict_views(category: str, input_df: pd.DataFrame) -> Dict[str, Any]:
-    """카테고리별 모델을 사용하여 조회수 예측"""
-    category_int = int(category)
-    
-    print(f"🔍 predict_views 시작 - 카테고리: {category}")
-    
-    # 모델 로드
-    models = load_prediction_models(category)
-    print(f"🔍 모델 로드 결과: {models}")
-    
-    if not models:
-        error_msg = f"카테고리 {category} 모델을 찾을 수 없습니다. MODEL_BASE_PATH: {MODEL_BASE_PATH}"
-        print(f"❌ {error_msg}")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=error_msg
-        )
-    
-    cls_model = models['cls']
-    reg_model = models['reg']
-    model_type = models['type']
-    
-    print(f"🔍 모델 타입: {model_type}")
-    print(f"🔍 분류 모델: {type(cls_model)}")
-    print(f"🔍 회귀 모델: {type(reg_model)}")
-    
-    try:
-        # 분류 모델로 pred_popular_prob 생성
-        print(f"🔍 분류 모델 feature 추출 시작...")
-        if model_type == 'catboost':
-            cls_features = cls_model.feature_names_
-        elif model_type == 'lightgbm':
-            # LightGBM: feature_name_ 또는 feature_names_ 사용
-            if hasattr(cls_model, 'feature_name_'):
-                cls_features = cls_model.feature_name_
-            elif hasattr(cls_model, 'feature_names_'):
-                cls_features = cls_model.feature_names_
-            else:
-                raise AttributeError("LightGBM 모델에서 feature_name_ 또는 feature_names_ 속성을 찾을 수 없습니다.")
-        else:  # xgboost
-            # XGBoost: get_booster() 사용 시도, 없으면 직접 feature_names_ 사용
-            try:
-                cls_features = cls_model.get_booster().feature_names
-            except:
-                if hasattr(cls_model, 'feature_names_'):
-                    cls_features = cls_model.feature_names_
-                else:
-                    raise AttributeError("XGBoost 모델에서 feature_names를 찾을 수 없습니다.")
-        
-        # 누락된 피처는 0으로 채우기
-        print("=" * 80)
-        print("🔍 [분류 모델] Feature 확인")
-        print("=" * 80)
-        print(f"🔍 분류 모델 feature 개수: {len(cls_features)}")
-        print(f"🔍 분류 모델 features: {cls_features}")
-        
-        missing_features = []
-        for f in cls_features:
-            if f not in input_df.columns:
-                input_df[f] = 0
-                missing_features.append(f)
-        if missing_features:
-            print(f"⚠️ 누락된 feature를 0으로 채움: {missing_features}")
-        
-        print("\n📊 [분류 모델] 입력 데이터 준비 완료")
-        print(f"📊 분류 모델 입력 컬럼 ({len(input_df[cls_features].columns)}개): {input_df[cls_features].columns.tolist()}")
-        print(f"\n📊 분류 모델 입력 데이터:")
-        print(input_df[cls_features])
-        
-        # pred_popular_prob 계산
-        print("\n" + "=" * 80)
-        print("🔍 [분류 모델] predict_proba 실행 시작...")
-        print("=" * 80)
-        try:
-            if model_type == 'catboost':
-                proba_result = cls_model.predict_proba(input_df[cls_features])
-                print(f"📊 CatBoost predict_proba 결과 shape: {proba_result.shape}")
-                print(f"📊 CatBoost predict_proba 결과: {proba_result}")
-                input_df['pred_popular_prob'] = proba_result[:, 1]
-            elif model_type == 'lightgbm':
-                proba_result = cls_model.predict_proba(input_df[cls_features])
-                print(f"📊 LightGBM predict_proba 결과 shape: {proba_result.shape}")
-                print(f"📊 LightGBM predict_proba 결과: {proba_result}")
-                print(f"📊 LightGBM predict_proba 결과 (상세): 클래스 0 확률={proba_result[0][0]:.6f}, 클래스 1 확률={proba_result[0][1]:.6f}")
-                input_df['pred_popular_prob'] = proba_result[:, 1]
-            else:  # xgboost
-                proba_result = cls_model.predict_proba(input_df[cls_features])
-                print(f"📊 XGBoost predict_proba 결과 shape: {proba_result.shape}")
-                print(f"📊 XGBoost predict_proba 결과: {proba_result}")
-                input_df['pred_popular_prob'] = proba_result[:, 1]
-            
-            print("\n" + "=" * 80)
-            print("✅ [분류 모델] pred_popular_prob 계산 완료")
-            print("=" * 80)
-            pred_value = input_df['pred_popular_prob'].iloc[0]
-            print(f"📊 pred_popular_prob 값: {pred_value}")
-            print(f"📊 pred_popular_prob 타입: {type(pred_value)}")
-            print(f"📊 pred_popular_prob (퍼센트): {pred_value * 100:.2f}%")
-            print("=" * 80 + "\n")
-        except Exception as e:
-            print("\n" + "=" * 80)
-            print("❌ [분류 모델] 예측 실패")
-            print("=" * 80)
-            print(f"❌ 오류 메시지: {str(e)}")
-            import traceback
-            print(f"❌ 상세 오류:\n{traceback.format_exc()}")
-            print("=" * 80 + "\n")
-            raise
-        
-        # 회귀 모델로 조회수 예측
-        print("=" * 80)
-        print("🔍 [회귀 모델] Feature 확인")
-        print("=" * 80)
-        if model_type == 'catboost':
-            reg_features = reg_model.feature_names_
-        elif model_type == 'lightgbm':
-            # LightGBM: feature_name_ 또는 feature_names_ 사용
-            if hasattr(reg_model, 'feature_name_'):
-                reg_features = reg_model.feature_name_
-            elif hasattr(reg_model, 'feature_names_'):
-                reg_features = reg_model.feature_names_
-            else:
-                raise AttributeError("LightGBM 회귀 모델에서 feature_name_ 또는 feature_names_ 속성을 찾을 수 없습니다.")
-        else:  # xgboost
-            # XGBoost: get_booster() 사용 시도, 없으면 직접 feature_names_ 사용
-            try:
-                reg_features = reg_model.get_booster().feature_names
-            except:
-                if hasattr(reg_model, 'feature_names_'):
-                    reg_features = reg_model.feature_names_
-                else:
-                    raise AttributeError("XGBoost 회귀 모델에서 feature_names를 찾을 수 없습니다.")
-        
-        print(f"🔍 회귀 모델 feature 개수: {len(reg_features)}")
-        print(f"🔍 회귀 모델 features: {reg_features}")
-        print(f"🔍 예상 features (11개): ['caption_available', 'pub_month', 'pub_day', 'pub_hour_sin', 'pub_hour_cos', 'pub_weekday_sin', 'pub_weekday_cos', 'duration_sec', 'definition', 'subscriber_count_log', 'pred_popular_prob']")
-        
-        # 누락된 피처는 0으로 채우기
-        missing_reg_features = []
-        for f in reg_features:
-            if f not in input_df.columns:
-                input_df[f] = 0
-                missing_reg_features.append(f)
-        if missing_reg_features:
-            print(f"⚠️ 누락된 feature를 0으로 채움: {missing_reg_features}")
-        
-        print("\n📊 [회귀 모델] 입력 데이터 준비 완료")
-        print(f"📊 회귀 모델 입력 컬럼 ({len(input_df[reg_features].columns)}개): {input_df[reg_features].columns.tolist()}")
-        print(f"\n📊 회귀 모델 입력 데이터:")
-        print(input_df[reg_features])
-        
-        print("\n" + "=" * 80)
-        print("🔍 [회귀 모델] predict 실행 시작...")
-        print("=" * 80)
-        
-        # XGBoost의 경우 input_df를 명시적으로 전달해야 할 수 있음
-        if model_type == 'xgboost' and category_int == 23:
-            # 카테고리 23의 경우 특별 처리
-            input_df_for_pred = input_df[reg_features]
-            print(f"📊 XGBoost (카테고리 23) - 사용할 데이터 shape: {input_df_for_pred.shape}")
-            y_pred_log = reg_model.predict(input_df_for_pred)
-        else:
-            print(f"📊 {model_type} 회귀 모델 predict 실행...")
-            print(f"📊 사용할 컬럼: {reg_features}")
-            y_pred_log = reg_model.predict(input_df[reg_features])
-        
-        print(f"✅ [회귀 모델] 예측 완료")
-        print(f"📊 예측값 (로그 스케일): {y_pred_log[0]:.6f}")
-        print("=" * 80)
-        
-        # 카테고리별 스케일 적용
-        if category_int in [10, 23]:  # 100만 단위
-            y_pred = np.expm1(y_pred_log) * 1_000_000
-            print(f"📊 스케일 적용 (100만 단위): {y_pred[0]:,.0f}")
-        else:  # 10만 단위
-            y_pred = np.expm1(y_pred_log) * 100_000
-            print(f"📊 스케일 적용 (10만 단위): {y_pred[0]:,.0f}")
-        
-        # 실제 사용된 모델 파일명 생성
-        if category_int in [1, 15, 19]:  # CatBoost
-            cls_model_file = f"catboost_model_{category_int}_class.cbm"
-            reg_model_file = f"catboost_model_{category_int}.cbm"
-        elif category_int in [10, 22, 24, 26]:  # LightGBM
-            cls_model_file = f"lgbm_model_{category_int}_class.pkl"
-            reg_model_file = f"lgbm_model_{category_int}.pkl"
-        else:  # XGBoost
-            cls_model_file = f"xgb_model_{category_int}_class.pkl"
-            reg_model_file = f"xgb_model_{category_int}.pkl"
-        
-        # 모델 이름 생성 (표시용)
-        model_type_names = {
-            'catboost': 'CatBoost',
-            'lightgbm': 'LightGBM',
-            'xgboost': 'XGBoost'
-        }
-        cls_model_name = f"{model_type_names[model_type]} Classifier"
-        reg_model_name = f"{model_type_names[model_type]} Regressor"
-        
-        return {
-            'predicted_views': int(y_pred[0]),
-            'pred_popular_prob': float(input_df['pred_popular_prob'].iloc[0]),
-            'confidence': float(input_df['pred_popular_prob'].iloc[0]) * 100,
-            'cls_model': cls_model_name,
-            'reg_model': reg_model_name,
-            'cls_model_file': cls_model_file,
-            'reg_model_file': reg_model_file,
-            'model_type': model_type
-        }
-        
-    except Exception as e:
-        print(f"❌ 예측 중 오류 발생: {str(e)}")
-        import traceback
-        print(traceback.format_exc())
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"예측 중 오류가 발생했습니다: {str(e)}"
-        )
 
 # Pydantic 모델 정의
 class UserRegister(BaseModel):
@@ -491,15 +144,14 @@ class TagEnrichResponse(BaseModel):
     final_tags: List[str]
     extra_tags: List[str]
 
-class TitleGenerateRequest(BaseModel):
-    keyword: str = Field(..., description="주제 키워드")
-    imageText: Optional[str] = Field(default="", description="이미지 내용 요약")
+class TitleSuggestRequest(BaseModel):
+    keyword: str = Field(..., description="제목 추천을 위한 키워드")
+    imageText: Optional[str] = Field(default="", description="이미지 텍스트 (선택사항)")
     n: int = Field(default=5, ge=1, le=10, description="생성할 제목 개수")
 
-class TitleGenerateResponse(BaseModel):
+class TitleSuggestResponse(BaseModel):
     success: bool
     titles: List[str]
-    message: Optional[str] = None
 
 class VideoCreateRequest(BaseModel):
     title: str = Field(..., description="영상 제목")
@@ -508,50 +160,8 @@ class VideoCreateRequest(BaseModel):
     upload_time: Optional[str] = Field(default=None, description="업로드 예정 시간")
     description: Optional[str] = Field(default=None, description="영상 설명")
     thumbnail_image: Optional[str] = Field(default=None, description="썸네일 이미지 (Base64)")
-    has_subtitles: Optional[str] = Field(default=None, description="자막 제공 여부 (provided/not_provided)")
-    video_quality: Optional[str] = Field(default=None, description="해상도 품질 (HD/SD)")
-    subscriber_count: Optional[int] = Field(default=None, description="구독자수")
-
-def preprocess_input_data(request: VideoCreateRequest) -> pd.DataFrame:
-    """사용자 입력 데이터를 모델 입력 형식으로 전처리"""
-    # 업로드 예정 시간 파싱
-    upload_time = request.upload_time
-    if not upload_time:
-        # 기본값 (현재 시간 + 1시간)
-        dt = datetime.now()
-        dt = dt.replace(hour=(dt.hour + 1) % 24)
-    else:
-        # datetime-local 형식: YYYY-MM-DDTHH:mm
-        dt = datetime.fromisoformat(upload_time)
-        if dt.tzinfo:
-            dt = dt.astimezone().replace(tzinfo=None)
-    
-    month = dt.month
-    day = dt.day
-    hour = dt.hour
-    weekday_python = dt.weekday()  # Python: 0=월요일, 6=일요일
-    
-    # 요일 변환: Python weekday (0=월, 6=일) -> JavaScript/일반 형식 (0=일, 6=토)
-    # Python weekday + 1 -> modulo 7로 변환
-    weekday = (weekday_python + 1) % 7  # 0=일요일, 1=월요일, ..., 6=토요일
-    
-    # 데이터프레임 생성
-    # 학습 시 subscriber_count는 drop되고 subscriber_count_log만 사용됨
-    # 모델이 요구하는 컬럼명: duration_sec (duration 아님!)
-    df = pd.DataFrame({
-        'duration_sec': [request.length * 60],  # 분을 초로 변환
-        'definition': [1 if request.video_quality == 'HD' else 0],
-        'caption_available': [1 if request.has_subtitles == 'provided' else 0],
-        'pub_month': [month],
-        'pub_day': [day],
-        'pub_hour_sin': [np.sin(2 * np.pi * hour / 24)],
-        'pub_hour_cos': [np.cos(2 * np.pi * hour / 24)],
-        'pub_weekday_sin': [np.sin(2 * np.pi * weekday / 7)],
-        'pub_weekday_cos': [np.cos(2 * np.pi * weekday / 7)],
-        'subscriber_count_log': [np.log1p(request.subscriber_count) if request.subscriber_count and request.subscriber_count > 0 else 0]
-    })
-    
-    return df
+    caption_status: Optional[str] = Field(default=None, description="캡션 상태")
+    quality: Optional[str] = Field(default=None, description="화질")
 
 class VideoResponse(BaseModel):
     success: bool
@@ -562,15 +172,37 @@ def load_tag_model():
     """태그 추천 모델 로드"""
     global tag_model
     try:
-        model_path = "tag_recommendation_model.pkl"
-        if os.path.exists(model_path):
+        # 여러 경로에서 모델 파일 찾기
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        
+        possible_paths = [
+            os.path.join(script_dir, "tag_recommendation_model.pkl"),  # 유튜브서버/tag_recommendation_model.pkl
+            os.path.join(project_root, "tags", "tag_recommendation_model.pkl"),  # 프로젝트 루트/tags/tag_recommendation_model.pkl
+            os.path.join(project_root, "유튜브서버", "tag_recommendation_model.pkl"),  # 프로젝트 루트/유튜브서버/tag_recommendation_model.pkl
+            "tag_recommendation_model.pkl",
+            "/Users/han-yujeong/Desktop/유튜브 데이터/유튜브서버/tag_recommendation_model.pkl"  # 절대 경로
+        ]
+        
+        model_path = None
+        for path in possible_paths:
+            abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
+            if os.path.exists(abs_path):
+                model_path = abs_path
+                break
+        
+        if model_path:
             tag_model = TagRecommendationModel()
             tag_model.load_model(model_path)
-            print("✅ 태그 추천 모델 로드 완료")
+            print(f"✅ 태그 추천 모델 로드 완료: {model_path}")
         else:
             print("⚠️ 태그 추천 모델 파일이 없습니다. 먼저 모델을 학습시켜주세요.")
+            print(f"   시도한 경로들: {possible_paths}")
+            tag_model = None
     except Exception as e:
         print(f"❌ 태그 추천 모델 로드 실패: {e}")
+        import traceback
+        traceback.print_exc()
         tag_model = None
 
 def get_current_user(session_token: str = None):
@@ -1020,12 +652,6 @@ def refine_tags_simple(title: str, candidate_tags: List[str]) -> List[str]:
 async def enrich_tags(request: TagEnrichRequest):
     """제목 기반 태그 추천 및 OpenAI 보정 (enrich_tags.py 기능)"""
     try:
-        if tag_model is None:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="태그 추천 모델이 로드되지 않았습니다."
-            )
-        
         title = request.title.strip()
         description = request.description.strip() if request.description else ""
         
@@ -1035,14 +661,38 @@ async def enrich_tags(request: TagEnrichRequest):
                 detail="제목을 입력해주세요."
             )
         
-        # 모델 경로 설정
-        model_path = os.path.join(os.path.dirname(__file__), "tag_recommendation_model.pkl")
-        if not os.path.exists(model_path):
-            model_path = "tag_recommendation_model.pkl"
-        if not os.path.exists(model_path):
+        # 모델 경로 설정 (여러 경로 시도)
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        
+        possible_paths = [
+            os.path.join(script_dir, "tag_recommendation_model.pkl"),  # 유튜브서버/tag_recommendation_model.pkl
+            os.path.join(project_root, "tags", "tag_recommendation_model.pkl"),  # 프로젝트 루트/tags/tag_recommendation_model.pkl
+            os.path.join(project_root, "유튜브서버", "tag_recommendation_model.pkl"),  # 프로젝트 루트/유튜브서버/tag_recommendation_model.pkl
+            "tag_recommendation_model.pkl",
+            "/Users/han-yujeong/Desktop/유튜브 데이터/유튜브서버/tag_recommendation_model.pkl"  # 절대 경로
+        ]
+        
+        model_path = None
+        for path in possible_paths:
+            abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
+            if os.path.exists(abs_path):
+                model_path = abs_path
+                print(f"✅ 모델 파일 발견: {model_path}")
+                break
+        
+        if not model_path:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="태그 추천 모델 파일을 찾을 수 없습니다."
+                detail=f"태그 추천 모델 파일을 찾을 수 없습니다. 시도한 경로: {possible_paths}"
+            )
+        
+        # API 키 설정 (요청에서 받거나 환경변수 사용)
+        api_key = request.api_key or os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="OpenAI API 키가 설정되지 않았습니다. api_key 파라미터를 제공하거나 OPENAI_API_KEY 환경변수를 설정해주세요."
             )
         
         # enrich_tags 파이프라인 실행 (제목과 설명 모두 사용)
@@ -1054,7 +704,7 @@ async def enrich_tags(request: TagEnrichRequest):
             title_sim_threshold=request.title_sim_threshold,
             tag_abs_threshold=request.tag_abs_threshold,
             extra_k=request.extra_k,
-            api_key=request.api_key or os.environ.get("OPENAI_API_KEY")
+            api_key=api_key
         )
         
         # 응답 형식 변환
@@ -1080,40 +730,39 @@ async def enrich_tags(request: TagEnrichRequest):
             detail=f"태그 추천 중 오류가 발생했습니다: {str(e)}"
         )
 
-@app.post("/api/titles/generate", response_model=TitleGenerateResponse)
-async def generate_titles(request: TitleGenerateRequest):
-    """제목 추천 기능 (OpenAI GPT 사용)"""
+@app.post("/api/titles/suggest", response_model=TitleSuggestResponse)
+async def suggest_titles(request: TitleSuggestRequest):
+    """제목 추천 (OpenAI GPT 사용)"""
     try:
-        # OpenAI API 키 확인
-        api_key = os.environ.get("OPENAI_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="OPENAI_API_KEY 환경 변수가 설정되지 않았습니다."
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="OpenAI API 키가 설정되지 않았습니다. .env 파일에 OPENAI_API_KEY를 설정해주세요."
             )
         
         client = OpenAI(api_key=api_key)
         
         prompt = f"""
-            사용자가 '{request.keyword}'라는 주제를 입력했습니다.
-            {f'이미지에 포함된 내용 요약: {request.imageText}' if request.imageText else ''}
+사용자가 '{request.keyword}'라는 주제를 입력했습니다.
+{request.imageText if request.imageText else ''}
 
-            아래 유튜브 제목 작성 전략을 참고하여, 실제 유튜브에서 클릭을 유도할 수 있는 흥미롭고 자극적인 제목 {request.n}개를 만들어 주세요.
-            
-            유튜브 제목 최적화 전략 (Actionable Tips):
-            1. [필수] 일치성 및 신뢰: 제목은 콘텐츠 내용을 정확히 반영해야 합니다 (클릭베이트 금지).
-            2. [검색/SEO] 키워드: 제목 앞부분에 주요 키워드를 자연스럽게 배치합니다 (60자 미만 권장).
-            3. [클릭률] 가치/질문/긴박감: 시청자의 문제(질문)를 제기하거나, 명확한 가치("10분 만에 전문가 되기")나 긴박감("놓치지 마세요")을 제시합니다.
-            4. [형식] 숫자/괄호: 홀수(7, 9)를 포함한 리스트 스타일 제목과 괄호 () 사용은 클릭률을 높입니다.
-            5. [타깃] 언어: 시청자의 은어/전문 용어를 사용하고 시청자("당신")에게 직접 명령합니다.
-            6. [시너지] 썸네일: 제목은 썸네일과 일관성 있게 조화되어야 합니다.
-            7. [경쟁] 분석: 경쟁사 상위 동영상의 제목 구조를 연구하여 변형합니다.
-            8. [추가] 와우 요소: '놀라운', '충격적인', '역대급' 등의 감탄사/수식어를 활용하여 호기심을 극대화합니다.
-            9. [교육/리스트] '하우투(How-to)' 또는 '리스트 스타일' 형식을 적용합니다.
+아래 유튜브 제목 작성 전략을 참고하여, 실제 유튜브에서 클릭을 유도할 수 있는 흥미롭고 자극적인 제목 {request.n}개를 만들어 주세요.
 
-            제목은 자연스럽고 유머/감탄사/의문형 등을 적절히 활용하여 사람들의 호기심을 자극하세요.
-            제목 목록만 출력해 주세요. (예: 1. ... 2. ...)
-            """
+유튜브 제목 최적화 전략 (Actionable Tips):
+1. [필수] 일치성 및 신뢰: 제목은 콘텐츠 내용을 정확히 반영해야 합니다 (클릭베이트 금지).
+2. [검색/SEO] 키워드: 제목 앞부분에 주요 키워드를 자연스럽게 배치합니다 (60자 미만 권장).
+3. [클릭률] 가치/질문/긴박감: 시청자의 문제(질문)를 제기하거나, 명확한 가치("10분 만에 전문가 되기")나 긴박감("놓치지 마세요")을 제시합니다.
+4. [형식] 숫자/괄호: 홀수(7, 9)를 포함한 리스트 스타일 제목과 괄호 () 사용은 클릭률을 높입니다.
+5. [타깃] 언어: 시청자의 은어/전문 용어를 사용하고 시청자("당신")에게 직접 명령합니다.
+6. [시너지] 썸네일: 제목은 썸네일과 일관성 있게 조화되어야 합니다.
+7. [경쟁] 분석: 경쟁사 상위 동영상의 제목 구조를 연구하여 변형합니다.
+8. [추가] 와우 요소: '놀라운', '충격적인', '역대급' 등의 감탄사/수식어를 활용하여 호기심을 극대화합니다.
+9. [교육/리스트] '하우투(How-to)' 또는 '리스트 스타일' 형식을 적용합니다.
+
+제목은 자연스럽고 유머/감탄사/의문형 등을 적절히 활용하여 사람들의 호기심을 자극하세요.
+제목 목록만 출력해 주세요. (예: 1. ... 2. ...)
+"""
         
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -1121,36 +770,21 @@ async def generate_titles(request: TitleGenerateRequest):
             temperature=1.0,
         )
         
-        content = response.choices[0].message.content.strip()
+        titles_text = response.choices[0].message.content.strip()
         
-        # 제목 목록 파싱 (1. 2. 3. 형식 또는 - 형식)
-        titles = []
-        lines = content.split('\n')
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-            # 숫자나 기호로 시작하는 경우 제거 (정규식 사용)
-            line = re.sub(r'^\d+[\.\)]\s*', '', line)  # "1. " 또는 "1) " 제거
-            line = re.sub(r'^[-•]\s*', '', line)  # "- " 또는 "• " 제거
-            line = line.strip()
-            if line and len(line) > 0:
-                titles.append(line)
+        # 제목을 배열로 파싱
+        import re
+        titles_list = []
+        for line in titles_text.split('\n'):
+            title = re.sub(r'^\d+[\.\)]\s*', '', line).strip()
+            if title and len(title) > 0:
+                titles_list.append(title)
+            if len(titles_list) >= request.n:
+                break
         
-        # 요청한 개수만큼만 반환
-        titles = titles[:request.n]
-        
-        if not titles:
-            return TitleGenerateResponse(
-                success=False,
-                titles=[],
-                message="제목 생성에 실패했습니다."
-            )
-        
-        return TitleGenerateResponse(
+        return TitleSuggestResponse(
             success=True,
-            titles=titles,
-            message=None
+            titles=titles_list
         )
         
     except HTTPException:
@@ -1158,15 +792,12 @@ async def generate_titles(request: TitleGenerateRequest):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"제목 생성 중 오류가 발생했습니다: {str(e)}"
+            detail=f"제목 추천 중 오류가 발생했습니다: {str(e)}"
         )
 
 @app.post("/api/videos/create", response_model=VideoResponse)
-async def create_video(
-    request: VideoCreateRequest,
-    session_token: Optional[str] = Query(None, description="세션 토큰")
-):
-    """영상 정보 저장 및 조회수 예측"""
+async def create_video(request: VideoCreateRequest, session_token: str = None):
+    """영상 정보 저장"""
     print(f"🚀 /api/videos/create 엔드포인트 호출됨")
     print(f"🚀 요청 데이터: {request}")
     print(f"🚀 세션 토큰: {session_token}")
@@ -1175,126 +806,38 @@ async def create_video(
         # 사용자 ID 추출 (로그인한 경우)
         user_id = None
         if session_token:
-            try:
-                validated_user = user_db.validate_session(session_token)
-                if validated_user:
-                    user_id = validated_user['id']
-                    print(f"🚀 사용자 ID: {user_id}")
-                else:
-                    print(f"🚀 세션 토큰이 유효하지 않음")
-            except Exception as e:
-                print(f"⚠️ 세션 토큰 검증 오류: {str(e)}")
+            user = user_db.validate_session(session_token)
+            if user:
+                user_id = user['id']
+                print(f"🚀 사용자 ID: {user_id}")
+            else:
+                print(f"🚀 세션 토큰이 유효하지 않음")
         else:
-            print(f"🚀 세션 토큰이 없음 (비로그인 상태)")
+            print(f"🚀 세션 토큰이 없음")
         
         print(f"🚀 create_video 함수 호출 전")
-        print(f"🚀 저장할 데이터: title={request.title}, category={request.category}, length={request.length}")
-        
-        # 조회수 예측 수행
-        print("\n" + "!" * 80)
-        print("!" * 80)
-        print("🚀 [조회수 예측 수행 시작 - 코드 실행 확인]")
-        print("!" * 80)
-        print("!" * 80 + "\n")
-        
-        prediction_result = None
-        print("\n" + "=" * 80)
-        print("🚀 [조회수 예측 시작]")
-        print("=" * 80)
-        print(f"🔍 예측 시작 - 카테고리: {request.category}")
-        try:
-            # 데이터 전처리
-            print(f"\n📊 [1단계] 전처리 시작...")
-            input_df = preprocess_input_data(request)
-            print(f"✅ 전처리 완료!")
-            print(f"📊 입력 데이터 shape: {input_df.shape}")
-            print(f"📊 입력 데이터 columns: {input_df.columns.tolist()}")
-            print(f"\n📊 전처리된 입력 데이터:")
-            print(input_df)
-            
-            # 예측 수행
-            print(f"\n🔍 [2단계] predict_views 호출 시작, category: {request.category}")
-            prediction_result = predict_views(request.category, input_df)
-            print(f"\n" + "=" * 80)
-            print("✅ [조회수 예측 완료]")
-            print("=" * 80)
-            print(f"✅ 조회수 예측 결과: {prediction_result}")
-            print("=" * 80 + "\n")
-        except HTTPException as pred_error:
-            # HTTPException은 그대로 재발생 (상태 코드와 함께)
-            print(f"⚠️ 조회수 예측 실패 (HTTPException): {str(pred_error)}")
-            print(f"⚠️ 상태 코드: {pred_error.status_code}")
-            print(f"⚠️ 상세 메시지: {pred_error.detail}")
-            # HTTPException은 상위로 전파되어야 함
-            raise
-        except Exception as pred_error:
-            print(f"⚠️ 조회수 예측 실패: {str(pred_error)}")
-            import traceback
-            print(f"⚠️ 예측 실패 상세 오류:\n{traceback.format_exc()}")
-            # 예측 실패해도 저장은 계속 진행 (prediction_result는 None으로 유지)
-        
         # 영상 정보 저장
-        try:
-            video = user_db.create_video(
-                title=request.title,
-                category=request.category,
-                length=request.length,
-                upload_time=request.upload_time,
-                description=request.description,
-                thumbnail_image=request.thumbnail_image,
-                user_id=user_id
-            )
-            print(f"🚀 create_video 함수 호출 완료: {video}")
-        except Exception as db_error:
-            print(f"❌ 데이터베이스 저장 오류: {str(db_error)}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"데이터베이스 저장 중 오류가 발생했습니다: {str(db_error)}"
-            )
-        
-        # prediction이 None이어도 명시적으로 포함
-        print("\n" + "=" * 80)
-        print("📤 [응답 생성]")
-        print("=" * 80)
-        print(f"📊 prediction_result 값: {prediction_result}")
-        print(f"📊 prediction_result 타입: {type(prediction_result)}")
-        print(f"📊 prediction_result is None: {prediction_result is None}")
-        
-        data_dict = {
-            "video": video
-        }
-        # None이어도 명시적으로 포함
-        data_dict["prediction"] = prediction_result
-        
-        print(f"📊 data_dict에 prediction 포함 여부: {'prediction' in data_dict}")
-        print(f"📊 data_dict['prediction'] 값: {data_dict['prediction']}")
+        video = user_db.create_video(
+            title=request.title,
+            category=request.category,
+            length=request.length,
+            upload_time=request.upload_time,
+            description=request.description,
+            thumbnail_image=request.thumbnail_image,
+            user_id=user_id
+        )
+        print(f"🚀 create_video 함수 호출 완료: {video}")
         
         response_data = {
             "success": True,
             "message": "영상 정보가 저장되었습니다.",
-            "data": data_dict
+            "data": {"video": video}
         }
         
-        print(f"📊 response_data['data']에 prediction 포함 여부: {'prediction' in response_data['data']}")
-        print(f"📊 response_data['data']['prediction'] 값: {response_data['data'].get('prediction')}")
-        print(f"✅ 최종 응답 데이터 구조:")
-        print(f"   - success: {response_data['success']}")
-        print(f"   - data.video: {response_data['data'].get('video') is not None}")
-        print(f"   - data.prediction: {response_data['data'].get('prediction')}")
-        print("=" * 80 + "\n")
-        
         # JSONResponse를 사용하여 한글 인코딩 보장
-        response = UTF8JSONResponse(content=response_data)
-        print(f"📊 응답 직렬화 후 확인: prediction이 포함되어 있는지 확인 필요")
-        return response
+        return UTF8JSONResponse(content=response_data)
         
-    except HTTPException:
-        # HTTPException은 그대로 재발생
-        raise
     except Exception as e:
-        print(f"❌ 예상치 못한 오류: {str(e)}")
-        import traceback
-        print(f"❌ 트레이스백: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"영상 저장 중 오류가 발생했습니다: {str(e)}"
@@ -1351,15 +894,14 @@ if __name__ == "__main__":
     
     print("✅ 데이터베이스 연결 확인")
     print("🚀 FastAPI 서버 시작 중...")
-    
-    import os
-    port = int(os.environ.get("PORT", 8001))  # 기본값을 8001로 변경
-    
-    print(f"\n서버 주소: http://localhost:{port}")
-    print(f"API 문서: http://localhost:{port}/docs")
-    print(f"ReDoc 문서: http://localhost:{port}/redoc")
+    print("\n서버 주소: http://localhost:8001")
+    print("API 문서: http://localhost:8001/docs")
+    print("ReDoc 문서: http://localhost:8001/redoc")
     print("\n종료하려면 Ctrl+C를 누르세요.")
     print("=" * 50)
+    
+    import os
+    port = int(os.environ.get("PORT", 8001))
     
     uvicorn.run(
         "fastapi_server:app",
