@@ -497,7 +497,7 @@ class TagEnrichRequest(BaseModel):
     top_k: int = Field(default=15, ge=1, le=50, description="추천할 태그 개수")
     title_sim_threshold: float = Field(default=0.30, description="제목 유사도 임계값")
     tag_abs_threshold: float = Field(default=0.30, description="태그 유사도 임계값")
-    extra_k: int = Field(default=10, description="추가 태그 개수")
+    extra_k: int = Field(default=20, description="추가 태그 개수")
     api_key: Optional[str] = Field(default=None, description="OpenAI API 키 (없으면 환경변수 사용)")
 
 class TagEnrichResponse(BaseModel):
