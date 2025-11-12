@@ -2528,7 +2528,442 @@
 
         
         function downloadReport() {
-            alert('보고서 다운로드 기능은 준비 중입니다.');
+            try {
+                // 현재 분석 결과 수집
+                const videoData = JSON.parse(localStorage.getItem('videoData'));
+                const predictionResult = JSON.parse(localStorage.getItem('predictionResult'));
+                
+                if (!videoData) {
+                    alert('저장할 영상 정보가 없습니다. 다시 입력해주세요.');
+                    return;
+                }
+                
+                // 태그 정보 수집
+                const finalTags = [];
+                const finalDiv = document.getElementById('finalTags');
+                if (finalDiv) {
+                    finalDiv.querySelectorAll('.tag-badge').forEach(badge => {
+                        const tagText = badge.textContent.trim();
+                        const cleanTag = tagText.replace(/^#/, '').replace(/\s*\([^)]*\)$/, '').trim();
+                        if (cleanTag && !tagText.includes('(')) {
+                            finalTags.push(cleanTag);
+                        }
+                    });
+                }
+                
+                // 개선점 정보 수집 (detailedRecommendations div에서)
+                const improvements = [];
+                const detailedRecDiv = document.getElementById('detailedRecommendations');
+                if (detailedRecDiv) {
+                    const recItems = detailedRecDiv.querySelectorAll('.recommendation-item');
+                    recItems.forEach(item => {
+                        const titleEl = item.querySelector('.recommendation-title');
+                        if (titleEl) {
+                            const title = titleEl.textContent.replace(/개선점:\s*/, '').trim();
+                            // 내용 추출 (현재/추천 정보와 설명 모두 포함)
+                            let content = '';
+                            const currentEl = item.querySelector('.badge.bg-secondary')?.nextElementSibling;
+                            const recommendedEl = item.querySelector('.badge.bg-warning')?.nextElementSibling;
+                            const descEl = item.querySelector('div[style*="background: rgba(255, 255, 255, 0.05)"]');
+                            
+                            if (currentEl && recommendedEl) {
+                                const current = currentEl.textContent.trim();
+                                const recommended = recommendedEl.textContent.trim();
+                                content = `현재: ${current} → 추천: ${recommended}`;
+                                if (descEl) {
+                                    const descText = descEl.textContent.trim();
+                                    if (descText) {
+                                        content += `\n\n${descText}`;
+                                    }
+                                }
+                            } else {
+                                // 일반 텍스트인 경우
+                                const textEl = item.querySelector('.recommendation-text');
+                                if (textEl) {
+                                    content = textEl.textContent.trim();
+                                } else {
+                                    // 전체 텍스트에서 제목 제외한 부분
+                                    const allText = item.textContent.trim();
+                                    content = allText.replace(title, '').trim();
+                                }
+                            }
+                            
+                            if (title && content) {
+                                improvements.push({
+                                    title: title,
+                                    description: content
+                                });
+                            }
+                        }
+                    });
+                }
+                
+                // 카테고리 이름 가져오기
+                const categoryMap = {
+                    '1': 'Film & Animation',
+                    '2': 'Autos & Vehicles',
+                    '10': 'Music',
+                    '15': 'Pets & Animals',
+                    '17': 'Sports',
+                    '18': 'Short Movies',
+                    '19': 'Travel & Events',
+                    '20': 'Gaming',
+                    '21': 'Videoblogging',
+                    '22': 'People & Blogs',
+                    '23': 'Comedy',
+                    '24': 'Entertainment',
+                    '25': 'News & Politics',
+                    '26': 'Howto & Style'
+                };
+                const categoryName = categoryMap[videoData.category] || '기타';
+                
+                // 보고서 내용 생성
+                const reportDate = new Date().toLocaleString('ko-KR');
+                const predictedViews = predictionResult?.predicted_views?.toLocaleString() || 'N/A';
+                const confidence = predictionResult?.confidence?.toFixed(1) || 'N/A';
+                const titleSuggestions = predictionResult?.title_suggestions || [];
+                const recommendations = predictionResult?.recommendations || [];
+                
+                // HTML 형식의 보고서 생성
+                let htmlContent = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유튜브 영상 분석 보고서</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Malgun Gothic', '맑은 고딕', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #ff0000;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #ff0000;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header .date {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #ff0000;
+        }
+        .section h2 {
+            color: #ff0000;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .info-value {
+            color: #333;
+        }
+        .prediction-box {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .prediction-box .big-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .prediction-box .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .tag-item {
+            background: #ff0000;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .title-list, .recommendation-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .title-list li, .recommendation-list li {
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-left: 3px solid #ff0000;
+            border-radius: 4px;
+        }
+        .title-list li {
+            font-weight: 500;
+        }
+        .recommendation-list li {
+            line-height: 1.8;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 유튜브 영상 분석 보고서</h1>
+            <div class="date">생성일: ${reportDate}</div>
+        </div>
+        
+        <div class="section">
+            <h2>📹 영상 정보</h2>
+            <div class="info-grid">
+                <div class="info-label">제목:</div>
+                <div class="info-value">${videoData.title || 'N/A'}</div>
+                
+                <div class="info-label">카테고리:</div>
+                <div class="info-value">${categoryName}</div>
+                
+                <div class="info-label">길이:</div>
+                <div class="info-value">${videoData.length || 0}분</div>
+                
+                <div class="info-label">업로드 예정:</div>
+                <div class="info-value">${videoData.upload_time || '미설정'}</div>`;
+                
+                if (videoData.description) {
+                    htmlContent += `
+                <div class="info-label">설명:</div>
+                <div class="info-value">${videoData.description}</div>`;
+                }
+                
+                htmlContent += `
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📈 예측 결과</h2>
+            <div class="prediction-box">
+                <div class="label">예상 조회수</div>
+                <div class="big-number">${predictedViews}회</div>
+                <div class="label">신뢰도: ${confidence}%</div>`;
+                
+                if (predictionResult?.model_used) {
+                    htmlContent += `
+                <div class="label" style="margin-top: 10px;">사용 모델: ${predictionResult.model_used}</div>`;
+                }
+                
+                htmlContent += `
+            </div>
+        </div>`;
+                
+                if (titleSuggestions.length > 0) {
+                    htmlContent += `
+        <div class="section">
+            <h2>✏️ 추천 제목</h2>
+            <ol class="title-list">`;
+                    titleSuggestions.forEach((title, index) => {
+                        htmlContent += `
+                <li>${title}</li>`;
+                    });
+                    htmlContent += `
+            </ol>
+        </div>`;
+                }
+                
+                if (finalTags.length > 0) {
+                    htmlContent += `
+        <div class="section">
+            <h2>🏷️ 추천 태그</h2>
+            <div class="tag-list">`;
+                    finalTags.forEach(tag => {
+                        htmlContent += `
+                <span class="tag-item">#${tag}</span>`;
+                    });
+                    htmlContent += `
+            </div>
+        </div>`;
+                }
+                
+                if (recommendations.length > 0) {
+                    htmlContent += `
+        <div class="section">
+            <h2>💡 추천사항</h2>
+            <ol class="recommendation-list">`;
+                    recommendations.forEach((rec, index) => {
+                        htmlContent += `
+                <li>${rec}</li>`;
+                    });
+                    htmlContent += `
+            </ol>
+        </div>`;
+                }
+                
+                if (improvements.length > 0) {
+                    htmlContent += `
+        <div class="section">
+            <h2>🔧 개선점</h2>`;
+                    improvements.forEach((improvement, index) => {
+                        htmlContent += `
+            <div style="margin-bottom: 20px; padding: 15px; background: white; border-left: 3px solid #ffc107; border-radius: 4px;">
+                <h3 style="color: #ffc107; font-size: 1.1em; margin-bottom: 10px;">${index + 1}. ${improvement.title}</h3>
+                <p style="line-height: 1.8; color: #555; white-space: pre-line;">${improvement.description}</p>
+            </div>`;
+                    });
+                    htmlContent += `
+        </div>`;
+                }
+                
+                if (predictionResult?.category_analysis) {
+                    htmlContent += `
+        <div class="section">
+            <h2>📊 카테고리 분석</h2>
+            <p style="line-height: 1.8; color: #555;">${predictionResult.category_analysis}</p>
+        </div>`;
+                }
+                
+                htmlContent += `
+        <div class="footer">
+            <p>본 보고서는 1등 유튜버 되기 서비스를 통해 생성되었습니다.</p>
+            <p>© 2024 1등 유튜버 되기. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+                
+                // 텍스트 형식의 보고서 생성 (PDF용)
+                let textContent = `========================================\n`;
+                textContent += `유튜브 영상 분석 보고서\n`;
+                textContent += `========================================\n\n`;
+                textContent += `생성일: ${reportDate}\n\n`;
+                
+                textContent += `[영상 정보]\n`;
+                textContent += `제목: ${videoData.title || 'N/A'}\n`;
+                textContent += `카테고리: ${categoryName}\n`;
+                textContent += `길이: ${videoData.length || 0}분\n`;
+                textContent += `업로드 예정: ${videoData.upload_time || '미설정'}\n`;
+                if (videoData.description) {
+                    textContent += `설명: ${videoData.description}\n`;
+                }
+                textContent += `\n`;
+                
+                textContent += `[예측 결과]\n`;
+                textContent += `예상 조회수: ${predictedViews}회\n`;
+                if (predictionResult?.model_used) {
+                    textContent += `사용 모델: ${predictionResult.model_used}\n`;
+                }
+                textContent += `\n`;
+                
+                if (titleSuggestions.length > 0) {
+                    textContent += `[추천 제목]\n`;
+                    titleSuggestions.forEach((title, index) => {
+                        textContent += `${index + 1}. ${title}\n`;
+                    });
+                    textContent += `\n`;
+                }
+                
+                if (finalTags.length > 0) {
+                    textContent += `[추천 태그]\n`;
+                    textContent += `${finalTags.join(', ')}\n\n`;
+                }
+                
+                if (recommendations.length > 0) {
+                    textContent += `[추천사항]\n`;
+                    recommendations.forEach((rec, index) => {
+                        textContent += `${index + 1}. ${rec}\n`;
+                    });
+                    textContent += `\n`;
+                }
+                
+                if (improvements.length > 0) {
+                    textContent += `[개선점]\n`;
+                    improvements.forEach((improvement, index) => {
+                        textContent += `${index + 1}. ${improvement.title}\n`;
+                        textContent += `   ${improvement.description.replace(/\n/g, '\n   ')}\n\n`;
+                    });
+                }
+                
+                if (predictionResult?.category_analysis) {
+                    textContent += `[카테고리 분석]\n`;
+                    textContent += `${predictionResult.category_analysis}\n\n`;
+                }
+                
+                textContent += `========================================\n`;
+                textContent += `보고서 끝\n`;
+                textContent += `========================================\n`;
+                
+                // 텍스트 파일로 다운로드
+                const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // 파일명 생성 (제목에서 특수문자 제거)
+                const safeTitle = (videoData.title || '영상분석').replace(/[^a-zA-Z0-9가-힣\s]/g, '').trim().substring(0, 30);
+                const fileName = `유튜브_분석_보고서_${safeTitle}_${new Date().toISOString().split('T')[0]}.txt`;
+                link.download = fileName;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                alert('보고서가 텍스트 파일로 다운로드되었습니다.');
+            } catch (error) {
+                console.error('보고서 다운로드 오류:', error);
+                alert('보고서 다운로드 중 오류가 발생했습니다: ' + error.message);
+            }
         }
         
         // 제목 추천 함수 (서버 API 사용)
@@ -2730,7 +3165,7 @@
                         top_k: 20,
                         title_sim_threshold: 0.30,
                         tag_abs_threshold: 0.30,
-                        extra_k: 10
+                        extra_k: 20
                     })
                 });
 
