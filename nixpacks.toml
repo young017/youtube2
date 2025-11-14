@@ -1,17 +1,17 @@
 [phases.setup]
-nixPkgs = ["python311", "git", "git-lfs"]
+nixPkgs = ["python311", "curl"]
 
-# Git LFS 파일을 install 단계에서 다운로드 (의존성 설치 전)
-# Nixpacks는 requirements.txt를 자동으로 감지하고 설치합니다
 [phases.install]
 cmds = [
-  "echo '=== Checking Git repository ==='",
-  "pwd",
-  "ls -la | head -10",
-  "test -d .git && (echo '=== Git repository found, pulling LFS files ===' && git lfs install && git lfs pull) || echo '=== Not a Git repository, checking if files exist ==='",
-  "echo '=== Checking downloaded files ==='",
-  "ls -la 모델/ 2>/dev/null | head -10 || echo 'Model directory not found'",
-  "find . -name '*.pkl' -o -name '*.cbm' 2>/dev/null | head -10 || echo 'No model files found'",
-  "ls -la tags/tag_recommendation_model.pkl 2>/dev/null || echo 'Tag model file not found'"
-]
+  "pip install -r requirements.txt",
 
+  # Create local directories (optional)
+  "mkdir -p models tags",
+
+  # Download files from HuggingFace
+  "curl -L 'https://huggingface.co/yudaag/youtube-view-predict-models/resolve/main/catboost_model_10.cbm' -o models/catboost_model_10.cbm",
+  "curl -L 'https://huggingface.co/yudaag/youtube-view-predict-models/resolve/main/tag_recommendation_model.pkl' -o tags/tag_recommendation_model.pkl",
+
+  "echo '=== Download complete ==='",
+  "ls -R ."
+]
