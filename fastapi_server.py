@@ -1252,21 +1252,26 @@ async def generate_titles(request: TitleGenerateRequest):
     """제목 추천 기능 (OpenAI GPT 사용)"""
     try:
         # OpenAI 클라이언트 초기화 (환경변수 자동 감지)
-        # httpx 클라이언트를 직접 설정하여 proxies 문제 회피
+        # httpx Client를 사용하여 연결 안정성 향상
         try:
             import httpx
             http_client = httpx.Client(
-                timeout=60.0,  # 60초 타임아웃
-                follow_redirects=True
+                timeout=httpx.Timeout(60.0, connect=10.0),  # 연결 타임아웃 10초, 전체 60초
+                follow_redirects=True,
+                limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
             )
             client = OpenAI(
                 http_client=http_client,
-                max_retries=2
+                max_retries=3,  # 재시도 횟수 증가
+                timeout=60.0
             )
         except Exception as e:
             # httpx 클라이언트 설정 실패 시 기본 초기화 (환경변수 자동 감지)
             print(f"⚠️ httpx 클라이언트 설정 실패, 기본 초기화 사용: {e}")
-            client = OpenAI()
+            client = OpenAI(
+                max_retries=3,
+                timeout=60.0
+            )
         
         prompt = f"""
             사용자가 '{request.keyword}'라는 주제를 입력했습니다.
@@ -1289,11 +1294,24 @@ async def generate_titles(request: TitleGenerateRequest):
             제목 목록만 출력해 주세요. (예: 1. ... 2. ...)
             """
         
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=1.0,
-        )
+        # OpenAI API 호출 (연결 에러 처리)
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=1.0,
+                timeout=60.0
+            )
+        except Exception as api_error:
+            error_str = str(api_error)
+            print(f"❌ OpenAI API 호출 실패: {error_str}")
+            # Connection error를 명시적으로 처리
+            if "connection" in error_str.lower() or "connect" in error_str.lower():
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="OpenAI API 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요."
+                )
+            raise
         
         content = response.choices[0].message.content.strip()
         
@@ -1334,7 +1352,10 @@ async def generate_titles(request: TitleGenerateRequest):
         error_detail = ""
         
         # OpenAI API 관련 에러 메시지 개선
-        if "401" in error_msg or "invalid_api_key" in error_msg.lower() or "incorrect api key" in error_msg.lower():
+        if "connection" in error_msg.lower() or "connect" in error_msg.lower() or "network" in error_msg.lower():
+            error_detail = "OpenAI API 서버에 연결할 수 없습니다. 인터넷 연결을 확인하고 잠시 후 다시 시도해주세요."
+            status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        elif "401" in error_msg or "invalid_api_key" in error_msg.lower() or "incorrect api key" in error_msg.lower():
             error_detail = "OpenAI API 키가 유효하지 않거나 설정되지 않았습니다. Railway 환경 변수에서 OPENAI_API_KEY를 확인해주세요."
             status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         elif "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
@@ -2130,3 +2151,4 @@ if __name__ == "__main__":
         port=port,
         reload=False  # 프로덕션에서는 reload=False
     )
+s
