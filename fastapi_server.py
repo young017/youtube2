@@ -44,7 +44,7 @@ cache_metadata = {
 
 # 현재 스크립트의 디렉토리와 상위 디렉토리를 sys.path에 추가
 script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(script_dir)
+project_root = script_dir  # 루트에 있으면 project_root = script_dir
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 if project_root not in sys.path:
@@ -139,16 +139,13 @@ prediction_models = {}
 def get_model_base_path():
     """모델 디렉토리 경로 찾기 (여러 경로 시도)"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(script_dir)
+    project_root = script_dir  # 루트에 있으면 project_root = script_dir
     current_dir = os.getcwd()
     
     possible_paths = [
         os.path.join(project_root, "모델"),  # 프로젝트 루트/모델
-        os.path.join(script_dir, "모델"),  # tags/모델
         "/app/모델",  # Railway 배포 환경 (루트)
-        "/app/tags/모델",  # Railway 배포 환경 (tags 디렉토리)
         os.path.join(current_dir, "모델"),  # 현재 작업 디렉토리/모델
-        os.path.join(current_dir, "tags", "모델"),  # 현재 작업 디렉토리/tags/모델
         "모델",  # 상대 경로
     ]
     
@@ -638,16 +635,16 @@ def load_tag_model():
     try:
         # 여러 경로에서 모델 파일 찾기
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(script_dir)
+        project_root = script_dir  # 루트에 있으면 project_root = script_dir
         current_dir = os.getcwd()
         
         possible_paths = [
-            os.path.join(script_dir, "tag_recommendation_model.pkl"),  # tags/tag_recommendation_model.pkl
             os.path.join(project_root, "tags", "tag_recommendation_model.pkl"),  # 프로젝트 루트/tags/tag_recommendation_model.pkl
             "/app/tags/tag_recommendation_model.pkl",  # Railway 배포 환경 (tags 디렉토리)
             "/app/tag_recommendation_model.pkl",  # Railway 배포 환경 (루트)
-            os.path.join(current_dir, "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리
             os.path.join(current_dir, "tags", "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리/tags
+            os.path.join(current_dir, "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리
+            "tags/tag_recommendation_model.pkl",  # 상대 경로
             "tag_recommendation_model.pkl",  # 상대 경로
         ]
         
@@ -707,12 +704,12 @@ async def startup_event():
     try:
         import subprocess
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(script_dir)
+        project_root = script_dir  # 루트에 있으면 project_root = script_dir
         download_script = os.path.join(project_root, "download_models.py")
         
         # 모델 디렉토리와 태그 모델 파일 확인
         model_dir = os.path.join(project_root, "모델")
-        tag_model_path = os.path.join(script_dir, "tag_recommendation_model.pkl")
+        tag_model_path = os.path.join(project_root, "tags", "tag_recommendation_model.pkl")
         
         # 모델이 하나도 없으면 다운로드 시도
         models_exist = (
@@ -1183,16 +1180,16 @@ async def enrich_tags(request: TagEnrichRequest):
         
         # 모델 경로 설정 (여러 경로 시도) - load_tag_model과 동일한 로직 사용
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(script_dir)
+        project_root = script_dir  # 루트에 있으면 project_root = script_dir
         current_dir = os.getcwd()
         
         possible_paths = [
-            os.path.join(script_dir, "tag_recommendation_model.pkl"),  # tags/tag_recommendation_model.pkl
             os.path.join(project_root, "tags", "tag_recommendation_model.pkl"),  # 프로젝트 루트/tags/tag_recommendation_model.pkl
             "/app/tags/tag_recommendation_model.pkl",  # Railway 배포 환경 (tags 디렉토리)
             "/app/tag_recommendation_model.pkl",  # Railway 배포 환경 (루트)
-            os.path.join(current_dir, "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리
             os.path.join(current_dir, "tags", "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리/tags
+            os.path.join(current_dir, "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리
+            "tags/tag_recommendation_model.pkl",  # 상대 경로
             "tag_recommendation_model.pkl",  # 상대 경로
         ]
         
@@ -1254,15 +1251,7 @@ async def enrich_tags(request: TagEnrichRequest):
 async def generate_titles(request: TitleGenerateRequest):
     """제목 추천 기능 (OpenAI GPT 사용)"""
     try:
-        # OpenAI API 키 확인
-        api_key = os.environ.get("OPENAI_API_KEY")
-        if not api_key:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="OPENAI_API_KEY 환경 변수가 설정되지 않았습니다."
-            )
-        
-        # OpenAI 클라이언트 초기화 (proxies 관련 에러 방지)
+        # OpenAI 클라이언트 초기화 (환경변수 자동 감지)
         # httpx 클라이언트를 직접 설정하여 proxies 문제 회피
         try:
             import httpx
@@ -1271,14 +1260,13 @@ async def generate_titles(request: TitleGenerateRequest):
                 follow_redirects=True
             )
             client = OpenAI(
-                api_key=api_key,
                 http_client=http_client,
                 max_retries=2
             )
         except Exception as e:
-            # httpx 클라이언트 설정 실패 시 기본 초기화
+            # httpx 클라이언트 설정 실패 시 기본 초기화 (환경변수 자동 감지)
             print(f"⚠️ httpx 클라이언트 설정 실패, 기본 초기화 사용: {e}")
-            client = OpenAI(api_key=api_key)
+            client = OpenAI()
         
         prompt = f"""
             사용자가 '{request.keyword}'라는 주제를 입력했습니다.
