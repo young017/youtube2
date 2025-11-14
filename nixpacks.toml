@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python311", "git", "git-lfs"]
+nixPkgs = ["python311", "python311Packages.pip", "git", "git-lfs"]
 
 # Git LFS 파일을 install 단계에서 다운로드 (의존성 설치 전)
 [phases.install]
