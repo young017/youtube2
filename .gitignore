@@ -43,7 +43,7 @@ ENV/
 *.sqlite3
 
 # Model files (large files - use Git LFS)
-*.pkl  # Git LFS로 관리하므로 주석 처리
+#*.pkl  # Git LFS로 관리하므로 주석 처리
 *.cbm
 *.h5
 *.hdf5
