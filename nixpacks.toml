@@ -1,16 +1,14 @@
 [phases.setup]
-nixPkgs = ["python311", "python311Packages.pip", "git", "git-lfs"]
+nixPkgs = ["python311", "git", "git-lfs"]
 
 # Git LFS 파일을 install 단계에서 다운로드 (의존성 설치 전)
+# Nixpacks는 requirements.txt를 자동으로 감지하고 설치합니다
 [phases.install]
 cmds = [
   "echo '=== Checking Git repository ==='",
   "pwd",
   "ls -la | head -10",
   "test -d .git && (echo '=== Git repository found, pulling LFS files ===' && git lfs install && git lfs pull) || echo '=== Not a Git repository, checking if files exist ==='",
-  "echo '=== Installing Python dependencies ==='",
-  "python -m pip install --upgrade pip",
-  "python -m pip install -r requirements.txt",
   "echo '=== Checking downloaded files ==='",
   "ls -la 모델/ 2>/dev/null | head -10 || echo 'Model directory not found'",
   "find . -name '*.pkl' -o -name '*.cbm' 2>/dev/null | head -10 || echo 'No model files found'",
