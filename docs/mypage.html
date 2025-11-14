@@ -510,12 +510,15 @@
             }
         }
 
+        // API Base URL 설정 (Railway 배포 URL)
+        const API_BASE = "https://youtube-production-ee6c.up.railway.app";
+        
         // 로그아웃
         async function logout() {
             try {
                 const sessionToken = localStorage.getItem('session_token');
                 if (sessionToken) {
-                    await fetch('http://localhost:8001/api/auth/logout', {
+                    await fetch(`${API_BASE}/api/auth/logout`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -544,7 +547,7 @@
 
             try {
                 const sessionToken = localStorage.getItem('session_token');
-                const response = await fetch('http://localhost:8001/api/videos/list', {
+                const response = await fetch(`${API_BASE}/api/videos/list`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
