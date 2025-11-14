@@ -618,33 +618,49 @@ def load_tag_model():
         # 여러 경로에서 모델 파일 찾기
         script_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(script_dir)
+        current_dir = os.getcwd()
         
         possible_paths = [
             os.path.join(script_dir, "tag_recommendation_model.pkl"),  # tags/tag_recommendation_model.pkl
             os.path.join(project_root, "tags", "tag_recommendation_model.pkl"),  # 프로젝트 루트/tags/tag_recommendation_model.pkl
-            "/app/tags/tag_recommendation_model.pkl",  # Railway 배포 환경
-            "tag_recommendation_model.pkl",  # 현재 작업 디렉토리
+            "/app/tags/tag_recommendation_model.pkl",  # Railway 배포 환경 (tags 디렉토리)
+            "/app/tag_recommendation_model.pkl",  # Railway 배포 환경 (루트)
+            os.path.join(current_dir, "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리
+            os.path.join(current_dir, "tags", "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리/tags
+            "tag_recommendation_model.pkl",  # 상대 경로
         ]
+        
+        print(f"🔍 태그 추천 모델 파일 검색 시작...")
+        print(f"   script_dir: {script_dir}")
+        print(f"   project_root: {project_root}")
+        print(f"   current_dir: {current_dir}")
         
         model_path = None
         for path in possible_paths:
             abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
+            print(f"   시도: {abs_path} (존재: {os.path.exists(abs_path)})")
             if os.path.exists(abs_path):
                 model_path = abs_path
+                print(f"   ✅ 모델 파일 발견: {abs_path}")
                 break
         
         if model_path:
+            print(f"📦 태그 추천 모델 로딩 시작: {model_path}")
             tag_model = TagRecommendationModel()
             tag_model.load_model(model_path)
             print(f"✅ 태그 추천 모델 로드 완료: {model_path}")
         else:
-            print("⚠️ 태그 추천 모델 파일이 없습니다. 먼저 모델을 학습시켜주세요.")
-            print(f"   시도한 경로들: {possible_paths}")
+            print("⚠️ 태그 추천 모델 파일을 찾을 수 없습니다.")
+            print(f"   시도한 경로들:")
+            for path in possible_paths:
+                abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
+                print(f"     - {abs_path}")
+            print("   💡 Railway 배포 시 tags/tag_recommendation_model.pkl 파일이 포함되어 있는지 확인하세요.")
             tag_model = None
     except Exception as e:
         print(f"❌ 태그 추천 모델 로드 실패: {e}")
         import traceback
-        traceback.print_exc()
+        print(f"❌ 상세 오류:\n{traceback.format_exc()}")
         tag_model = None
 
 def get_current_user(session_token: str = None):
@@ -1109,15 +1125,19 @@ async def enrich_tags(request: TagEnrichRequest):
                 detail="제목을 입력해주세요."
             )
         
-        # 모델 경로 설정 (여러 경로 시도)
+        # 모델 경로 설정 (여러 경로 시도) - load_tag_model과 동일한 로직 사용
         script_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(script_dir)
+        current_dir = os.getcwd()
         
         possible_paths = [
             os.path.join(script_dir, "tag_recommendation_model.pkl"),  # tags/tag_recommendation_model.pkl
             os.path.join(project_root, "tags", "tag_recommendation_model.pkl"),  # 프로젝트 루트/tags/tag_recommendation_model.pkl
-            "/app/tags/tag_recommendation_model.pkl",  # Railway 배포 환경
-            "tag_recommendation_model.pkl",  # 현재 작업 디렉토리
+            "/app/tags/tag_recommendation_model.pkl",  # Railway 배포 환경 (tags 디렉토리)
+            "/app/tag_recommendation_model.pkl",  # Railway 배포 환경 (루트)
+            os.path.join(current_dir, "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리
+            os.path.join(current_dir, "tags", "tag_recommendation_model.pkl"),  # 현재 작업 디렉토리/tags
+            "tag_recommendation_model.pkl",  # 상대 경로
         ]
         
         model_path = None
@@ -1125,13 +1145,18 @@ async def enrich_tags(request: TagEnrichRequest):
             abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
             if os.path.exists(abs_path):
                 model_path = abs_path
-                print(f"✅ 모델 파일 발견: {model_path}")
+                print(f"✅ enrich_tags 모델 파일 발견: {model_path}")
                 break
         
         if not model_path:
+            error_detail = f"태그 추천 모델 파일을 찾을 수 없습니다.\n시도한 경로:\n"
+            for path in possible_paths:
+                abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
+                error_detail += f"  - {abs_path}\n"
+            error_detail += "\nRailway 배포 시 tags/tag_recommendation_model.pkl 파일이 포함되어 있는지 확인하세요."
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"태그 추천 모델 파일을 찾을 수 없습니다. 시도한 경로: {possible_paths}"
+                detail=error_detail
             )
         
         # enrich_tags 파이프라인 실행 (제목과 설명 모두 사용)
@@ -1262,17 +1287,28 @@ async def generate_titles(request: TitleGenerateRequest):
         raise
     except Exception as e:
         error_msg = str(e)
+        error_detail = ""
+        
         # OpenAI API 관련 에러 메시지 개선
-        if "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
-            error_msg = "OpenAI API 요청 시간이 초과되었습니다. 잠시 후 다시 시도해주세요."
+        if "401" in error_msg or "invalid_api_key" in error_msg.lower() or "incorrect api key" in error_msg.lower():
+            error_detail = "OpenAI API 키가 유효하지 않거나 설정되지 않았습니다. Railway 환경 변수에서 OPENAI_API_KEY를 확인해주세요."
+            status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        elif "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
+            error_detail = "OpenAI API 요청 시간이 초과되었습니다. 잠시 후 다시 시도해주세요."
+            status_code = status.HTTP_504_GATEWAY_TIMEOUT
         elif "rate limit" in error_msg.lower():
-            error_msg = "OpenAI API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요."
-        elif "invalid api key" in error_msg.lower() or "authentication" in error_msg.lower():
-            error_msg = "OpenAI API 키가 유효하지 않습니다."
+            error_detail = "OpenAI API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요."
+            status_code = status.HTTP_429_TOO_MANY_REQUESTS
+        elif "authentication" in error_msg.lower():
+            error_detail = "OpenAI API 인증에 실패했습니다. API 키를 확인해주세요."
+            status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        else:
+            error_detail = f"제목 생성 중 오류가 발생했습니다: {error_msg}"
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"제목 생성 중 오류가 발생했습니다: {error_msg}"
+            status_code=status_code,
+            detail=error_detail
         )
 
 @app.post("/api/videos/create", response_model=VideoResponse)
