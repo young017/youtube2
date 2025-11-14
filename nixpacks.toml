@@ -1,17 +1,7 @@
 [phases.setup]
 nixPkgs = ["python311", "git", "git-lfs"]
 
-# Hugging Face에서 모델 다운로드 (의존성 설치 후)
-# Nixpacks는 requirements.txt를 자동으로 감지하고 설치합니다
-[phases.install]
-cmds = [
-  "echo '=== Checking for model files ==='",
-  "pwd",
-  "ls -la | head -10",
-  "echo '=== Checking model directory ==='",
-  "ls -la 모델/ 2>/dev/null | head -10 || echo 'Model directory not found'",
-  "find . -name '*.pkl' -o -name '*.cbm' 2>/dev/null | head -10 || echo 'No model files found'",
-  "ls -la tags/tag_recommendation_model.pkl 2>/dev/null || echo 'Tag model file not found'",
-  "echo '=== If models are missing, they will be downloaded from Hugging Face on server startup ==='"
-]
+# install 단계를 커스터마이징하지 않음
+# Nixpacks가 자동으로 requirements.txt를 감지하고 설치합니다
+# 모델 파일은 서버 시작 시 Hugging Face에서 자동으로 다운로드됩니다
 
