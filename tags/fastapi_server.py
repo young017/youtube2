@@ -135,8 +135,34 @@ tag_model = None
 # 조회수 예측 모델 캐시 (카테고리별)
 prediction_models = {}
 
-# 모델 파일 경로 설정
-MODEL_BASE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "모델")
+# 모델 파일 경로 설정 (여러 경로 시도)
+def get_model_base_path():
+    """모델 디렉토리 경로 찾기 (여러 경로 시도)"""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    
+    possible_paths = [
+        os.path.join(project_root, "모델"),  # 프로젝트 루트/모델
+        os.path.join(script_dir, "모델"),  # tags/모델
+        "/app/모델",  # Railway 배포 환경
+        "모델",  # 현재 작업 디렉토리
+    ]
+    
+    for path in possible_paths:
+        abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
+        if os.path.exists(abs_path) and os.path.isdir(abs_path):
+            # 모델 파일이 하나라도 있는지 확인
+            files = os.listdir(abs_path)
+            if any(f.endswith(('.cbm', '.pkl')) for f in files):
+                print(f"✅ 모델 디렉토리 발견: {abs_path}")
+                return abs_path
+    
+    # 기본 경로 반환 (존재하지 않아도)
+    default_path = os.path.join(project_root, "모델")
+    print(f"⚠️ 모델 디렉토리를 찾을 수 없습니다. 기본 경로 사용: {default_path}")
+    return default_path
+
+MODEL_BASE_PATH = get_model_base_path()
 
 def load_prediction_models(category: str):
     """카테고리별 분류/회귀 모델 로드"""
@@ -589,15 +615,36 @@ def load_tag_model():
     """태그 추천 모델 로드"""
     global tag_model
     try:
-        model_path = "tag_recommendation_model.pkl"
-        if os.path.exists(model_path):
+        # 여러 경로에서 모델 파일 찾기
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        
+        possible_paths = [
+            os.path.join(script_dir, "tag_recommendation_model.pkl"),  # tags/tag_recommendation_model.pkl
+            os.path.join(project_root, "tags", "tag_recommendation_model.pkl"),  # 프로젝트 루트/tags/tag_recommendation_model.pkl
+            "/app/tags/tag_recommendation_model.pkl",  # Railway 배포 환경
+            "tag_recommendation_model.pkl",  # 현재 작업 디렉토리
+        ]
+        
+        model_path = None
+        for path in possible_paths:
+            abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
+            if os.path.exists(abs_path):
+                model_path = abs_path
+                break
+        
+        if model_path:
             tag_model = TagRecommendationModel()
             tag_model.load_model(model_path)
-            print("✅ 태그 추천 모델 로드 완료")
+            print(f"✅ 태그 추천 모델 로드 완료: {model_path}")
         else:
             print("⚠️ 태그 추천 모델 파일이 없습니다. 먼저 모델을 학습시켜주세요.")
+            print(f"   시도한 경로들: {possible_paths}")
+            tag_model = None
     except Exception as e:
         print(f"❌ 태그 추천 모델 로드 실패: {e}")
+        import traceback
+        traceback.print_exc()
         tag_model = None
 
 def get_current_user(session_token: str = None):
@@ -1062,14 +1109,29 @@ async def enrich_tags(request: TagEnrichRequest):
                 detail="제목을 입력해주세요."
             )
         
-        # 모델 경로 설정
-        model_path = os.path.join(os.path.dirname(__file__), "tag_recommendation_model.pkl")
-        if not os.path.exists(model_path):
-            model_path = "tag_recommendation_model.pkl"
-        if not os.path.exists(model_path):
+        # 모델 경로 설정 (여러 경로 시도)
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        
+        possible_paths = [
+            os.path.join(script_dir, "tag_recommendation_model.pkl"),  # tags/tag_recommendation_model.pkl
+            os.path.join(project_root, "tags", "tag_recommendation_model.pkl"),  # 프로젝트 루트/tags/tag_recommendation_model.pkl
+            "/app/tags/tag_recommendation_model.pkl",  # Railway 배포 환경
+            "tag_recommendation_model.pkl",  # 현재 작업 디렉토리
+        ]
+        
+        model_path = None
+        for path in possible_paths:
+            abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
+            if os.path.exists(abs_path):
+                model_path = abs_path
+                print(f"✅ 모델 파일 발견: {model_path}")
+                break
+        
+        if not model_path:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="태그 추천 모델 파일을 찾을 수 없습니다."
+                detail=f"태그 추천 모델 파일을 찾을 수 없습니다. 시도한 경로: {possible_paths}"
             )
         
         # enrich_tags 파이프라인 실행 (제목과 설명 모두 사용)
@@ -1119,7 +1181,23 @@ async def generate_titles(request: TitleGenerateRequest):
                 detail="OPENAI_API_KEY 환경 변수가 설정되지 않았습니다."
             )
         
-        client = OpenAI(api_key=api_key)
+        # OpenAI 클라이언트 초기화 (proxies 관련 에러 방지)
+        # httpx 클라이언트를 직접 설정하여 proxies 문제 회피
+        try:
+            import httpx
+            http_client = httpx.Client(
+                timeout=60.0,  # 60초 타임아웃
+                follow_redirects=True
+            )
+            client = OpenAI(
+                api_key=api_key,
+                http_client=http_client,
+                max_retries=2
+            )
+        except Exception as e:
+            # httpx 클라이언트 설정 실패 시 기본 초기화
+            print(f"⚠️ httpx 클라이언트 설정 실패, 기본 초기화 사용: {e}")
+            client = OpenAI(api_key=api_key)
         
         prompt = f"""
             사용자가 '{request.keyword}'라는 주제를 입력했습니다.
@@ -1183,9 +1261,18 @@ async def generate_titles(request: TitleGenerateRequest):
     except HTTPException:
         raise
     except Exception as e:
+        error_msg = str(e)
+        # OpenAI API 관련 에러 메시지 개선
+        if "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
+            error_msg = "OpenAI API 요청 시간이 초과되었습니다. 잠시 후 다시 시도해주세요."
+        elif "rate limit" in error_msg.lower():
+            error_msg = "OpenAI API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요."
+        elif "invalid api key" in error_msg.lower() or "authentication" in error_msg.lower():
+            error_msg = "OpenAI API 키가 유효하지 않습니다."
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"제목 생성 중 오류가 발생했습니다: {str(e)}"
+            detail=f"제목 생성 중 오류가 발생했습니다: {error_msg}"
         )
 
 @app.post("/api/videos/create", response_model=VideoResponse)
