@@ -703,6 +703,41 @@ def get_current_user(session_token: str = None):
 @app.on_event("startup")
 async def startup_event():
     """서버 시작 시 실행"""
+    # 모델 파일이 없으면 Hugging Face에서 다운로드 시도
+    try:
+        import subprocess
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        download_script = os.path.join(project_root, "download_models.py")
+        
+        # 모델 디렉토리와 태그 모델 파일 확인
+        model_dir = os.path.join(project_root, "모델")
+        tag_model_path = os.path.join(script_dir, "tag_recommendation_model.pkl")
+        
+        # 모델이 하나도 없으면 다운로드 시도
+        models_exist = (
+            os.path.exists(model_dir) and 
+            len([f for f in os.listdir(model_dir) if f.endswith(('.pkl', '.cbm'))]) > 0
+        ) or os.path.exists(tag_model_path)
+        
+        if not models_exist and os.path.exists(download_script):
+            print("📥 모델 파일이 없습니다. Hugging Face에서 다운로드를 시도합니다...")
+            try:
+                result = subprocess.run(
+                    [sys.executable, download_script],
+                    capture_output=True,
+                    text=True,
+                    timeout=300  # 5분 타임아웃
+                )
+                if result.returncode == 0:
+                    print("✅ 모델 다운로드 완료")
+                else:
+                    print(f"⚠️ 모델 다운로드 실패: {result.stderr}")
+            except Exception as e:
+                print(f"⚠️ 모델 다운로드 중 오류: {e}")
+    except Exception as e:
+        print(f"⚠️ 모델 다운로드 체크 중 오류: {e}")
+    
     load_tag_model()
 
 @app.get("/", response_class=HTMLResponse)
