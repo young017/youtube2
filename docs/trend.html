@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>월별 트렌드 분석 - YouTube Data Analytics</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Chart.js (소스맵 경고 방지를 위해 소스맵 비활성화) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Chart.js 소스맵 경고 방지
+        if (typeof window !== 'undefined') {
+            window.chartJsSourceMapWarning = false;
+        }
+    </script>
+    
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --secondary-color: #1a1a1a;
+            --accent-color: #ff3333;
+            --text-dark: #ffffff;
+            --text-light: #cccccc;
+            --bg-light: #0a0a0a;
+            --bg-dark: #000000;
+        }
+        
+        body {
+            background-color: #000000;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+        }
+        
+        .hero-section {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 100px 0;
+            border-bottom: 3px solid #ff0000;
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(220, 53, 69, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: #ff0000;
+            margin-bottom: 1rem;
+        }
+        
+        .footer {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 50px 0 20px;
+            border-top: 3px solid #ff0000;
+        }
+        
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.95) !important;
+            border-bottom: 2px solid #ff0000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #ff0000 !important;
+        }
+        
+        .nav-link {
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: #ff0000 !important;
+        }
+        
+        .navbar-toggler {
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 0, 0, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        
+        .btn-custom {
+            background-color: #ff0000;
+            border: 2px solid #ff0000;
+            color: #ffffff;
+            padding: 12px 30px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom:hover {
+            background-color: transparent;
+            color: #ff0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        .trend-card {
+            background-color: #1a1a1a;
+            border: 2px solid #ff0000;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            color: #ffffff;
+        }
+        
+        .month-header {
+            background-color: #ff0000;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .topic-item {
+            background-color: #1a1a1a;
+            border-left: 4px solid #ff0000;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+            color: #ffffff;
+        }
+        
+        .topic-item:hover {
+            background-color: #ff0000;
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+        
+        .topic-rank {
+            background-color: #ff0000;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .chart-container {
+            background-color: #1a1a1a;
+            border: 2px solid #ff0000;
+            border-radius: 0;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: #1a1a1a;
+            border: 2px solid #ff0000;
+            padding: 25px;
+            border-radius: 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            color: #ffffff;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background-color: #ff0000;
+            color: #ffffff;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff0000;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card:hover .stat-number {
+            color: #ffffff;
+        }
+        
+        .stat-label {
+            color: #cccccc;
+            font-weight: 500;
+        }
+        
+        .stat-card:hover .stat-label {
+            color: #ffffff;
+        }
+        
+        .rank-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #ffffff;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .rank-1 { background-color: #ff0000; }
+        .rank-2 { background-color: #ff0000; }
+        .rank-3 { background-color: #ff0000; }
+        .rank-4 { background-color: #ff0000; }
+        .rank-5 { background-color: #ff0000; }
+        
+        .rank-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+        
+        .table-dark th {
+            background-color: #ff0000;
+            color: #ffffff;
+            border-color: #ff0000;
+        }
+        
+        .table-dark td {
+            border-color: #ff0000;
+        }
+        
+        .bg-primary { background-color: #ff0000 !important; }
+        .bg-success { background-color: #ff0000 !important; }
+        .bg-warning { background-color: #ff0000 !important; }
+        .bg-info { background-color: #ff0000 !important; }
+        .bg-secondary { background-color: #ff0000 !important; }
+        
+        .progress-bar {
+            background-color: #ff0000;
+        }
+        
+        .alert-success {
+            background-color: #ff0000;
+            border-color: #ff0000;
+            color: #ffffff;
+        }
+        
+        .alert-warning {
+            background-color: #000000;
+            border-color: #ff0000;
+            color: #ffffff;
+        }
+        
+        .monthly-trend-panel {
+            background-color: #ff0000;
+            border-radius: 15px;
+            padding: 30px;
+            height: 100%;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .monthly-trend-panel:hover {
+            transform: translateY(-5px);
+        }
+        
+        .panel-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .panel-header h4 {
+            color: #ffffff;
+            font-weight: bold;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .trend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .trend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .trend-item:last-child {
+            border-bottom: none;
+        }
+        
+        .trend-rank {
+            color: #ffffff;
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 25px;
+        }
+        
+        .trend-category {
+            color: #ffffff;
+            flex-grow: 1;
+            font-size: 0.95rem;
+        }
+        
+        .trend-count {
+            color: #ffffff;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .trend-more {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2rem;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .trend-ranking-container {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 20px;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab-btn.active {
+            background-color: #ff0000;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background-color: #1a1a1a;
+            color: #ff0000;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .tab-navigation {
+            border-bottom: 2px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .tab-content {
+            position: relative;
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        .ranking-cards {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+        
+        .ranking-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: #1a1a1a;
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .ranking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 0, 0, 0.4);
+            border-color: #ff0000;
+        }
+        
+        .rank-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ff0000;
+            color: #ffffff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(255, 0, 0, 0.5);
+        }
+        
+        .ranking-card.rank-1 .rank-badge {
+            background-color: #ffd700;
+            color: #000000;
+        }
+        
+        .ranking-card.rank-2 .rank-badge {
+            background-color: #c0c0c0;
+            color: #000000;
+        }
+        
+        .ranking-card.rank-3 .rank-badge {
+            background-color: #cd7f32;
+            color: #ffffff;
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            margin: 20px 0 15px 0;
+        }
+        
+        .card-info h5 {
+            color: #ffffff;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .card-info p {
+            color: #cccccc;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .card-count {
+            background-color: #ff0000;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+        
+        .more-button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .more-btn {
+            background-color: transparent;
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .more-btn:hover {
+            background-color: #ff0000;
+            color: #ffffff;
+            border-color: #ff0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        .back-btn {
+            background-color: #ff0000;
+            border: 2px solid #ff0000;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background-color: transparent;
+            color: #ff0000;
+            transform: translateY(-2px);
+        }
+        
+        .display-4 {
+            color: #ffffff;
+        }
+        
+        .lead {
+            color: #cccccc;
+        }
+        
+        .tab-btn {
+            color: #cccccc;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-graph-up me-2"></i>
+                1등 유튜버 되기
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">홈</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#features">주요 기능</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#how-it-works">사용 방법</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#key-features">핵심 특징</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="trend.html">트렌드</a></li>
+                    <li class="nav-item"><a class="nav-link" href="feedback.html">피드백</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" style="margin-top: 76px;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <a href="index.html" class="back-btn mb-4 d-inline-block">
+                        <i class="bi bi-arrow-left me-2"></i>뒤로 가기
+                    </a>
+                    <h1 class="display-4 fw-bold mb-4" style="font-size: 3rem;">월별 트렌드 분석</h1>
+                    <p class="lead mb-4" style="font-size: 1.25rem; font-weight: 400; line-height: 1.8;">각 월별로 어떤 카테고리가 인기였는지 확인해보세요.</p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="bi bi-graph-up-arrow feature-icon"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom: 50px;"></section>
+
+    <!-- Main Content -->
+    <div class="container" style="padding-bottom: 50px;">
+        <!-- Monthly Trend Ranking -->
+        <div class="trend-ranking-container">
+            <!-- Tab Navigation -->
+            <div class="tab-navigation" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="tab-btn active" data-month="january">1월</button>
+                    <button class="tab-btn" data-month="february">2월</button>
+                    <button class="tab-btn" data-month="march">3월</button>
+                    <button class="tab-btn" data-month="april">4월</button>
+                    <button class="tab-btn" data-month="may">5월</button>
+                    <button class="tab-btn" data-month="june">6월</button>
+                    <button class="tab-btn" data-month="july">7월</button>
+                    <button class="tab-btn" data-month="august">8월</button>
+                    <button class="tab-btn" data-month="september">9월</button>
+                    <button class="tab-btn" data-month="october">10월</button>
+                    <button class="tab-btn" data-month="november">11월</button>
+                    <button class="tab-btn" data-month="december">12월</button>
+                </div>
+                <button class="btn btn-primary" id="updateTrendsBtn" onclick="updateTrends()" style="background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); border: none; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                    <i class="bi bi-arrow-clockwise me-2"></i>트렌드 업데이트
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="tabContent">
+                <!-- 탭 패널은 JavaScript로 동적으로 생성됩니다 -->
+            </div>
+
+        </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Tab Functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 탭 패널 초기화 (이미 정의된 함수 호출)
+            if (typeof initializeMonthPanels === 'function') {
+                initializeMonthPanels();
+            }
+            
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetMonth = this.getAttribute('data-month');
+                    
+                    // Remove active class from all tabs and panels
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabPanels.forEach(p => p.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding panel
+                    this.classList.add('active');
+                    const targetPanel = document.getElementById(targetMonth);
+                    if (targetPanel) {
+                        targetPanel.classList.add('active');
+                    } else {
+                        console.warn(`탭 패널을 찾을 수 없습니다: ${targetMonth}`);
+                    }
+                });
+            });
+            
+            // More button functionality
+            const moreBtn = document.querySelector('.more-btn');
+            moreBtn.addEventListener('click', function() {
+                alert('더 많은 월별 트렌드 데이터를 보려면 구독하세요!');
+            });
+        });
+        
+        // 카테고리 이름 매핑
+        const categoryMap = {
+            '1': 'Film & Animation',
+            '2': 'Autos & Vehicles',
+            '10': 'Music',
+            '15': 'Pets & Animals',
+            '17': 'Sports',
+            '18': 'Short Movies',
+            '19': 'Travel & Events',
+            '20': 'Gaming',
+            '21': 'Videoblogging',
+            '22': 'People & Blogs',
+            '23': 'Comedy',
+            '24': 'Entertainment',
+            '25': 'News & Politics',
+            '26': 'Howto & Style'
+        };
+        
+        // 카테고리 아이콘 매핑
+        const categoryIcons = {
+            '24': '🎬',
+            '10': '🎵',
+            '22': '👥',
+            '23': '😄',
+            '17': '⚽',
+            '19': '✈️',
+            '26': '💅',
+            '20': '🎮',
+            '1': '🎞️',
+            '15': '🐾'
+        };
+        
+        // 카테고리 한글 이름 매핑
+        const categoryNamesKo = {
+            '24': '엔터테인먼트',
+            '10': '음악',
+            '22': '인물 및 블로그',
+            '23': '코미디',
+            '17': '스포츠',
+            '19': '여행 및 이벤트',
+            '26': '하우투 및 스타일',
+            '20': '게임',
+            '1': '영화 및 애니메이션',
+            '15': '반려동물 및 동물'
+        };
+        
+        // 트렌드 업데이트 함수 (월별 순차 처리)
+        async function updateTrends() {
+            const updateBtn = document.getElementById('updateTrendsBtn');
+            const originalText = updateBtn.innerHTML;
+            
+            try {
+                // 버튼 비활성화 및 로딩 표시
+                updateBtn.disabled = true;
+                updateBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>업데이트 중...';
+                
+                // API 기본 URL 설정
+                let API_BASE_URL = 'http://localhost:8001';
+                if (window.location.hostname && 
+                    window.location.hostname !== 'localhost' && 
+                    window.location.hostname !== '127.0.0.1' &&
+                    window.location.protocol !== 'file:') {
+                    API_BASE_URL = 'https://youtube-analytics-production.up.railway.app';
+                }
+                
+                // 전체 트렌드 결과 저장
+                const allTrends = {};
+                
+                // 이미 있는 월 데이터 확인 (localStorage 또는 화면에서)
+                const existingTrendData = JSON.parse(localStorage.getItem('trendData') || '{}');
+                const existingMonths = Object.keys(existingTrendData).filter(key => 
+                    key !== 'updated_at' && existingTrendData[key] && existingTrendData[key].length > 0
+                );
+                
+                console.log(`📊 이미 있는 월 데이터: ${existingMonths.join(', ')}`);
+                
+                // 1월부터 12월까지 순차적으로 처리 (없는 월만)
+                for (let month = 1; month <= 12; month++) {
+                    const monthKey = `${month}월`;
+                    
+                    // 이미 데이터가 있으면 스킵
+                    if (existingMonths.includes(monthKey)) {
+                        console.log(`⏭️ ${monthKey}는 이미 데이터가 있어 스킵합니다.`);
+                        continue;
+                    }
+                    try {
+                        // 버튼에 현재 진행 상황 표시
+                        updateBtn.innerHTML = `<i class="bi bi-hourglass-split me-2"></i>${month}월 분석 중...`;
+                        
+                        // 월별 API 호출
+                        const response = await fetch(`${API_BASE_URL}/api/trends/update-month?month=${month}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            console.warn(`${month}월 분석 실패:`, errorData.detail || `HTTP ${response.status}`);
+                            // 해당 월이 없어도 계속 진행
+                            continue;
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.success && data.data && data.data.trends) {
+                            // 해당 월의 트렌드 결과를 전체 결과에 추가
+                            Object.assign(allTrends, data.data.trends);
+                            
+                            // 즉시 화면에 업데이트 (데이터가 없어도 표시)
+                            updateTrendDisplay(data.data.trends);
+                            
+                            // localStorage에도 업데이트
+                            updateCategoryRankStatus(data.data.trends);
+                            
+                            // 데이터가 있는지 확인
+                            const monthKey = `${month}월`;
+                            const monthTrend = data.data.trends[monthKey];
+                            if (monthTrend && monthTrend.top5 && monthTrend.top5.length > 0) {
+                                console.log(`✅ ${month}월 분석 완료`);
+                            } else {
+                                console.log(`⚠️ ${month}월 데이터가 없습니다.`);
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`${month}월 분석 중 오류:`, error.message);
+                        // 해당 월 실패해도 다음 월 계속 진행
+                    }
+                }
+                
+                // 최종 결과를 localStorage에 저장
+                if (Object.keys(allTrends).length > 0) {
+                    updateCategoryRankStatus(allTrends);
+                    alert(`✅ 트렌드 분석이 완료되었습니다!`);
+                } else {
+                    alert('⚠️ 분석된 데이터가 없습니다.');
+                }
+                
+            } catch (error) {
+                console.error('트렌드 업데이트 실패:', error);
+                alert(`❌ 트렌드 업데이트 실패: ${error.message}`);
+            } finally {
+                // 버튼 복원
+                updateBtn.disabled = false;
+                updateBtn.innerHTML = originalText;
+            }
+        }
+        
+        // 월별 ID 매핑 (1~12월)
+        const monthMapping = {
+            '1월': 'january',
+            '2월': 'february',
+            '3월': 'march',
+            '4월': 'april',
+            '5월': 'may',
+            '6월': 'june',
+            '7월': 'july',
+            '8월': 'august',
+            '9월': 'september',
+            '10월': 'october',
+            '11월': 'november',
+            '12월': 'december'
+        };
+        
+        // 기본 트렌드 데이터 (사용자 제공 데이터)
+        const defaultTrendData = {
+            '1월': {
+                top5: [
+                    { rank: 1, category_id: '24', count: 2029 },
+                    { rank: 2, category_id: '22', count: 1910 },
+                    { rank: 3, category_id: '23', count: 515 },
+                    { rank: 4, category_id: '19', count: 418 },
+                    { rank: 5, category_id: '10', count: 398 }
+                ]
+            },
+            '2월': {
+                top5: [
+                    { rank: 1, category_id: '24', count: 2048 },
+                    { rank: 2, category_id: '22', count: 1665 },
+                    { rank: 3, category_id: '26', count: 520 },
+                    { rank: 4, category_id: '19', count: 468 },
+                    { rank: 5, category_id: '10', count: 459 }
+                ]
+            },
+            '3월': {
+                top5: [
+                    { rank: 1, category_id: '22', count: 2065 },
+                    { rank: 2, category_id: '24', count: 1739 },
+                    { rank: 3, category_id: '23', count: 749 },
+                    { rank: 4, category_id: '10', count: 635 },
+                    { rank: 5, category_id: '26', count: 471 }
+                ]
+            },
+            '4월': {
+                top5: [
+                    { rank: 1, category_id: '22', count: 2134 },
+                    { rank: 2, category_id: '24', count: 1952 },
+                    { rank: 3, category_id: '10', count: 690 },
+                    { rank: 4, category_id: '23', count: 603 },
+                    { rank: 5, category_id: '26', count: 406 }
+                ]
+            },
+            '5월': {
+                top5: [
+                    { rank: 1, category_id: '24', count: 1951 },
+                    { rank: 2, category_id: '22', count: 1931 },
+                    { rank: 3, category_id: '10', count: 902 },
+                    { rank: 4, category_id: '19', count: 501 },
+                    { rank: 5, category_id: '23', count: 425 }
+                ]
+            },
+            '6월': {
+                top5: [
+                    { rank: 1, category_id: '22', count: 1755 },
+                    { rank: 2, category_id: '24', count: 1419 },
+                    { rank: 3, category_id: '10', count: 605 },
+                    { rank: 4, category_id: '23', count: 513 },
+                    { rank: 5, category_id: '26', count: 423 }
+                ]
+            },
+            '7월': {
+                top5: [
+                    { rank: 1, category_id: '24', count: 1315 },
+                    { rank: 2, category_id: '10', count: 1125 },
+                    { rank: 3, category_id: '22', count: 949 },
+                    { rank: 4, category_id: '20', count: 318 },
+                    { rank: 5, category_id: '26', count: 309 }
+                ]
+            },
+            '8월': {
+                top5: [
+                    { rank: 1, category_id: '10', count: 2041 },
+                    { rank: 2, category_id: '20', count: 1081 },
+                    { rank: 3, category_id: '24', count: 179 },
+                    { rank: 4, category_id: '1', count: 131 },
+                    { rank: 5, category_id: '22', count: 44 }
+                ]
+            },
+            '9월': {
+                top5: [
+                    { rank: 1, category_id: '10', count: 2157 },
+                    { rank: 2, category_id: '20', count: 1043 },
+                    { rank: 3, category_id: '24', count: 156 },
+                    { rank: 4, category_id: '1', count: 85 },
+                    { rank: 5, category_id: '22', count: 69 }
+                ]
+            },
+            '10월': {
+                top5: [
+                    { rank: 1, category_id: '10', count: 2206 },
+                    { rank: 2, category_id: '20', count: 1000 },
+                    { rank: 3, category_id: '24', count: 157 },
+                    { rank: 4, category_id: '1', count: 103 },
+                    { rank: 5, category_id: '22', count: 97 }
+                ]
+            }
+        };
+        
+        // 페이지 로드 시 탭 패널 생성
+        function initializeMonthPanels() {
+            const tabContent = document.getElementById('tabContent');
+            if (!tabContent) return;
+            
+            const monthNames = [
+                { key: '1월', id: 'january' },
+                { key: '2월', id: 'february' },
+                { key: '3월', id: 'march' },
+                { key: '4월', id: 'april' },
+                { key: '5월', id: 'may' },
+                { key: '6월', id: 'june' },
+                { key: '7월', id: 'july' },
+                { key: '8월', id: 'august' },
+                { key: '9월', id: 'september' },
+                { key: '10월', id: 'october' },
+                { key: '11월', id: 'november' },
+                { key: '12월', id: 'december' }
+            ];
+            
+            monthNames.forEach((month, index) => {
+                const panel = document.createElement('div');
+                panel.className = `tab-panel ${index === 3 ? 'active' : ''}`; // 4월이 기본 active
+                panel.id = month.id;
+                panel.innerHTML = `
+                    <div class="ranking-cards" style="display: flex; justify-content: center; align-items: center; min-height: 400px;">
+                        <div style="text-align: center; padding: 40px; color: #cccccc;">
+                            <i class="bi bi-hourglass-split" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                            <p>트렌드 업데이트 버튼을 클릭하여 ${month.key} 트렌드 데이터를 불러오세요.</p>
+                        </div>
+                    </div>
+                `;
+                tabContent.appendChild(panel);
+            });
+            
+            // 기본 트렌드 데이터 표시 (1~10월)
+            updateTrendDisplay(defaultTrendData);
+            
+            // localStorage에도 기본 데이터 저장
+            updateCategoryRankStatus(defaultTrendData);
+        }
+        
+        // 트렌드 결과를 화면에 반영하는 함수
+        function updateTrendDisplay(trends) {
+            
+            for (const [monthKey, monthData] of Object.entries(trends)) {
+                const monthId = monthMapping[monthKey];
+                if (!monthId) continue;
+                
+                const panel = document.getElementById(monthId);
+                if (!panel) continue;
+                
+                const rankingCards = panel.querySelector('.ranking-cards');
+                if (!rankingCards) continue;
+                
+                // 기존 카드 제거
+                rankingCards.innerHTML = '';
+                
+                // 데이터가 없는 경우 메시지 표시
+                if (!monthData.top5 || monthData.top5.length === 0) {
+                    rankingCards.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #cccccc; width: 100%;">
+                            <i class="bi bi-hourglass-split" style="font-size: 3rem; margin-bottom: 20px; display: block; color: #ffa500;"></i>
+                            <p style="font-size: 1.2rem; margin: 0;">${monthKey} 데이터는 아직 집계되지 않았습니다.</p>
+                        </div>
+                    `;
+                    continue;
+                }
+                
+                // TOP 5 카테고리 표시
+                monthData.top5.forEach((item, index) => {
+                    const categoryId = item.category_id;
+                    const categoryName = categoryMap[categoryId] || '기타';
+                    const categoryNameKo = categoryNamesKo[categoryId] || categoryName;
+                    const icon = categoryIcons[categoryId] || '📺';
+                    const rank = index + 1;
+                    
+                    const rankClass = `rank-${rank}`;
+                    const card = document.createElement('div');
+                    card.className = `ranking-card ${rankClass}`;
+                    card.innerHTML = `
+                        <div class="rank-badge">${rank}위</div>
+                        <div class="card-icon">${icon}</div>
+                        <div class="card-info">
+                            <h5>${categoryName}</h5>
+                            <p>${categoryNameKo}</p>
+                        </div>
+                        <div class="card-count">${item.count}개</div>
+                    `;
+                    rankingCards.appendChild(card);
+                });
+            }
+        }
+        
+        // feedback-result.html의 getCategoryRankStatus 함수 업데이트
+        function updateCategoryRankStatus(trends) {
+            // localStorage에 저장하여 feedback-result.html에서 사용할 수 있도록 함
+            const trendData = {
+                '1월': trends['1월']?.top5.map(item => item.category_id) || [],
+                '2월': trends['2월']?.top5.map(item => item.category_id) || [],
+                '3월': trends['3월']?.top5.map(item => item.category_id) || [],
+                '4월': trends['4월']?.top5.map(item => item.category_id) || [],
+                '5월': trends['5월']?.top5.map(item => item.category_id) || [],
+                '6월': trends['6월']?.top5.map(item => item.category_id) || [],
+                '7월': trends['7월']?.top5.map(item => item.category_id) || [],
+                '8월': trends['8월']?.top5.map(item => item.category_id) || [],
+                '9월': trends['9월']?.top5.map(item => item.category_id) || [],
+                '10월': trends['10월']?.top5.map(item => item.category_id) || [],
+                '11월': trends['11월']?.top5.map(item => item.category_id) || [],
+                '12월': trends['12월']?.top5.map(item => item.category_id) || [],
+                updated_at: new Date().toISOString()
+            };
+            
+            localStorage.setItem('trendData', JSON.stringify(trendData));
+            console.log('✅ 트렌드 데이터가 localStorage에 저장되었습니다:', trendData);
+        }
+    </script>
+</body>
+</html>

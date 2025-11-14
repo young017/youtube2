@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영상 피드백 - 1등 유튜버 되기</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --secondary-color: #1a1a1a;
+            --accent-color: #ff3333;
+            --text-dark: #ffffff;
+            --text-light: #cccccc;
+            --bg-light: #0a0a0a;
+            --bg-dark: #000000;
+        }
+        
+        body {
+            background-color: #000000;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+        }
+        
+        .hero-section {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 100px 0;
+            border-bottom: 3px solid #ff0000;
+        }
+        
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.95) !important;
+            border-bottom: 2px solid #ff0000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #ff0000 !important;
+        }
+        
+        .nav-link {
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: #ff0000 !important;
+        }
+        
+        .navbar-toggler {
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 0, 0, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        
+        .feedback-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 50px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(255, 0, 0, 0.2);
+            color: #ffffff;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feedback-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff0000 0%, #cc0000 100%);
+        }
+        
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .form-control {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .form-control:hover {
+            border-color: rgba(255, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .form-control:focus {
+            background-color: rgba(0, 0, 0, 0.8);
+            border-color: #ff0000;
+            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.15), 0 0 20px rgba(255, 0, 0, 0.2);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        
+        .form-control::placeholder {
+            color: #666666;
+            opacity: 0.7;
+        }
+        
+        .form-label {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-label i {
+            color: #ff0000;
+            font-size: 1.1rem;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 0, 0, 0.5);
+            pointer-events: none;
+        }
+        
+        .form-control:focus ~ .input-icon {
+            color: #ff0000;
+        }
+        
+        .btn-custom {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            border: none;
+            color: #ffffff;
+            padding: 16px 45px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-custom:hover::before {
+            left: 100%;
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 0, 0, 0.5);
+        }
+        
+        .btn-custom:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            color: #ff0000;
+            padding: 16px 45px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(255, 0, 0, 0.1);
+            border-color: #ff0000;
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .back-btn {
+            background-color: #ff0000;
+            border: 2px solid #ff0000;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background-color: transparent;
+            color: #ff0000;
+            transform: translateY(-2px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: #ff0000;
+            margin-bottom: 1rem;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 0 20px;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 0, 0, 0.3);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .step-number.active {
+            background-color: #ff0000;
+        }
+        
+        .step-number.completed {
+            background-color: #ff0000;
+        }
+        
+        .step-text {
+            color: #ffffff;
+            font-weight: 500;
+        }
+        
+        .step-line {
+            width: 50px;
+            height: 2px;
+            background-color: #ff0000;
+            margin: 0 10px;
+        }
+        
+        .footer {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 50px 0 20px;
+            border-top: 3px solid #ff0000;
+        }
+        
+        .form-select {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff0000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            padding-right: 45px;
+        }
+        
+        .form-select:hover {
+            border-color: rgba(255, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .form-select:focus {
+            background-color: rgba(0, 0, 0, 0.8);
+            border-color: #ff0000;
+            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.15), 0 0 20px rgba(255, 0, 0, 0.2);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        
+        .form-select option {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 10px;
+        }
+        
+        textarea.form-control {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-upload-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px dashed rgba(255, 0, 0, 0.3);
+            border-radius: 12px;
+            color: #cccccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 120px;
+        }
+        
+        .file-upload-label:hover {
+            border-color: rgba(255, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #ffffff;
+        }
+        
+        .file-upload-label.has-file {
+            border-color: #ff0000;
+            border-style: solid;
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+        
+        .file-upload-label i {
+            font-size: 2rem;
+            color: #ff0000;
+        }
+        
+        .text-muted {
+            color: #cccccc !important;
+        }
+        
+        .display-4 {
+            color: #ffffff;
+        }
+        
+        .lead {
+            color: #cccccc;
+        }
+        
+        .form-text {
+            color: #cccccc !important;
+        }
+        
+        h3 {
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 40px;
+            position: relative;
+            padding-bottom: 20px;
+        }
+        
+        h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #ff0000 0%, #cc0000 100%);
+            border-radius: 2px;
+        }
+        
+        .form-text {
+            color: #cccccc !important;
+            font-size: 0.875rem;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .required-indicator {
+            color: #ff0000;
+            margin-left: 4px;
+        }
+        
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.3), transparent);
+            margin: 40px 0;
+        }
+        
+        .preview-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+        
+        .preview-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-graph-up me-2"></i>
+                1등 유튜버 되기
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">홈</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#features">주요 기능</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#how-it-works">사용 방법</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#key-features">핵심 특징</a></li>
+                    <li class="nav-item"><a class="nav-link" href="trend.html">트렌드</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="feedback.html">피드백</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" style="margin-top: 76px;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <a href="index.html" class="back-btn mb-4 d-inline-block">
+                        <i class="bi bi-arrow-left me-2"></i>뒤로 가기
+                    </a>
+                    <h1 class="display-4 fw-bold mb-4">영상 피드백</h1>
+                    <p class="lead mb-4">영상 정보를 입력하면 AI가 조회수 예측과 개선 방향을 제안해드립니다.</p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="bi bi-chat-heart feature-icon"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container" style="padding-bottom: 50px;">
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step">
+                <div class="step-number active">1</div>
+                <div class="step-text">영상 정보 입력</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">피드백 결과</div>
+            </div>
+        </div>
+
+        <!-- Feedback Form -->
+        <div class="feedback-card">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <h3 class="text-center">영상 정보를 입력해주세요</h3>
+                    
+                    <form id="feedbackForm">
+                        <!-- 영상 제목 -->
+                        <div class="form-group">
+                            <label for="videoTitle" class="form-label">
+                                <i class="bi bi-film"></i>
+                                <span>영상 제목</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" class="form-control" id="videoTitle" placeholder="영상 제목을 입력해주세요" required>
+                            </div>
+                        </div>
+                        
+                        <!-- 영상 설명 -->
+                        <div class="form-group">
+                            <label for="videoDescription" class="form-label">
+                                <i class="bi bi-card-text"></i>
+                                <span>영상 설명</span>
+                            </label>
+                            <textarea class="form-control" id="videoDescription" rows="5" placeholder="영상의 주요 내용이나 특징을 간단히 설명해주세요" required></textarea>
+                        </div>
+                        
+                        <!-- 카테고리 -->
+                        <div class="form-group">
+                            <label for="videoCategory" class="form-label">
+                                <i class="bi bi-tags"></i>
+                                <span>카테고리</span>
+                            </label>
+                            <select class="form-select" id="videoCategory" required>
+                                <option value="">카테고리를 선택해주세요</option>
+                                <option value="1">Film & Animation</option>
+                                <option value="10">Music</option>
+                                <option value="15">Pets & Animals</option>
+                                <option value="17">Sports</option>
+                                <option value="19">Travel & Events</option>
+                                <option value="20">Gaming</option>
+                                <option value="22">People & Blogs</option>
+                                <option value="23">Comedy</option>
+                                <option value="24">Entertainment</option>
+                                <option value="26">Howto & Style</option>
+                                <option value="28">Science & Technology</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 영상 길이 -->
+                        <div class="form-group">
+                            <label for="videoLength" class="form-label">
+                                <i class="bi bi-clock"></i>
+                                <span>영상 길이 (분)</span>
+                            </label>
+                            <input type="number" class="form-control" id="videoLength" placeholder="예: 10 또는 2.35 (2분 35초) 또는 80.58 (80분 58초)" min="0.01" max="1440" step="0.01" required>
+                        </div>
+                        
+                        <!-- 자막 제공 여부 -->
+                        <div class="form-group">
+                            <label for="hasSubtitles" class="form-label">
+                                <i class="bi bi-subtitles"></i>
+                                <span>자막 제공 여부</span>
+                            </label>
+                            <select class="form-select" id="hasSubtitles" required>
+                                <option value="">선택해주세요</option>
+                                <option value="provided">제공</option>
+                                <option value="not_provided">미제공</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 해상도 품질 -->
+                        <div class="form-group">
+                            <label for="videoQuality" class="form-label">
+                                <i class="bi bi-display"></i>
+                                <span>해상도 품질</span>
+                            </label>
+                            <select class="form-select" id="videoQuality" required>
+                                <option value="">해상도를 선택해주세요</option>
+                                <option value="HD">HD</option>
+                                <option value="SD">SD</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 업로드 예정 시간 -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-calendar-event"></i>
+                                <span>업로드 예정 시간</span>
+                            </label>
+                            <div class="d-flex gap-2 flex-wrap align-items-end">
+                                <div style="flex: 1; min-width: 80px;">
+                                    <label for="uploadMonth" class="form-label" style="font-size: 0.85rem; margin-bottom: 5px;">월</label>
+                                    <select class="form-control" id="uploadMonth" required onchange="updateDateTime()"></select>
+                                </div>
+                                <div style="flex: 1; min-width: 80px;">
+                                    <label for="uploadDay" class="form-label" style="font-size: 0.85rem; margin-bottom: 5px;">일</label>
+                                    <select class="form-control" id="uploadDay" required onchange="updateDateTime()"></select>
+                                </div>
+                                <div style="flex: 1; min-width: 100px;">
+                                    <label for="uploadDayOfWeek" class="form-label" style="font-size: 0.85rem; margin-bottom: 5px;">요일</label>
+                                    <select class="form-control" id="uploadDayOfWeek" required onchange="updateDateTime()">
+                                        <option value="0">일요일</option>
+                                        <option value="1">월요일</option>
+                                        <option value="2">화요일</option>
+                                        <option value="3">수요일</option>
+                                        <option value="4">목요일</option>
+                                        <option value="5">금요일</option>
+                                        <option value="6">토요일</option>
+                                    </select>
+                                </div>
+                                <div style="flex: 1; min-width: 80px;">
+                                    <label for="uploadHour" class="form-label" style="font-size: 0.85rem; margin-bottom: 5px;">시간</label>
+                                    <select class="form-control" id="uploadHour" required onchange="updateDateTime()"></select>
+                                </div>
+                            </div>
+                            <input type="hidden" id="uploadTime" required>
+                        </div>
+                        
+                        <!-- 구독자수 -->
+                        <div class="form-group">
+                            <label for="subscriberCount" class="form-label">
+                                <i class="bi bi-people"></i>
+                                <span>구독자수</span>
+                            </label>
+                            <input type="number" class="form-control" id="subscriberCount" placeholder="예: 1000" min="0" required>
+                        </div>
+                        
+                        <!-- 썸네일 이미지 -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-image"></i>
+                                <span>썸네일 이미지 (선택사항)</span>
+                            </label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" class="file-upload-input" id="thumbnailImage" accept="image/*">
+                                <label for="thumbnailImage" class="file-upload-label" id="fileUploadLabel">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <div>
+                                        <div style="font-weight: 600; margin-bottom: 5px;">클릭하여 이미지 업로드</div>
+                                        <div style="font-size: 0.875rem; opacity: 0.7;">JPG, PNG, GIF (최대 5MB)</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="imagePreview" class="preview-container" style="display: none;">
+                                <img id="previewImg" src="" alt="미리보기">
+                            </div>
+                        </div>
+                        
+                        <!-- 제출 버튼 -->
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-custom btn-lg">
+                                <i class="bi bi-arrow-right me-2"></i>다음으로
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-lg" onclick="resetForm()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>초기화
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 1등 유튜버 되기. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-light text-decoration-none me-3">개인정보처리방침</a>
+                    <a href="#" class="text-light text-decoration-none">이용약관</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // 영상 길이 입력값 변환 함수 (2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
+        function parseLengthInput(lengthStr) {
+            if (!lengthStr) return 0;
+            
+            const num = parseFloat(lengthStr);
+            if (isNaN(num)) return 0;
+            
+            // 문자열로 변환하여 소수점 확인
+            const str = lengthStr.toString();
+            const parts = str.split('.');
+            
+            if (parts.length === 1) {
+                // 정수만 있으면 그대로 반환 (예: "10" → 10분)
+                return num;
+            }
+            
+            // 소수 부분이 있으면
+            const integerPart = parseInt(parts[0]) || 0;
+            const decimalPart = parts[1];
+            
+            if (decimalPart) {
+                const decimalInt = parseInt(decimalPart);
+                // 소수 부분이 60 미만이면 초로 해석
+                // 예: 2.35 → 2분 35초 → 2.583분
+                // 예: 80.58 → 80분 58초 → 80.967분 (1시간 20분 58초)
+                if (decimalInt < 60) {
+                    const seconds = decimalInt;
+                    return integerPart + seconds / 60;
+                }
+            }
+            
+            // 그 외에는 기존 방식 (예: 2.60 → 2.60분)
+            return num;
+        }
+        
+        // Form submission
+        console.log('폼 이벤트 리스너 등록');
+        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+            console.log('폼 제출 이벤트 발생!');
+            e.preventDefault();
+            console.log('폼 제출 시작');
+            
+            try {
+                // Get form data
+                const formData = {
+                    title: document.getElementById('videoTitle').value,
+                    category: document.getElementById('videoCategory').value,
+                    length: document.getElementById('videoLength').value,
+                    uploadTime: document.getElementById('uploadTime').value,
+                    thumbnailImage: document.getElementById('thumbnailImage').files[0] ? await convertImageToBase64(document.getElementById('thumbnailImage').files[0]) : null,
+                    description: document.getElementById('videoDescription').value,
+                    hasSubtitles: document.getElementById('hasSubtitles').value,
+                    videoQuality: document.getElementById('videoQuality').value,
+                    subscriberCount: parseInt(document.getElementById('subscriberCount').value) || 0
+                };
+                
+                console.log('폼 데이터:', formData);
+                
+                // Validate form
+                if (!formData.title || !formData.category || !formData.length || !formData.uploadTime || !formData.description || 
+                    document.getElementById('hasSubtitles').value === '' || !formData.videoQuality || !formData.subscriberCount) {
+                    alert('필수 항목을 모두 입력해주세요.');
+                    console.log('필수 항목 검증 실패');
+                    return;
+                }
+                
+                console.log('필수 항목 검증 통과');
+                
+                // DB에 영상 정보 저장
+                console.log('DB 저장 시작...');
+                // 영상 길이 변환 (2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
+                const convertedLength = parseLengthInput(formData.length);
+                console.log(`영상 길이 변환: ${formData.length} → ${convertedLength}분`);
+                
+                console.log('API 요청 전송:', {
+                    title: formData.title,
+                    category: formData.category,
+                    length: convertedLength,
+                    upload_time: formData.uploadTime,
+                    description: formData.description,
+                    thumbnail_image: formData.thumbnailImage ? '있음' : '없음',
+                    has_subtitles: formData.hasSubtitles,
+                    video_quality: formData.videoQuality,
+                    subscriber_count: formData.subscriberCount
+                });
+                
+                // 세션 토큰 가져오기
+                const sessionToken = localStorage.getItem('session_token');
+                console.log('세션 토큰:', sessionToken);
+                
+                // API 기본 URL 설정 (로컬 개발 환경 또는 프로덕션 환경)
+                // file:// 프로토콜로 열었을 때도 localhost 사용
+                let API_BASE_URL = 'http://localhost:8001';
+                if (window.location.hostname && 
+                    window.location.hostname !== 'localhost' && 
+                    window.location.hostname !== '127.0.0.1' &&
+                    window.location.protocol !== 'file:') {
+                    API_BASE_URL = 'https://youtube-analytics-production.up.railway.app';
+                }
+                
+                // URL에 세션 토큰 추가
+                let url = `${API_BASE_URL}/api/videos/create`;
+                if (sessionToken) {
+                    url += `?session_token=${sessionToken}`;
+                }
+                
+                console.log('API 요청 URL:', url);
+                // 영상 길이 변환 (2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
+                const convertedLength2 = parseLengthInput(formData.length);
+                console.log(`영상 길이 변환: ${formData.length} → ${convertedLength2}분`);
+                
+                console.log('요청 데이터:', {
+                    title: formData.title,
+                    category: formData.category,
+                    length: convertedLength2,
+                    upload_time: formData.uploadTime,
+                    description: formData.description,
+                    thumbnail_image: formData.thumbnailImage ? '있음' : '없음',
+                    has_subtitles: formData.hasSubtitles,
+                    video_quality: formData.videoQuality,
+                    subscriber_count: formData.subscriberCount
+                });
+                
+                console.log('fetch 요청 시작...');
+                try {
+                    // 서버 연결 테스트 (OPTIONS 요청 또는 간단한 GET 요청)
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5초 타임아웃
+                    
+                    const saveResponse = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            title: formData.title,
+                            category: formData.category,
+                            length: convertedLength2,
+                            upload_time: formData.uploadTime,
+                            description: formData.description,
+                            thumbnail_image: formData.thumbnailImage,
+                            has_subtitles: formData.hasSubtitles,
+                            video_quality: formData.videoQuality,
+                            subscriber_count: formData.subscriberCount
+                        }),
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                        
+                    if (!saveResponse.ok) {
+                        // 에러 응답 본문 읽기
+                        let errorMessage = `HTTP ${saveResponse.status}: ${saveResponse.statusText}`;
+                        try {
+                            const errorData = await saveResponse.json();
+                            errorMessage = errorData.detail || errorData.message || errorMessage;
+                        } catch (e) {
+                            // JSON 파싱 실패 시 기본 메시지 사용
+                        }
+                        throw new Error(errorMessage);
+                    }
+                    
+                    const saveData = await saveResponse.json();
+                    if (saveData.success) {
+                        console.log('영상 정보가 DB에 저장되었습니다:', saveData.data);
+                        
+                        // 예측 결과를 localStorage에 저장
+                        if (saveData.data && saveData.data.prediction) {
+                            const predictionResult = {
+                                predicted_views: saveData.data.prediction.predicted_views,
+                                pred_popular_prob: saveData.data.prediction.pred_popular_prob,
+                                confidence: saveData.data.prediction.confidence,
+                                cls_model: saveData.data.prediction.cls_model || 'Unknown',
+                                reg_model: saveData.data.prediction.reg_model || 'Unknown',
+                                cls_model_file: saveData.data.prediction.cls_model_file || '',
+                                reg_model_file: saveData.data.prediction.reg_model_file || '',
+                                model_type: saveData.data.prediction.model_type || 'unknown',
+                                model_used: `${saveData.data.prediction.cls_model || 'Unknown'} + ${saveData.data.prediction.reg_model || 'Unknown'}`
+                            };
+                            localStorage.setItem('predictionResult', JSON.stringify(predictionResult));
+                            console.log('✅ 예측 결과 저장:', predictionResult);
+                            console.log('저장된 모델 정보 - cls_model:', predictionResult.cls_model);
+                            console.log('저장된 모델 정보 - reg_model:', predictionResult.reg_model);
+                            console.log('저장된 모델 파일 - cls_model_file:', predictionResult.cls_model_file);
+                            console.log('저장된 모델 파일 - reg_model_file:', predictionResult.reg_model_file);
+                        } else {
+                            console.error('❌ 예측 결과가 없습니다!');
+                            console.error('saveData:', saveData);
+                            console.error('saveData.data:', saveData.data);
+                            console.error('saveData.data.prediction:', saveData.data ? saveData.data.prediction : '없음');
+                            // 예측 실패 시 시뮬레이션 사용을 위해 predictionResult를 null로 설정하지 않음
+                            // 대신 빈 객체를 저장해서 나중에 시뮬레이션 생성하도록 함
+                        }
+                    } else {
+                        throw new Error(saveData.detail || saveData.message || '저장 실패');
+                    }
+                } catch (saveError) {
+                    console.error('영상 정보 저장 실패:', saveError);
+                    console.error('에러 타입:', saveError.name);
+                    console.error('에러 메시지:', saveError.message);
+                    console.error('에러 스택:', saveError.stack);
+                    
+                    // 에러 메시지 개선
+                    let errorMessage = '영상 정보 저장에 실패했습니다.\n\n';
+                    
+                    if (saveError.name === 'AbortError' || saveError.message.includes('aborted')) {
+                        errorMessage += '⏱️ 요청 시간이 초과되었습니다.\n';
+                        errorMessage += '서버 응답이 느리거나 네트워크 연결에 문제가 있을 수 있습니다.\n\n';
+                    } else if (saveError.name === 'TypeError' && saveError.message.includes('fetch')) {
+                        errorMessage += '🔌 서버에 연결할 수 없습니다.\n\n';
+                        errorMessage += '가능한 원인:\n';
+                        errorMessage += '1. 서버가 실행 중이 아닙니다 (http://localhost:8001)\n';
+                        errorMessage += '2. 네트워크 연결 문제\n';
+                        errorMessage += '3. CORS 정책 문제 (파일을 브라우저에서 직접 열 경우)\n\n';
+                        errorMessage += `서버 URL: ${url}\n\n`;
+                        errorMessage += '💡 해결 방법:\n';
+                        errorMessage += '- 서버를 실행하세요: python -m uvicorn main:app --reload --port 8001\n';
+                        errorMessage += '- 또는 로컬 서버를 사용하세요 (예: Live Server 확장 프로그램)';
+                    } else if (saveError.message) {
+                        errorMessage += `에러 상세: ${saveError.message}`;
+                    }
+                    
+                    alert(errorMessage);
+                    // 저장 실패해도 계속 진행
+                }
+                
+                // Store data in localStorage
+                localStorage.setItem('videoData', JSON.stringify(formData));
+                console.log('데이터 저장 완료');
+                
+                // Redirect to feedback result page
+                console.log('피드백 결과 페이지로 이동');
+                window.location.href = 'feedback-result.html';
+            } catch (error) {
+                console.error('폼 제출 오류:', error);
+                alert('오류가 발생했습니다: ' + error.message);
+            }
+        });
+        
+        // Reset form
+        function resetForm() {
+            document.getElementById('feedbackForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
+            const fileUploadLabel = document.getElementById('fileUploadLabel');
+            if (fileUploadLabel) {
+                fileUploadLabel.classList.remove('has-file');
+                fileUploadLabel.innerHTML = `
+                    <i class="bi bi-cloud-upload"></i>
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 5px;">클릭하여 이미지 업로드</div>
+                        <div style="font-size: 0.875rem; opacity: 0.7;">JPG, PNG, GIF (최대 5MB)</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Set default upload time to current time + 1 hour
+        // 이미지를 Base64로 변환하는 함수
+        function convertImageToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // 이미지 미리보기 기능
+        function setupImagePreview() {
+            const thumbnailInput = document.getElementById('thumbnailImage');
+            const fileUploadLabel = document.getElementById('fileUploadLabel');
+            
+            if (thumbnailInput) {
+                thumbnailInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        // 파일 크기 체크 (5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('파일 크기는 5MB를 초과할 수 없습니다.');
+                            e.target.value = '';
+                            fileUploadLabel.classList.remove('has-file');
+                            return;
+                        }
+                        
+                        // 파일 타입 체크
+                        if (!file.type.startsWith('image/')) {
+                            alert('이미지 파일만 업로드 가능합니다.');
+                            e.target.value = '';
+                            fileUploadLabel.classList.remove('has-file');
+                            return;
+                        }
+                        
+                        // 파일 업로드 레이블 스타일 변경
+                        fileUploadLabel.classList.add('has-file');
+                        fileUploadLabel.innerHTML = `
+                            <i class="bi bi-check-circle-fill"></i>
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 5px;">${file.name}</div>
+                                <div style="font-size: 0.875rem; opacity: 0.7;">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                            </div>
+                        `;
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const previewImg = document.getElementById('previewImg');
+                            const imagePreview = document.getElementById('imagePreview');
+                            
+                            previewImg.src = e.target.result;
+                            imagePreview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        document.getElementById('imagePreview').style.display = 'none';
+                        fileUploadLabel.classList.remove('has-file');
+                        fileUploadLabel.innerHTML = `
+                            <i class="bi bi-cloud-upload"></i>
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 5px;">클릭하여 이미지 업로드</div>
+                                <div style="font-size: 0.875rem; opacity: 0.7;">JPG, PNG, GIF (최대 5MB)</div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+        }
+        
+        // 날짜/시간 선택 옵션 초기화
+        function initializeDateTimeSelectors() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            
+            // 월 옵션 (1-12)
+            const monthSelect = document.getElementById('uploadMonth');
+            for (let i = 1; i <= 12; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + '월';
+                monthSelect.appendChild(option);
+            }
+            
+            // 일 옵션 업데이트 함수 (월에 따라)
+            function updateDays() {
+                const year = currentYear;
+                const month = parseInt(document.getElementById('uploadMonth').value);
+                const daySelect = document.getElementById('uploadDay');
+                const currentDay = parseInt(daySelect.value) || 1;
+                
+                // 해당 월의 마지막 날짜 계산
+                const lastDay = new Date(year, month, 0).getDate();
+                
+                daySelect.innerHTML = '';
+                for (let i = 1; i <= lastDay; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = i + '일';
+                    daySelect.appendChild(option);
+                }
+                
+                // 현재 선택된 일이 유효한 범위인지 확인
+                if (currentDay > lastDay) {
+                    daySelect.value = lastDay;
+                } else {
+                    daySelect.value = currentDay;
+                }
+                
+                // 요일 업데이트
+                updateDayOfWeek();
+            }
+            
+            // 요일 업데이트 함수
+            function updateDayOfWeek() {
+                const year = currentYear;
+                const month = parseInt(document.getElementById('uploadMonth').value);
+                const day = parseInt(document.getElementById('uploadDay').value);
+                const date = new Date(year, month - 1, day);
+                const dayOfWeek = date.getDay(); // 0 = 일요일, 6 = 토요일
+                document.getElementById('uploadDayOfWeek').value = dayOfWeek;
+                updateDateTime();
+            }
+            
+            document.getElementById('uploadMonth').addEventListener('change', function() {
+                updateDays();
+            });
+            document.getElementById('uploadDay').addEventListener('change', updateDayOfWeek);
+            
+            // 시간 옵션 (0-23)
+            const hourSelect = document.getElementById('uploadHour');
+            for (let i = 0; i <= 23; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + '시';
+                hourSelect.appendChild(option);
+            }
+            
+            // 기본값 설정 (현재 시간 + 1시간) - localStorage에 데이터가 없을 때만
+            const savedVideoData = JSON.parse(localStorage.getItem('videoData'));
+            if (!savedVideoData || !savedVideoData.uploadTime) {
+                now.setHours(now.getHours() + 1);
+                document.getElementById('uploadMonth').value = now.getMonth() + 1;
+                updateDays();
+                document.getElementById('uploadDay').value = now.getDate();
+                document.getElementById('uploadHour').value = now.getHours();
+                
+                updateDateTime();
+            }
+        }
+        
+        // 선택된 날짜/시간을 datetime-local 형식으로 변환
+        function updateDateTime() {
+            const year = new Date().getFullYear(); // 현재 년도 사용
+            const month = document.getElementById('uploadMonth').value.padStart(2, '0');
+            const day = document.getElementById('uploadDay').value.padStart(2, '0');
+            const hour = parseInt(document.getElementById('uploadHour').value);
+            const hourStr = hour.toString().padStart(2, '0');
+            const minute = '00';
+            
+            // datetime-local 형식으로 조합 (YYYY-MM-DDTHH:mm)
+            const dateTimeValue = `${year}-${month}-${day}T${hourStr}:${minute}`;
+            document.getElementById('uploadTime').value = dateTimeValue;
+        }
+        
+        // localStorage에서 videoData를 불러와 폼에 채우는 함수
+        function loadVideoDataFromStorage() {
+            try {
+                const videoData = JSON.parse(localStorage.getItem('videoData'));
+                if (!videoData) {
+                    console.log('저장된 videoData가 없습니다.');
+                    return;
+                }
+                
+                console.log('저장된 videoData 불러오기:', videoData);
+                
+                // 제목
+                if (videoData.title) {
+                    document.getElementById('videoTitle').value = videoData.title;
+                }
+                
+                // 설명
+                if (videoData.description) {
+                    document.getElementById('videoDescription').value = videoData.description;
+                }
+                
+                // 카테고리
+                if (videoData.category) {
+                    document.getElementById('videoCategory').value = videoData.category;
+                }
+                
+                // 영상 길이
+                if (videoData.length) {
+                    document.getElementById('videoLength').value = videoData.length;
+                }
+                
+                // 자막 제공 여부
+                if (videoData.hasSubtitles) {
+                    document.getElementById('hasSubtitles').value = videoData.hasSubtitles;
+                }
+                
+                // 해상도 품질
+                if (videoData.videoQuality) {
+                    document.getElementById('videoQuality').value = videoData.videoQuality;
+                }
+                
+                // 구독자 수
+                if (videoData.subscriberCount !== undefined) {
+                    document.getElementById('subscriberCount').value = videoData.subscriberCount;
+                }
+                
+                // 업로드 시간
+                if (videoData.uploadTime) {
+                    // datetime-local 형식 (YYYY-MM-DDTHH:mm)을 파싱
+                    const dateTime = new Date(videoData.uploadTime);
+                    if (!isNaN(dateTime.getTime())) {
+                        document.getElementById('uploadMonth').value = dateTime.getMonth() + 1;
+                        // 일 옵션 업데이트 (월 변경 시)
+                        const daySelect = document.getElementById('uploadDay');
+                        const currentYear = dateTime.getFullYear();
+                        const month = dateTime.getMonth() + 1;
+                        const lastDay = new Date(currentYear, month, 0).getDate();
+                        
+                        daySelect.innerHTML = '';
+                        for (let i = 1; i <= lastDay; i++) {
+                            const option = document.createElement('option');
+                            option.value = i;
+                            option.textContent = i + '일';
+                            daySelect.appendChild(option);
+                        }
+                        
+                        document.getElementById('uploadDay').value = dateTime.getDate();
+                        document.getElementById('uploadDayOfWeek').value = dateTime.getDay();
+                        document.getElementById('uploadHour').value = dateTime.getHours();
+                        updateDateTime();
+                    }
+                }
+                
+                // 썸네일 이미지 (Base64)
+                if (videoData.thumbnailImage) {
+                    const previewImg = document.getElementById('previewImg');
+                    const imagePreview = document.getElementById('imagePreview');
+                    const fileUploadLabel = document.getElementById('fileUploadLabel');
+                    
+                    previewImg.src = videoData.thumbnailImage;
+                    imagePreview.style.display = 'block';
+                    fileUploadLabel.classList.add('has-file');
+                    fileUploadLabel.innerHTML = `
+                        <i class="bi bi-check-circle-fill"></i>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">이미지 로드됨</div>
+                            <div style="font-size: 0.875rem; opacity: 0.7;">저장된 이미지</div>
+                        </div>
+                    `;
+                }
+                
+                console.log('✅ 폼 데이터 복원 완료');
+            } catch (error) {
+                console.error('videoData 불러오기 실패:', error);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 날짜/시간 선택기 초기화
+            initializeDateTimeSelectors();
+            
+            // 이미지 미리보기 설정
+            setupImagePreview();
+            
+            // 페이지 로드 시 저장된 데이터 복원 (날짜 선택기 초기화 후)
+            // setTimeout을 사용하여 날짜 선택기 초기화가 완전히 끝난 후 실행
+            setTimeout(function() {
+                loadVideoDataFromStorage();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
