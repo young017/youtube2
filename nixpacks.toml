@@ -1,0 +1,22 @@
+[phases.setup]
+nixPkgs = ["git", "git-lfs"]
+
+# Git LFS 파일을 빌드 단계에서 다운로드 (가장 먼저 실행)
+[phases.build]
+cmds = [
+  "echo '=== Git LFS Setup ==='",
+  "git lfs version || echo 'Git LFS not found'",
+  "git lfs install || echo 'Git LFS install failed'",
+  "echo '=== Pulling Git LFS files ==='",
+  "git lfs pull || (echo 'Git LFS pull failed, trying alternative method...' && git lfs fetch --all && git lfs checkout)",
+  "echo '=== Checking downloaded files ==='",
+  "pwd",
+  "ls -la | head -20",
+  "echo '=== Checking model directory ==='",
+  "ls -la 모델/ 2>/dev/null | head -10 || echo 'Model directory not found at ./모델/'",
+  "find . -name '*.pkl' -o -name '*.cbm' | head -10 || echo 'No model files found'",
+  "echo '=== Checking tag model ==='",
+  "ls -la tags/tag_recommendation_model.pkl 2>/dev/null || echo 'Tag model file not found'",
+  "echo '=== Git LFS files check complete ==='"
+]
+
