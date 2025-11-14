@@ -42,9 +42,16 @@ cache_metadata = {
     'video_id_column': None
 }
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# 현재 스크립트의 디렉토리와 상위 디렉토리를 sys.path에 추가
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from database import UserDatabase, db
-from tag_recommendation_model import TagRecommendationModel
+from tags.tag_recommendation_model import TagRecommendationModel
 from enrich_tags import run_pipeline
 from openai import OpenAI
 
