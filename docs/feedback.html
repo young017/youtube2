@@ -784,18 +784,11 @@
                 const sessionToken = localStorage.getItem('session_token');
                 console.log('세션 토큰:', sessionToken);
                 
-                // API 기본 URL 설정 (로컬 개발 환경 또는 프로덕션 환경)
-                // file:// 프로토콜로 열었을 때도 localhost 사용
-                let API_BASE_URL = 'http://localhost:8001';
-                if (window.location.hostname && 
-                    window.location.hostname !== 'localhost' && 
-                    window.location.hostname !== '127.0.0.1' &&
-                    window.location.protocol !== 'file:') {
-                    API_BASE_URL = 'https://youtube-analytics-production.up.railway.app';
-                }
+                // API Base URL 설정 (Railway 배포 URL)
+                const API_BASE = "https://youtube-production-ee6c.up.railway.app";
                 
                 // URL에 세션 토큰 추가
-                let url = `${API_BASE_URL}/api/videos/create`;
+                let url = `${API_BASE}/api/videos/create`;
                 if (sessionToken) {
                     url += `?session_token=${sessionToken}`;
                 }
@@ -905,7 +898,7 @@
                     } else if (saveError.name === 'TypeError' && saveError.message.includes('fetch')) {
                         errorMessage += '🔌 서버에 연결할 수 없습니다.\n\n';
                         errorMessage += '가능한 원인:\n';
-                        errorMessage += '1. 서버가 실행 중이 아닙니다 (http://localhost:8001)\n';
+                        errorMessage += '1. 서버 연결 문제\n';
                         errorMessage += '2. 네트워크 연결 문제\n';
                         errorMessage += '3. CORS 정책 문제 (파일을 브라우저에서 직접 열 경우)\n\n';
                         errorMessage += `서버 URL: ${url}\n\n`;
