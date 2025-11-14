@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 5 웹페이지</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --secondary-color: #1a1a1a;
+            --accent-color: #ff3333;
+            --text-dark: #ffffff;
+            --text-light: #cccccc;
+            --bg-light: #0a0a0a;
+            --bg-dark: #000000;
+            --gradient-primary: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            --gradient-secondary: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background-color: #000000;
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* 앵커 링크 스크롤 오프셋 (네비게이션 바 높이 고려) */
+        section[id] {
+            scroll-margin-top: 80px;
+        }
+        
+        .hero-section {
+            background: #000000;
+            color: #ffffff;
+            padding: 120px 0 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,0,0,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .btn-outline-light {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-light:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color) !important;
+        }
+        
+        .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 0, 0, 0.7);
+            background: var(--gradient-primary);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
+        }
+        
+        .feature-card {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            height: 100%;
+            color: #ffffff;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(255, 0, 0, 0.4);
+            border-color: rgba(255, 0, 0, 0.6);
+        }
+        
+        .feature-card .text-muted {
+            color: #cccccc !important;
+        }
+        
+        .feature-icon {
+            font-size: 4rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 3rem;
+        }
+        
+        .text-muted {
+            color: var(--text-light) !important;
+        }
+        .footer {
+            background: var(--gradient-secondary);
+            color: #ffffff;
+            padding: 60px 0 30px;
+        }
+        
+        .stats-section {
+            background: var(--bg-dark);
+            padding: 80px 0;
+        }
+        
+        .stat-card {
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 0, 0, 0.3);
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .navbar-toggler {
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 0, 0, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        
+        .dropdown-menu {
+            background-color: #1a1a1a;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .dropdown-item {
+            color: #ffffff;
+        }
+        
+        .dropdown-item:hover {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ffffff;
+        }
+        
+        .dropdown-header {
+            color: var(--text-light);
+        }
+        
+        .dropdown-divider {
+            border-color: rgba(255, 0, 0, 0.3);
+        }
+        
+        .video-card {
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            height: 100%;
+            color: #ffffff;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 0, 0, 0.2);
+            border-color: rgba(255, 0, 0, 0.4);
+        }
+        
+        .video-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .video-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #ffffff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .video-meta {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        
+        .video-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .video-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+        
+        .category-badge {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-graph-up me-2"></i>
+                1등 유튜버 되기
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="index.html">홈</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features">주요 기능</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#how-it-works">사용 방법</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#key-features">핵심 특징</a></li>
+                    <li class="nav-item"><a class="nav-link" href="trend.html">트렌드</a></li>
+                    <li class="nav-item"><a class="nav-link" href="feedback.html">피드백</a></li>
+                    <li class="nav-item" id="myPageNavItem" style="display: none;"><a class="nav-link" href="mypage.html">내 페이지</a></li>
+                </ul>
+                <div class="navbar-nav ms-3">
+                    <div id="authButtons">
+                        <a href="login.html" class="btn btn-outline-light btn-sm me-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>로그인
+                        </a>
+                        <a href="signup.html" class="btn btn-light btn-sm">
+                            <i class="bi bi-person-plus me-2"></i>회원가입
+                        </a>
+                    </div>
+                    <div id="userMenu" class="dropdown" style="display: none;">
+                        <!-- 사용자 메뉴가 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-8 hero-content">
+                    <h1 class="display-3 fw-bold mb-4 text-white">
+                        유튜브 영상 제작을 위한<br>
+                        <span style="color: var(--primary-color);">맞춤형 피드백 서비스</span>
+                    </h1>
+                    <p class="fs-4 mb-5 text-white opacity-90" style="line-height: 1.8; font-size: 1.25rem;">
+                        <span style="font-weight: 500;">2025 유튜브 영상 데이터를 기반으로, 분석부터 맞춤형 피드백까지</span><br>
+                        <span style="font-weight: 400;">모든 유튜버가 성장할 수 있는 유튜브 생태계를 만듭니다.</span>
+                    </p>
+                    <div>
+                        <a href="feedback.html" class="btn btn-outline-light btn-lg px-5 py-3" style="font-size: 1.3rem; font-weight: 700;">
+                            <i class="bi bi-chat-heart me-2"></i>시작하기
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="hero-visual">
+                        <i class="bi bi-graph-up-arrow" style="font-size: 8rem; color: rgba(255,255,255,0.3);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="py-5" style="padding: 80px 0; background-color: #000000;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">왜 이 서비스를 선택해야 할까요?</h2>
+                <p class="section-subtitle">데이터 기반의 정확한 분석으로 성공적인 콘텐츠를 만드세요</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="bi bi-database fs-1" style="color: var(--primary-color);"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-2 text-white" style="font-size: 1.25rem;">풍부한 데이터</h5>
+                            <p class="text-muted mb-0" style="font-size: 1rem;">수만 개의 2025 영상 데이터를 기반으로한 신뢰할 수 있는 분석 제공.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="bi bi-graph-up-arrow fs-1" style="color: var(--primary-color);"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-2 text-white" style="font-size: 1.25rem;">트렌드 인사이트</h5>
+                            <p class="text-muted mb-0" style="font-size: 1rem;">월별 인기 카테고리 트렌드를 한눈에</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="bi bi-shield-check fs-1" style="color: var(--primary-color);"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-2 text-white" style="font-size: 1.25rem;">정확한 예측</h5>
+                            <p class="text-muted mb-0" style="font-size: 1rem;">카테고리 별 특화된 모델로 높은 정확도의 조회수 예측과 피드백 제공.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Features Section -->
+    <section id="features" class="py-5" style="padding: 80px 0; background-color: #0a0a0a;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">주요 기능</h2>
+                <p class="section-subtitle">1등 유튜버 되기의 핵심 기능들을 확인해보세요.</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-5 col-lg-4">
+                    <a href="trend.html" class="text-decoration-none">
+                        <div class="feature-card">
+                            <i class="bi bi-graph-up-arrow feature-icon"></i>
+                            <h4 class="fw-bold mb-3" style="font-size: 1.25rem;">월별 트렌드 분석</h4>
+                            <p class="text-muted mb-0" style="font-size: 1rem;">유튜브 영상 데이터의 분석 결과를 통해 각 월별로 어떤 카테고리가 인기였는지 확인해보세요.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-5 col-lg-4">
+                    <a href="feedback.html" class="text-decoration-none">
+                        <div class="feature-card">
+                            <i class="bi bi-chat-heart feature-icon"></i>
+                            <h4 class="fw-bold mb-3" style="font-size: 1.25rem;">영상 피드백</h4>
+                            <p class="text-muted mb-0" style="font-size: 1rem;">구상한 영상 제작 기획안를 입력하면 조회수 예측과 개선 방향을 제안해드립니다.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-5" style="padding: 80px 0; background-color: #000000;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">사용 방법</h2>
+                <p class="section-subtitle">간단한 4단계로 시작하세요</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-6 col-lg-3">
+                    <div class="text-center">
+                        <div class="mb-4" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);">
+                            <span style="font-size: 2rem; font-weight: 700; color: white;">1</span>
+                        </div>
+                        <h5 class="fw-bold mb-3 text-white" style="font-size: 1.25rem;">월별 트렌드 분석</h5>
+                        <p class="text-muted" style="font-size: 1rem;">어떤 카테고리의 영상이 주목받고 있는지 확인하여, 2025 트렌드를 파악해보세요.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="text-center">
+                        <div class="mb-4" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);">
+                            <span style="font-size: 2rem; font-weight: 700; color: white;">2</span>
+                        </div>
+                        <h5 class="fw-bold mb-3 text-white" style="font-size: 1.25rem;">데이터 입력</h5>
+                        <p class="text-muted" style="font-size: 1rem;">구상한 영상 제작 기획안을 입력하세요.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="text-center">
+                        <div class="mb-4" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);">
+                            <span style="font-size: 2rem; font-weight: 700; color: white;">3</span>
+                        </div>
+                        <h5 class="fw-bold mb-3 text-white" style="font-size: 1.25rem;">AI 분석</h5>
+                        <p class="text-muted" style="font-size: 1rem;">분류 & 회귀 모델로 데이터를 분석합니다.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="text-center">
+                        <div class="mb-4" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);">
+                            <span style="font-size: 2rem; font-weight: 700; color: white;">4</span>
+            </div>
+                        <h5 class="fw-bold mb-3 text-white" style="font-size: 1.25rem;">결과 확인</h5>
+                        <p class="text-muted" style="font-size: 1rem;">예측 조회수와 개선 방향을 확인하고 콘텐츠를 최적화하세요.</p>
+        </div>
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- My Page Section -->
+    <section id="myPage" class="py-5" style="padding: 80px 0; background-color: #0a0a0a; display: none;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">내 페이지</h2>
+                <p class="section-subtitle">내가 입력한 영상 정보를 확인하세요</p>
+            </div>
+            
+            <!-- 로그인 안내 -->
+            <div id="loginPrompt" class="text-center py-5">
+                <div class="card" style="background: #1a1a1a; border: 1px solid rgba(255, 0, 0, 0.3); border-radius: 20px; padding: 40px;">
+                    <i class="bi bi-person-circle" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 20px;"></i>
+                    <h4 class="text-white mb-3">로그인이 필요합니다</h4>
+                    <p class="text-muted mb-4">영상 정보를 확인하려면 먼저 로그인해주세요.</p>
+                    <div>
+                        <a href="login.html" class="btn btn-primary me-3">로그인</a>
+                        <a href="signup.html" class="btn btn-outline-primary">회원가입</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 영상 목록 -->
+            <div id="videoListSection" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="text-white mb-0">내 영상 목록</h4>
+                    <div>
+                        <button class="btn btn-outline-primary me-2" onclick="showSavedAnalyses()">
+                            <i class="bi bi-bookmark me-2"></i>저장된 분석
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="refreshVideoList()">
+                            <i class="bi bi-arrow-clockwise me-2"></i>새로고침
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 로딩 -->
+                <div id="videoListLoading" class="text-center py-5" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">로딩 중...</span>
+                    </div>
+                    <p class="text-muted mt-3">영상 목록을 불러오는 중...</p>
+                </div>
+                
+                <!-- 영상 목록 -->
+                <div id="videoList" class="row g-4">
+                    <!-- 영상 카드들이 여기에 동적으로 추가됩니다 -->
+                </div>
+                
+                <!-- 빈 목록 메시지 -->
+                <div id="emptyVideoList" class="text-center py-5" style="display: none;">
+                    <i class="bi bi-video" style="font-size: 4rem; color: var(--text-light); margin-bottom: 20px;"></i>
+                    <h5 class="text-white mb-3">아직 입력한 영상이 없습니다</h5>
+                    <p class="text-muted mb-4">첫 번째 영상 정보를 입력해보세요!</p>
+                    <a href="feedback.html" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>영상 분석하기
+                    </a>
+                </div>
+                
+                <!-- 저장된 분석 결과 모달 -->
+                <div class="modal fade" id="savedAnalysesModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content" style="background: #1a1a1a; border: 1px solid rgba(255, 0, 0, 0.3);">
+                            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 0, 0, 0.3);">
+                                <h5 class="modal-title text-white">
+                                    <i class="bi bi-bookmark me-2"></i>저장된 분석 결과
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="savedAnalysesList" class="row g-4">
+                                    <!-- 저장된 분석 결과들이 여기에 표시됩니다 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features Section -->
+    <section id="key-features" class="py-5" style="padding: 80px 0; background-color: #0a0a0a;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">핵심 특징</h2>
+                <p class="section-subtitle">1등 유튜버 되기만의 특별한 장점들을 확인해보세요.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <i class="bi bi-graph-up feature-icon"></i>
+                        <h4 class="fw-bold mb-3" style="font-size: 1.25rem;">월별 트렌드 분석</h4>
+                        <p class="text-muted" style="font-size: 1rem;">유튜브 영상 데이터의 분석 결과를 통해 각 월별로 어떤 카테고리가 인기였는지 확인해보세요.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <i class="bi bi-lightning-charge feature-icon"></i>
+                        <h4 class="fw-bold mb-3" style="font-size: 1.25rem;">실시간 분석</h4>
+                        <p class="text-muted" style="font-size: 1rem;">영상 정보를 입력하면 즉시 분석 결과를 확인할 수 있습니다.<br>빠른 의사결정으로 콘텐츠 제작 효율을 높이세요.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <i class="bi bi-graph-up-arrow feature-icon"></i>
+                        <h4 class="fw-bold mb-3" style="font-size: 1.25rem;">조회수 예측</h4>
+                        <p class="text-muted" style="font-size: 1rem;">AI가 수만 개의 데이터를 분석하여 정확한 조회수를 예측합니다.<br>카테고리별, 길이별, 제목별 성과를 미리 확인하세요.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <i class="bi bi-chat-heart feature-icon"></i>
+                        <h4 class="fw-bold mb-3" style="font-size: 1.25rem;">맞춤형 피드백</h4>
+                        <p class="text-muted" style="font-size: 1rem;">영상별로 구체적인 개선 방향을 제시합니다.<br>제목, 썸네일, 콘텐츠 전략까지 종합적인 조언을 받으세요.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <i class="bi bi-tags feature-icon"></i>
+                        <h4 class="fw-bold mb-3" style="font-size: 1.25rem;">AI 제목 & 태그 추천</h4>
+                        <p class="text-muted" style="font-size: 1rem;">영상 제목과 설명을 분석하여 최적의 태그를 추천합니다.<br>검색 노출도를 높이고 더 많은 시청자를 유치하세요.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <i class="bi bi-bookmark feature-icon"></i>
+                        <h4 class="fw-bold mb-3" style="font-size: 1.25rem;">분석 결과 저장</h4>
+                        <p class="text-muted" style="font-size: 1rem;">분석한 영상 정보와 결과를 저장하여 언제든 다시 확인할 수 있습니다.<br>성과 비교와 개선 추적이 가능합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="mb-3 text-white">
+                        <i class="bi bi-graph-up me-2"></i>1등 유튜버 되기
+                    </h5>
+                    <p class="text-white-50 mb-4">
+                        데이터 기반 분석을 통해 모두가 성장할 수 있는 유튜브 생태계를 만듭니다.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white-50 fs-4"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-white-50 fs-4"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-white-50 fs-4"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-white-50 fs-4"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="mb-3 text-white">서비스</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="trend.html" class="text-white-50 text-decoration-none">트렌드 분석</a></li>
+                        <li><a href="feedback.html" class="text-white-50 text-decoration-none">영상 피드백</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h6 class="mb-3 text-white">연락처 정보</h6>
+                    <div class="d-flex align-items-center text-white-50">
+                        <i class="bi bi-github me-2"></i>
+                        <a href="https://github.com/yudaag/youtube/tree/main" target="_blank" class="text-white-50 text-decoration-none">https://github.com/yudaag/youtube/tree/main</a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 border-white-25">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-white-50">&copy; 2024 1등 유튜버 되기. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-white-50 text-decoration-none me-3">개인정보처리방침</a>
+                    <a href="#" class="text-white-50 text-decoration-none">이용약관</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>    
+    <!-- Auth JavaScript -->
+    <script>
+        // FastAPI 기반 인증 관리자
+        class AuthAPI {
+            constructor() {
+                this.baseURL = 'http://localhost:8001/api';
+            }
+            
+            async login(email, password) {
+                try {
+                    const response = await fetch(`${this.baseURL}/auth/login`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('로그인 API 오류:', error);
+                    return { success: false, message: '서버 연결 실패' };
+                }
+            }
+            
+            async register(userData) {
+                try {
+                    const response = await fetch(`${this.baseURL}/auth/register`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userData)
+                    });
+                    
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('회원가입 API 오류:', error);
+                    return { success: false, message: '서버 연결 실패' };
+                }
+            }
+            
+            async logout() {
+                try {
+                    const response = await fetch(`${this.baseURL}/auth/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            session_token: localStorage.getItem('session_token')
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('로그아웃 API 오류:', error);
+                    return { success: false, message: '서버 연결 실패' };
+                }
+            }
+        }
+        
+        // 인증 관리자
+        class AuthManager {
+            constructor() {
+                this.api = new AuthAPI();
+                this.currentUser = this.loadCurrentUser();
+            }
+            
+            loadCurrentUser() {
+                const user = localStorage.getItem('current_user');
+                return user ? JSON.parse(user) : null;
+            }
+            
+            saveCurrentUser(user) {
+                if (user) {
+                    localStorage.setItem('current_user', JSON.stringify(user));
+                } else {
+                    localStorage.removeItem('current_user');
+                }
+                this.currentUser = user;
+            }
+            
+            async logout() {
+                try {
+                    await this.api.logout();
+                } catch (error) {
+                    console.error('로그아웃 오류:', error);
+                }
+                this.saveCurrentUser(null);
+                this.updateNavigation();
+            }
+            
+            isLoggedIn() {
+                return this.currentUser !== null;
+            }
+            
+            getCurrentUser() {
+                return this.currentUser;
+            }
+            
+            updateNavigation() {
+                const authButtons = document.getElementById('authButtons');
+                const userMenu = document.getElementById('userMenu');
+                
+                if (this.isLoggedIn()) {
+                    const user = this.getCurrentUser();
+                    authButtons.style.display = 'none';
+                    userMenu.style.display = 'block';
+                    userMenu.innerHTML = `
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-2"></i>${user.name}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><h6 class="dropdown-header">${user.email}</h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="mypage.html"><i class="bi bi-collection me-2"></i>내 페이지</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>프로필</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>설정</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="authManager.logout()"><i class="bi bi-box-arrow-right me-2"></i>로그아웃</a></li>
+                        </ul>
+                    `;
+                } else {
+                    authButtons.style.display = 'block';
+                    userMenu.style.display = 'none';
+                    authButtons.innerHTML = `
+                        <a href="login.html" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>로그인
+                        </a>
+                        <a href="signup.html" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-2"></i>회원가입
+                        </a>
+                    `;
+                }
+            }
+        }
+        
+        // 전역 인증 관리자
+        const authManager = new AuthManager();
+        
+        // 내 페이지 관련 함수들
+        function showMyPage() {
+            document.getElementById('myPage').style.display = 'block';
+            document.getElementById('myPage').scrollIntoView({ behavior: 'smooth' });
+            
+            // 로그인 상태 확인
+            if (authManager.isLoggedIn()) {
+                document.getElementById('loginPrompt').style.display = 'none';
+                document.getElementById('videoListSection').style.display = 'block';
+                loadVideoList();
+            } else {
+                document.getElementById('loginPrompt').style.display = 'block';
+                document.getElementById('videoListSection').style.display = 'none';
+            }
+        }
+        
+        async function loadVideoList() {
+            const loadingDiv = document.getElementById('videoListLoading');
+            const videoListDiv = document.getElementById('videoList');
+            const emptyDiv = document.getElementById('emptyVideoList');
+            
+            loadingDiv.style.display = 'block';
+            videoListDiv.innerHTML = '';
+            emptyDiv.style.display = 'none';
+            
+            try {
+                const sessionToken = localStorage.getItem('session_token');
+                const response = await fetch('http://localhost:8001/api/videos/list', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.data.videos.length > 0) {
+                    displayVideoList(data.data.videos);
+                } else {
+                    emptyDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('영상 목록 로드 실패:', error);
+                emptyDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+        
+        function displayVideoList(videos) {
+            const videoListDiv = document.getElementById('videoList');
+            videoListDiv.innerHTML = '';
+            
+            // 카테고리 매핑
+            const categoryMap = {
+                '1': 'Film & Animation',
+                '2': 'Autos & Vehicles',
+                '10': 'Music',
+                '15': 'Pets & Animals',
+                '17': 'Sports',
+                '18': 'Short Movies',
+                '19': 'Travel & Events',
+                '20': 'Gaming',
+                '21': 'Videoblogging',
+                '22': 'People & Blogs',
+                '23': 'Comedy',
+                '24': 'Entertainment',
+                '25': 'News & Politics',
+                '26': 'Howto & Style'
+            };
+            
+            videos.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'col-md-6 col-lg-4';
+                
+                const thumbnailHtml = video.thumbnail_image ? 
+                    `<img src="${video.thumbnail_image}" class="video-thumbnail" alt="썸네일">` :
+                    `<div class="video-thumbnail d-flex align-items-center justify-content-center" style="background: #2a2a2a;">
+                        <i class="bi bi-video" style="font-size: 3rem; color: #666;"></i>
+                    </div>`;
+                
+                const uploadTime = video.upload_time ? 
+                    new Date(video.upload_time).toLocaleDateString('ko-KR') : '미설정';
+                
+                videoCard.innerHTML = `
+                    <div class="video-card">
+                        ${thumbnailHtml}
+                        <div class="video-title">${video.title || '제목 없음'}</div>
+                        <div class="video-meta">
+                            <span class="category-badge">${categoryMap[video.category] || '기타'}</span>
+                            <span class="ms-2">${video.length || 0}분</span>
+                        </div>
+                        <div class="video-description">${video.description || '설명이 없습니다.'}</div>
+                        <div class="video-meta">
+                            <small>업로드 예정: ${uploadTime}</small>
+                        </div>
+                        <div class="video-actions">
+                            <button class="btn btn-primary btn-sm" onclick="viewVideoDetails(${video.id})">
+                                <i class="bi bi-eye me-1"></i>상세보기
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="editVideo(${video.id})">
+                                <i class="bi bi-pencil me-1"></i>수정
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                videoListDiv.appendChild(videoCard);
+            });
+        }
+        
+        function refreshVideoList() {
+            loadVideoList();
+        }
+        
+        function viewVideoDetails(videoId) {
+            // 영상 상세 정보를 보여주는 모달이나 페이지로 이동
+            alert(`영상 ID: ${videoId}의 상세 정보를 보여줍니다.`);
+        }
+        
+        function editVideo(videoId) {
+            // 영상 수정 페이지로 이동
+            alert(`영상 ID: ${videoId}를 수정합니다.`);
+        }
+        
+        // 저장된 분석 결과 표시
+        function showSavedAnalyses() {
+            const savedAnalyses = getSavedAnalyses();
+            const modal = new bootstrap.Modal(document.getElementById('savedAnalysesModal'));
+            const listDiv = document.getElementById('savedAnalysesList');
+            
+            if (savedAnalyses.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-bookmark" style="font-size: 4rem; color: var(--text-light); margin-bottom: 20px;"></i>
+                        <h5 class="text-white mb-3">저장된 분석 결과가 없습니다</h5>
+                        <p class="text-muted">피드백 결과 페이지에서 분석 결과를 저장해보세요!</p>
+                    </div>
+                `;
+            } else {
+                listDiv.innerHTML = '';
+                savedAnalyses.forEach((analysis, index) => {
+                    const analysisCard = document.createElement('div');
+                    analysisCard.className = 'col-md-6 col-lg-4';
+                    
+                    const analysisDate = new Date(analysis.analysis_date).toLocaleDateString('ko-KR');
+                    const thumbnailHtml = analysis.video_info.thumbnail_image ? 
+                        `<img src="${analysis.video_info.thumbnail_image}" class="video-thumbnail" alt="썸네일">` :
+                        `<div class="video-thumbnail d-flex align-items-center justify-content-center" style="background: #2a2a2a;">
+                            <i class="bi bi-video" style="font-size: 3rem; color: #666;"></i>
+                        </div>`;
+                    
+                    analysisCard.innerHTML = `
+                        <div class="video-card">
+                            ${thumbnailHtml}
+                            <div class="video-title">${analysis.video_info.title || '제목 없음'}</div>
+                            <div class="video-meta">
+                                <span class="category-badge">${getCategoryName(analysis.video_info.category)}</span>
+                                <span class="ms-2">${analysis.video_info.length || 0}분</span>
+                            </div>
+                            <div class="video-description">
+                                <strong>예상 조회수:</strong> ${analysis.analysis_result.predicted_views?.toLocaleString() || 'N/A'}회<br>
+                                <strong>신뢰도:</strong> ${analysis.analysis_result.confidence || 'N/A'}%<br>
+                                <strong>분석일:</strong> ${analysisDate}
+                            </div>
+                            <div class="video-actions">
+                                <button class="btn btn-primary btn-sm" onclick="viewAnalysisDetails(${index})">
+                                    <i class="bi bi-eye me-1"></i>상세보기
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteAnalysis(${index})">
+                                    <i class="bi bi-trash me-1"></i>삭제
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    listDiv.appendChild(analysisCard);
+                });
+            }
+            
+            modal.show();
+        }
+        
+        // 카테고리 이름 가져오기
+        function getCategoryName(categoryId) {
+            const categoryMap = {
+                '1': 'Film & Animation',
+                '2': 'Autos & Vehicles',
+                '10': 'Music',
+                '15': 'Pets & Animals',
+                '17': 'Sports',
+                '18': 'Short Movies',
+                '19': 'Travel & Events',
+                '20': 'Gaming',
+                '21': 'Videoblogging',
+                '22': 'People & Blogs',
+                '23': 'Comedy',
+                '24': 'Entertainment',
+                '25': 'News & Politics',
+                '26': 'Howto & Style'
+            };
+            return categoryMap[categoryId] || '기타';
+        }
+        
+        // 저장된 분석 결과 조회
+        function getSavedAnalyses() {
+            return JSON.parse(localStorage.getItem('savedAnalyses') || '[]');
+        }
+        
+        // 분석 결과 상세보기
+        function viewAnalysisDetails(index) {
+            const savedAnalyses = getSavedAnalyses();
+            if (index >= 0 && index < savedAnalyses.length) {
+                const analysis = savedAnalyses[index];
+                const details = `
+분석 상세 정보:
+
+영상 정보:
+- 제목: ${analysis.video_info.title}
+- 카테고리: ${getCategoryName(analysis.video_info.category)}
+- 길이: ${analysis.video_info.length}분
+- 업로드 예정: ${analysis.video_info.upload_time || '미설정'}
+- 설명: ${analysis.video_info.description || '없음'}
+
+분석 결과:
+- 예상 조회수: ${analysis.analysis_result.predicted_views?.toLocaleString() || 'N/A'}회
+- 신뢰도: ${analysis.analysis_result.confidence || 'N/A'}%
+- 추천 태그: ${analysis.analysis_result.tags?.join(', ') || '없음'}
+
+분석일: ${new Date(analysis.analysis_date).toLocaleString('ko-KR')}
+                `;
+                alert(details);
+            }
+        }
+        
+        // 분석 결과 삭제
+        function deleteAnalysis(index) {
+            if (confirm('이 분석 결과를 삭제하시겠습니까?')) {
+                const savedAnalyses = getSavedAnalyses();
+                if (index >= 0 && index < savedAnalyses.length) {
+                    savedAnalyses.splice(index, 1);
+                    localStorage.setItem('savedAnalyses', JSON.stringify(savedAnalyses));
+                    showSavedAnalyses(); // 목록 새로고침
+                    alert('분석 결과가 삭제되었습니다.');
+                }
+            }
+        }
+        
+        // 페이지 로드 시 네비게이션 업데이트
+        document.addEventListener('DOMContentLoaded', function() {
+            authManager.updateNavigation();
+            
+            // 내 페이지 링크 클릭 이벤트
+            const myPageLink = document.querySelector('a[href="#myPage"]');
+            if (myPageLink) {
+                myPageLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showMyPage();
+                });
+            }
+            
+            // 기능 링크 클릭 이벤트 (부드러운 스크롤)
+            const featuresLink = document.querySelector('a[href="#features"]');
+            if (featuresLink) {
+                featuresLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const featuresSection = document.getElementById('features');
+                    if (featuresSection) {
+                        const offsetTop = featuresSection.offsetTop - 80; // 네비게이션 바 높이 고려
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            }
+        });
+        
+        // 데모 계정 정보 표시
+        console.log('데모 계정: demo@youtubeanalytics.com / demo123');
+    </script>
+</body>
+</html>
