@@ -868,6 +868,8 @@
     
     <!-- Custom JavaScript -->
     <script>
+        // API Base URL 설정 (Railway 배포 URL)
+        const API_BASE = "https://youtube-production-ee6c.up.railway.app";
         // Category mapping
         const categoryMap = {
             '1': 'Film & Animation',
@@ -1236,15 +1238,7 @@
             // 실제 모델로 다시 예측 (API 호출)
             try {
                 const sessionToken = localStorage.getItem('session_token');
-                let API_BASE_URL = 'http://localhost:8001';
-                if (window.location.hostname && 
-                    window.location.hostname !== 'localhost' && 
-                    window.location.hostname !== '127.0.0.1' &&
-                    window.location.protocol !== 'file:') {
-                    API_BASE_URL = 'https://youtube-analytics-production.up.railway.app';
-                }
-                
-                let url = `${API_BASE_URL}/api/videos/create`;
+                let url = `${API_BASE}/api/videos/create`;
                 if (sessionToken) {
                     url += `?session_token=${sessionToken}`;
                 }
@@ -1388,15 +1382,7 @@
                 console.log('🔍 fetchRealPrediction 시작:', data);
                 
                 const sessionToken = localStorage.getItem('session_token');
-                let API_BASE_URL = 'http://localhost:8001';
-                if (window.location.hostname && 
-                    window.location.hostname !== 'localhost' && 
-                    window.location.hostname !== '127.0.0.1' &&
-                    window.location.protocol !== 'file:') {
-                    API_BASE_URL = 'https://youtube-analytics-production.up.railway.app';
-                }
-                
-                let url = `${API_BASE_URL}/api/videos/create`;
+                let url = `${API_BASE}/api/videos/create`;
                 if (sessionToken) {
                     url += `?session_token=${sessionToken}`;
                 }
@@ -2304,15 +2290,7 @@
                 
                 // API 호출하여 예측 조회수 계산
                 const sessionToken = localStorage.getItem('session_token');
-                let API_BASE_URL = 'http://localhost:8001';
-                if (window.location.hostname && 
-                    window.location.hostname !== 'localhost' && 
-                    window.location.hostname !== '127.0.0.1' &&
-                    window.location.protocol !== 'file:') {
-                    API_BASE_URL = 'https://youtube-analytics-production.up.railway.app';
-                }
-                
-                let url = `${API_BASE_URL}/api/videos/create`;
+                let url = `${API_BASE}/api/videos/create`;
                 if (sessionToken) {
                     url += `?session_token=${sessionToken}`;
                 }
@@ -2968,17 +2946,8 @@
         
         // 제목 추천 함수 (서버 API 사용)
         async function generateYouTubeTitles(keyword, imageText = '', n = 5) {
-            // API 기본 URL 설정
-            let API_BASE_URL = 'http://localhost:8001';
-            if (window.location.hostname && 
-                window.location.hostname !== 'localhost' && 
-                window.location.hostname !== '127.0.0.1' &&
-                window.location.protocol !== 'file:') {
-                API_BASE_URL = 'https://youtube-analytics-production.up.railway.app';
-            }
-            
             try {
-                const response = await fetch(`${API_BASE_URL}/api/titles/generate`, {
+                const response = await fetch(`${API_BASE}/api/titles/generate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -3118,8 +3087,6 @@
         }
         
         // 태그 추천 기능
-        const API_BASE_URL = "http://localhost:8001";  // FastAPI 서버 주소
-        
         async function generateTags() {
             const videoData = JSON.parse(localStorage.getItem('videoData'));
             console.log('태그 추천을 위한 videoData:', videoData);
@@ -3154,7 +3121,7 @@
             if (buttonDiv) buttonDiv.style.display = 'none';
             
             try {
-                const response = await fetch(`${API_BASE_URL}/api/tags/enrich`, {
+                const response = await fetch(`${API_BASE}/api/tags/enrich`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3188,7 +3155,7 @@
                     <div class="alert alert-danger">
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>태그 추천 실패:</strong> ${error.message}
-                        <br><small class="mt-2 d-block">FastAPI 서버가 실행 중인지 확인해주세요. (http://localhost:8001)</small>
+                        <br><small class="mt-2 d-block">서버 연결에 문제가 있을 수 있습니다. 잠시 후 다시 시도해주세요.</small>
                     </div>
                     <button class="btn btn-outline-danger mt-3" onclick="generateTags()">
                         <i class="bi bi-arrow-clockwise me-2"></i>다시 시도
