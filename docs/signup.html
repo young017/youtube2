@@ -519,8 +519,11 @@
                     role: document.getElementById('role').value
                 };
                 
+                // API Base URL 설정 (Railway 배포 URL)
+                const API_BASE = "https://youtube-production-ee6c.up.railway.app";
+                
                 // FastAPI 서버로 회원가입 시도
-                const response = await fetch('http://localhost:8001/api/auth/register', {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -555,7 +558,7 @@
             } catch (error) {
                 console.error('회원가입 오류:', error);
                 const errorMessage = error.message || '알 수 없는 오류가 발생했습니다.';
-                showAlert('danger', `회원가입 실패: ${errorMessage}<br><small>FastAPI 서버가 실행 중인지 확인하세요. (http://localhost:8001)</small>`);
+                showAlert('danger', `회원가입 실패: ${errorMessage}`);
             } finally {
                 // 로딩 상태 해제
                 signupBtn.disabled = false;
