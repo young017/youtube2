@@ -140,26 +140,47 @@ def get_model_base_path():
     """모델 디렉토리 경로 찾기 (여러 경로 시도)"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
+    current_dir = os.getcwd()
     
     possible_paths = [
         os.path.join(project_root, "모델"),  # 프로젝트 루트/모델
         os.path.join(script_dir, "모델"),  # tags/모델
-        "/app/모델",  # Railway 배포 환경
-        "모델",  # 현재 작업 디렉토리
+        "/app/모델",  # Railway 배포 환경 (루트)
+        "/app/tags/모델",  # Railway 배포 환경 (tags 디렉토리)
+        os.path.join(current_dir, "모델"),  # 현재 작업 디렉토리/모델
+        os.path.join(current_dir, "tags", "모델"),  # 현재 작업 디렉토리/tags/모델
+        "모델",  # 상대 경로
     ]
+    
+    print(f"🔍 모델 디렉토리 검색 시작...")
+    print(f"   script_dir: {script_dir}")
+    print(f"   project_root: {project_root}")
+    print(f"   current_dir: {current_dir}")
     
     for path in possible_paths:
         abs_path = os.path.abspath(path) if not os.path.isabs(path) else path
-        if os.path.exists(abs_path) and os.path.isdir(abs_path):
+        exists = os.path.exists(abs_path)
+        is_dir = os.path.isdir(abs_path) if exists else False
+        print(f"   시도: {abs_path} (존재: {exists}, 디렉토리: {is_dir})")
+        
+        if exists and is_dir:
             # 모델 파일이 하나라도 있는지 확인
-            files = os.listdir(abs_path)
-            if any(f.endswith(('.cbm', '.pkl')) for f in files):
-                print(f"✅ 모델 디렉토리 발견: {abs_path}")
-                return abs_path
+            try:
+                files = os.listdir(abs_path)
+                model_files = [f for f in files if f.endswith(('.cbm', '.pkl'))]
+                print(f"      파일 수: {len(files)}, 모델 파일 수: {len(model_files)}")
+                if model_files:
+                    print(f"      모델 파일 예시: {model_files[:3]}")
+                    print(f"✅ 모델 디렉토리 발견: {abs_path}")
+                    return abs_path
+            except Exception as e:
+                print(f"      디렉토리 읽기 실패: {e}")
     
     # 기본 경로 반환 (존재하지 않아도)
     default_path = os.path.join(project_root, "모델")
     print(f"⚠️ 모델 디렉토리를 찾을 수 없습니다. 기본 경로 사용: {default_path}")
+    print(f"💡 Railway 배포 시 Git LFS 파일이 제대로 다운로드되었는지 확인하세요.")
+    print(f"💡 Railway 로그에서 'git lfs pull' 명령이 성공했는지 확인하세요.")
     return default_path
 
 MODEL_BASE_PATH = get_model_base_path()
