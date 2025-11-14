@@ -43,7 +43,7 @@ def _cosine(a: np.ndarray, b: np.ndarray) -> float:
 def compute_title_tag_similarities_openai(
     title: str,
     tags: List[str],
-    api_key: str,
+    api_key: str | None = None,
     embed_model: str = "text-embedding-3-large"
 ) -> List[Tuple[str, float]]:
     """
@@ -52,7 +52,11 @@ def compute_title_tag_similarities_openai(
     """
     if not tags:
         return []
-    client = OpenAI(api_key=api_key)
+    # 환경변수 자동 감지 (api_key가 None이거나 빈 문자열이면)
+    if api_key:
+        client = OpenAI(api_key=api_key)
+    else:
+        client = OpenAI()  # 환경변수 자동 감지
     res = client.embeddings.create(model=embed_model, input=[title] + tags)
     vecs = [np.array(d.embedding, dtype=np.float32) for d in res.data]
     title_vec, tag_vecs = vecs[0], vecs[1:]
@@ -113,11 +117,11 @@ def refine_with_openai_json(
     """
     Chat Completions로 최종 태그 JSON 반환
     """
-    # 키 확보
-    api_key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("OPENAI_APIKEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY 환경변수 또는 --api_key 인자를 설정해주세요.")
-    client = OpenAI(api_key=api_key)
+    # 환경변수 자동 감지 (api_key가 None이거나 빈 문자열이면)
+    if api_key:
+        client = OpenAI(api_key=api_key)
+    else:
+        client = OpenAI()  # 환경변수 자동 감지
 
     prompt = build_openai_prompt(title, kept_tags, dropped_tags, extra_k)
     resp = client.chat.completions.create(
@@ -174,23 +178,22 @@ def run_pipeline(
     candidates = get_candidate_tags(mdl, title, top_k=top_k, min_similarity_title=title_sim_threshold)
 
     # 2) 임베딩 유사도 계산 (제목+설명 조합 사용)
-    key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("OPENAI_APIKEY")
-    if not key:
-        raise RuntimeError("OPENAI_API_KEY 환경변수 또는 --api_key 인자를 설정해주세요.")
-    sims = compute_title_tag_similarities_openai(combined_text, candidates, key, embed_model=embed_model)
+    # api_key가 None이면 함수 내부에서 환경변수 자동 감지
+    sims = compute_title_tag_similarities_openai(combined_text, candidates, api_key, embed_model=embed_model)
 
     # 3) 0.30 필터링
     kept, dropped = filter_by_threshold(sims, abs_threshold=tag_abs_threshold)
 
 
     # 4) GPT 보정 + 추가 (제목+설명 조합 사용)
+    # api_key가 None이면 함수 내부에서 환경변수 자동 감지
     refined = refine_with_openai_json(
         title=combined_text,
         kept_tags=kept,
         dropped_tags=dropped,
         extra_k=extra_k,
         chat_model=chat_model,
-        api_key=key
+        api_key=api_key
     )
 
     return {
