@@ -1,17 +1,13 @@
 [phases.setup]
 nixPkgs = ["python311", "curl"]
 
-[phases.install]
+# requirements.txt 설치는 Nixpacks 기본 동작에 맡기고
+# 우리는 모델 파일만 다운로드하면 됨
+[phases.build]
 cmds = [
-  "pip install -r requirements.txt",
-
-  # Create local directories (optional)
   "mkdir -p models tags",
-
-  # Download files from HuggingFace
   "curl -L 'https://huggingface.co/yudaag/youtube-view-predict-models/resolve/main/catboost_model_10.cbm' -o models/catboost_model_10.cbm",
   "curl -L 'https://huggingface.co/yudaag/youtube-view-predict-models/resolve/main/tag_recommendation_model.pkl' -o tags/tag_recommendation_model.pkl",
-
   "echo '=== Download complete ==='",
-  "ls -R ."
+  "ls -R . | head -100"
 ]
