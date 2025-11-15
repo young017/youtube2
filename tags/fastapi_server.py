@@ -48,7 +48,7 @@ cache_metadata = {
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database import UserDatabase, db
 from .tag_recommendation_model import TagRecommendationModel
-from enrich_tags import run_pipeline
+from .enrich_tags import run_pipeline
 from openai import OpenAI
 
 # ML 모델 라이브러리 import
