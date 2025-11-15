@@ -34,51 +34,78 @@ pip install -r requirements.txt
 python init_database.py
 ```
 
-### 5. 서버 실행
+### 5. 환경 변수 설정
+`.env` 파일을 생성하고 다음 환경 변수를 설정하세요:
 ```bash
-cd tags
+OPENAI_API_KEY=your-openai-api-key
+KAGGLE_USERNAME=your-kaggle-username
+KAGGLE_KEY=your-kaggle-key
+YOUTUBE_API_KEY=your-youtube-api-key
+```
+
+### 6. 서버 실행
+```bash
 python fastapi_server.py
 ```
 
-### 6. 웹 페이지 접속
+### 7. 웹 페이지 접속
 - **API 서버**: http://localhost:8001
+- **API 문서**: http://localhost:8001/docs (Swagger UI)
+- **ReDoc 문서**: http://localhost:8001/redoc
 - **웹 인터페이스**: `UI/index.html` 파일을 브라우저에서 열기
 
 ## ⚠️ 주의사항
 
-- **AI 모델 파일**: `tag_recommendation_model.pkl`은 태그 추천 기능에 필수적으로 사용됩니다
-- **태그 추천 기능**: `tags/tag_recommendation_model.pkl` 파일이 존재해야 태그 추천이 정상 작동합니다
-- **데이터베이스**: `youtube_analytics.db`는 실행 시 자동으로 생성됩니다
+- **AI 모델 파일**: ML 모델들은 Hugging Face Hub에서 자동으로 다운로드됩니다 (`yudaag/youtube-view-predict-models`)
+- **태그 추천 모델**: `tags/tag_recommendation_model.pkl` 파일이 존재해야 태그 추천이 정상 작동합니다
+- **데이터베이스**: `youtube_analytics.db`는 `init_database.py` 실행 시 자동으로 생성됩니다
+- **환경 변수**: OpenAI, Kaggle, YouTube API 키가 필요합니다 (`.env` 파일에 설정)
+- **Python 버전**: Python 3.11 이상 권장 (CatBoost 호환성)
 
-### 4. 사용 가능한 페이지
-- `index.html` - 메인 페이지
-- `login.html` - 로그인 페이지
-- `signup.html` - 회원가입 페이지
-- `trend.html` - 월별 트렌드 분석
-- `feedback.html` - 영상 피드백
-- `feedback-result.html` - 피드백 결과
+## 사용 가능한 페이지
+
+- `UI/index.html` - 메인 페이지
+- `UI/login.html` - 로그인 페이지
+- `UI/signup.html` - 회원가입 페이지
+- `UI/mypage.html` - 마이페이지 (저장된 분석 결과 확인)
+- `UI/trend.html` - 월별 트렌드 분석
+- `UI/feedback.html` - 영상 피드백 입력
+- `UI/feedback-result.html` - 피드백 결과 확인
 
 ## 사용법
 
 1. **메인 페이지**
-   - `index.html`에서 전체 서비스 개요를 확인할 수 있습니다
-   - 월별 트렌드와 피드백 기능으로 이동할 수 있습니다
+   - `UI/index.html`에서 전체 서비스 개요를 확인할 수 있습니다
+   - 월별 트렌드와 영상 분석 기능으로 이동할 수 있습니다
 
-2. **월별 트렌드 분석**
-   - `trend.html`에서 4월~6월 데이터를 확인할 수 있습니다
+2. **영상 분석 및 조회수 예측**
+   - `UI/feedback.html`에서 영상 정보(제목, 카테고리, 길이, 업로드 시간 등)를 입력할 수 있습니다
+   - 입력한 정보를 기반으로 AI가 조회수를 예측합니다
+   - `UI/feedback-result.html`에서 예측 결과를 확인할 수 있습니다
+   - 로그인한 사용자는 분석 결과가 마이페이지에 저장됩니다
+
+3. **월별 트렌드 분석**
+   - `UI/trend.html`에서 2025년 월별 트렌드 데이터를 확인할 수 있습니다
    - 각 월별로 인기 카테고리 TOP5를 확인할 수 있습니다
    - 탭을 클릭하여 월별 데이터를 전환할 수 있습니다
+   - 트렌드 데이터는 Kaggle API를 통해 최신 데이터로 업데이트할 수 있습니다
 
-3. **영상 피드백 (데모)**
-   - `feedback.html`에서 영상 정보를 입력할 수 있습니다
-   - 입력한 정보는 로컬 스토리지에 저장됩니다
-   - `feedback-result.html`에서 데모 결과를 확인할 수 있습니다
+4. **마이페이지**
+   - `UI/mypage.html`에서 저장된 영상 분석 결과를 확인할 수 있습니다
+   - 로그인 후 사용한 모든 분석 결과를 조회할 수 있습니다
 
 ## 기술 스택
 
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
-- **Backend**: Python, Flask
+- **Backend**: Python, FastAPI, Uvicorn
 - **Database**: SQLite
+- **ML/AI**: 
+  - CatBoost, LightGBM, XGBoost (조회수 예측)
+  - Sentence-BERT (태그 추천)
+  - OpenAI GPT (제목 생성, 태그 보정)
+- **API**: 
+  - Kaggle API (트렌드 데이터)
+  - YouTube Data API v3 (카테고리 정보)
 - **차트**: Chart.js
 - **아이콘**: Bootstrap Icons
 - **스타일**: 반응형 웹 디자인
@@ -98,14 +125,30 @@ python fastapi_server.py
 ## API 엔드포인트
 
 ### 인증 API
-- `POST /api/auth/register/` - 회원가입
-- `POST /api/auth/login/` - 로그인
-- `POST /api/auth/logout/` - 로그아웃
-- `GET /api/auth/profile/` - 프로필 조회
-- `PUT /api/auth/profile/` - 프로필 업데이트
+- `POST /api/auth/register` - 회원가입
+- `POST /api/auth/login` - 로그인
+- `POST /api/auth/logout` - 로그아웃
+- `GET /api/auth/profile` - 프로필 조회
+- `PUT /api/auth/profile` - 프로필 업데이트
+
+### 태그 추천 API
+- `POST /api/tags/recommend` - 제목 기반 태그 추천
+- `POST /api/tags/refine` - 프롬프트 기반 태그 수정
+- `POST /api/tags/enrich` - 제목/설명 기반 태그 보정 (OpenAI 사용)
+
+### 제목 생성 API
+- `POST /api/titles/generate` - 키워드 기반 제목 생성 (OpenAI GPT 사용)
+
+### 영상 분석 API
+- `POST /api/videos/create` - 영상 정보 저장 및 조회수 예측
+- `GET /api/videos/list` - 영상 목록 조회
+
+### 트렌드 분석 API
+- `POST /api/trends/update-month` - 특정 월의 트렌드 분석 업데이트 (Kaggle + YouTube API 사용)
+- `GET /api/trends/test-kaggle` - Kaggle 데이터 다운로드 테스트
 
 ### 시스템 API
-- `GET /api/stats/` - 시스템 통계
+- `GET /api/stats` - 시스템 통계
 
 ## 데모 계정
 
@@ -121,24 +164,38 @@ python fastapi_server.py
 ## 파일 구조
 
 ```
-유튜브 데이터/
+youtube-main배포완료 코드/
 ├── README.md                # 프로젝트 문서
 ├── requirements.txt         # Python 패키지 의존성
+├── runtime.txt              # Python 런타임 버전
+├── railway.json             # Railway 배포 설정
 ├── database.py              # 데이터베이스 관리 모듈
 ├── init_database.py         # 데이터베이스 초기화 스크립트
-├── web_server.py            # Flask 웹 서버
-├── run_server.py            # 서버 자동 실행 스크립트
-├── youtube_analytics.db     # SQLite 데이터베이스 파일
+├── fastapi_server.py        # FastAPI 웹 서버 (메인)
+├── enrich_tags.py           # 태그 보정 모듈
+├── youtube_analytics.db      # SQLite 데이터베이스 파일 (자동 생성)
 ├── UI/                      # 웹 인터페이스
 │   ├── index.html           # 메인 페이지
 │   ├── login.html           # 로그인 페이지
 │   ├── signup.html          # 회원가입 페이지
+│   ├── mypage.html          # 마이페이지
 │   ├── trend.html           # 월별 트렌드 분석
 │   ├── feedback.html        # 피드백 입력 페이지
 │   └── feedback-result.html # 피드백 결과 페이지
-├── data/                    # 데이터 파일들
-├── 트렌드 분석/             # 트렌드 분석 데이터
-└── 기타 폴더들...           # 프로젝트 관련 파일들
+├── tags/                    # 태그 추천 모듈
+│   ├── __init__.py
+│   ├── fastapi_server.py    # 태그 관련 API (사용 안 함)
+│   ├── tag_recommendation_model.py  # 태그 추천 모델
+│   ├── tag_recommendation_model.pkl # 태그 추천 모델 파일
+│   ├── predict_tags.py      # 태그 예측 스크립트
+│   ├── enrich_tags.py       # 태그 보정 모듈
+│   └── enrich_tags_openai_embed.py  # OpenAI 임베딩 태그 보정
+├── 모델/                    # ML 모델 파일들 (Hugging Face Hub에서 다운로드)
+│   ├── catboost_model_*.cbm # CatBoost 모델 (카테고리 1, 15, 19)
+│   ├── lgbm_model_*.pkl     # LightGBM 모델 (카테고리 10, 22, 24, 26)
+│   └── xgb_model_*.pkl      # XGBoost 모델 (카테고리 17, 20, 23, 28)
+└── docs/                    # 문서용 HTML 파일들
+    └── (UI와 동일한 구조)
 ```
 
 ## 보안 기능
@@ -149,14 +206,29 @@ python fastapi_server.py
 - **입력 검증**: 서버 측 데이터 유효성 검사
 - **활동 로깅**: 사용자 활동 추적 및 기록
 
-## 문제 해결
+## 주요 기능 상세
 
-### 웹 페이지가 제대로 표시되지 않는 경우
-1. 브라우저에서 JavaScript가 활성화되어 있는지 확인
-2. 인터넷 연결을 확인하여 CDN 리소스가 로드되는지 확인
-3. 브라우저 콘솔에서 오류 메시지 확인
+### 1. 조회수 예측
+- 카테고리별 전용 ML 모델 사용 (CatBoost, LightGBM, XGBoost)
+- 영상 정보(제목, 카테고리, 길이, 업로드 시간, 구독자 수 등)를 입력받아 조회수 예측
+- 인기도 확률(pred_popular_prob)과 예상 조회수를 함께 제공
 
-### 피드백 기능이 작동하지 않는 경우
-1. 브라우저에서 로컬 스토리지가 활성화되어 있는지 확인
-2. 필수 입력 항목이 모두 채워져 있는지 확인
-3. 브라우저 콘솔에서 JavaScript 오류 확인
+### 2. 태그 추천
+- Sentence-BERT 기반 유사도 분석
+- 제목과 유사한 영상의 태그를 기반으로 추천
+- 하이브리드 방식 지원 (SBERT + 유사도 결합)
+
+### 3. 태그 보정 (Enrich)
+- OpenAI GPT를 사용한 태그 자동 보정
+- 제목과 설명을 분석하여 관련성 높은 태그 추천
+- 불필요한 태그 제거 및 관련 태그 추가
+
+### 4. 제목 생성
+- OpenAI GPT-4o-mini를 사용한 제목 자동 생성
+- 키워드와 이미지 설명을 기반으로 클릭률 높은 제목 생성
+- 유튜브 제목 최적화 전략 적용
+
+### 5. 트렌드 분석
+- Kaggle API를 통한 최신 트렌드 데이터 수집
+- YouTube API를 통한 카테고리 정보 수집
+- 월별 인기 카테고리 TOP 5 분석
