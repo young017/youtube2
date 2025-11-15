@@ -3,7 +3,7 @@
 
 import argparse
 from typing import List, Dict
-from tag_recommendation_model import TagRecommendationModel
+from .tag_recommendation_model import TagRecommendationModel
 
 def print_similar(similar_list: List[Dict], top_k: int):
     print(f"\n[유사 제목 상위 {top_k}]")
