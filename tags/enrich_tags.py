@@ -10,7 +10,7 @@ import numpy as np
 from openai import OpenAI
 
 # 당신의 후보 추천 모델 클래스를 import (파일명에 맞게 바꾸세요)
-from tag_recommendation_model import TagRecommendationModel
+from .tag_recommendation_model import TagRecommendationModel
 
 
 # ========= 1) 후보 태그 뽑기 (당신의 모델 재사용) =========
@@ -257,3 +257,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
