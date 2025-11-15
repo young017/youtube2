@@ -51,6 +51,14 @@ from .tag_recommendation_model import TagRecommendationModel
 from .enrich_tags import run_pipeline
 from openai import OpenAI
 
+# Hugging Face Hub import
+try:
+    from huggingface_hub import hf_hub_download
+    HF_HUB_AVAILABLE = True
+except ImportError:
+    HF_HUB_AVAILABLE = False
+    print("⚠️ huggingface_hub가 설치되지 않았습니다. 'pip install huggingface_hub'를 실행하세요.")
+
 # ML 모델 라이브러리 import
 try:
     from catboost import CatBoostClassifier, CatBoostRegressor
@@ -131,97 +139,91 @@ tag_model = None
 # 조회수 예측 모델 캐시 (카테고리별)
 prediction_models = {}
 
-# 모델 파일 경로 설정
-MODEL_BASE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "모델")
+# Hugging Face 모델 리포지토리
+HF_REPO_ID = "yudaag/youtube-view-predict-models"
 
 def load_prediction_models(category: str):
-    """카테고리별 분류/회귀 모델 로드"""
+    """카테고리별 분류/회귀 모델 로드 (Hugging Face Hub에서 다운로드)"""
     if category in prediction_models:
         return prediction_models[category]
+    
+    if not HF_HUB_AVAILABLE:
+        raise ImportError("huggingface_hub가 설치되지 않았습니다.")
     
     category_int = int(category)
     models = {}
     
-    print(f"🔍 카테고리 {category} 모델 로드 시작")
-    print(f"🔍 MODEL_BASE_PATH: {MODEL_BASE_PATH}")
-    print(f"🔍 MODEL_BASE_PATH 존재 여부: {os.path.exists(MODEL_BASE_PATH)}")
+    print(f"🔍 카테고리 {category} 모델 로드 시작 (Hugging Face Hub)")
     
     try:
         # 카테고리별 모델 파일 경로 설정
         if category_int in [1, 15, 19]:  # CatBoost
             if not CATBOOST_AVAILABLE:
                 raise ImportError("CatBoost가 설치되지 않았습니다.")
-            cls_model_path = os.path.join(MODEL_BASE_PATH, f"catboost_model_{category_int}_class.cbm")
-            reg_model_path = os.path.join(MODEL_BASE_PATH, f"catboost_model_{category_int}.cbm")
-            print(f"🔍 CatBoost 모델 경로:")
-            print(f"   - 분류: {cls_model_path} (존재: {os.path.exists(cls_model_path)})")
-            print(f"   - 회귀: {reg_model_path} (존재: {os.path.exists(reg_model_path)})")
             
-            if os.path.exists(cls_model_path) and os.path.exists(reg_model_path):
-                cls_model = CatBoostClassifier()
-                cls_model.load_model(cls_model_path)
-                reg_model = CatBoostRegressor()
-                reg_model.load_model(reg_model_path)
-                models = {
-                    'cls': cls_model,
-                    'reg': reg_model,
-                    'type': 'catboost'
-                }
+            cls_filename = f"catboost_model_{category_int}_class.cbm"
+            reg_filename = f"catboost_model_{category_int}.cbm"
+            
+            print(f"📥 Hugging Face에서 CatBoost 모델 다운로드 중...")
+            cls_model_path = hf_hub_download(repo_id=HF_REPO_ID, filename=cls_filename)
+            reg_model_path = hf_hub_download(repo_id=HF_REPO_ID, filename=reg_filename)
+            
+            print(f"✅ 모델 다운로드 완료")
+            cls_model = CatBoostClassifier()
+            cls_model.load_model(cls_model_path)
+            reg_model = CatBoostRegressor()
+            reg_model.load_model(reg_model_path)
+            models = {
+                'cls': cls_model,
+                'reg': reg_model,
+                'type': 'catboost'
+            }
                 
         elif category_int in [10, 22, 24, 26]:  # LightGBM
             if not LIGHTGBM_AVAILABLE:
                 raise ImportError("LightGBM이 설치되지 않았습니다.")
-            cls_model_path = os.path.join(MODEL_BASE_PATH, f"lgbm_model_{category_int}_class.pkl")
-            reg_model_path = os.path.join(MODEL_BASE_PATH, f"lgbm_model_{category_int}.pkl")
-            print(f"🔍 LightGBM 모델 경로:")
-            print(f"   - 분류: {cls_model_path} (존재: {os.path.exists(cls_model_path)})")
-            print(f"   - 회귀: {reg_model_path} (존재: {os.path.exists(reg_model_path)})")
             
-            if os.path.exists(cls_model_path) and os.path.exists(reg_model_path):
-                print(f"📦 모델 파일 로딩 시작...")
-                cls_model = joblib.load(cls_model_path)
-                reg_model = joblib.load(reg_model_path)
-                models = {
-                    'cls': cls_model,
-                    'reg': reg_model,
-                    'type': 'lightgbm'
-                }
-                print(f"📦 모델 파일 로딩 완료")
-            else:
-                # 디렉토리 내용 확인
-                if os.path.exists(MODEL_BASE_PATH):
-                    print(f"📂 모델 디렉토리 내용:")
-                    for file in os.listdir(MODEL_BASE_PATH):
-                        if f"_{category_int}" in file:
-                            print(f"   - {file}")
+            cls_filename = f"lgbm_model_{category_int}_class.pkl"
+            reg_filename = f"lgbm_model_{category_int}.pkl"
+            
+            print(f"📥 Hugging Face에서 LightGBM 모델 다운로드 중...")
+            cls_model_path = hf_hub_download(repo_id=HF_REPO_ID, filename=cls_filename)
+            reg_model_path = hf_hub_download(repo_id=HF_REPO_ID, filename=reg_filename)
+            
+            print(f"✅ 모델 다운로드 완료")
+            cls_model = joblib.load(cls_model_path)
+            reg_model = joblib.load(reg_model_path)
+            models = {
+                'cls': cls_model,
+                'reg': reg_model,
+                'type': 'lightgbm'
+            }
                 
         elif category_int in [17, 20, 23, 28]:  # XGBoost
             if not XGBOOST_AVAILABLE:
                 raise ImportError("XGBoost가 설치되지 않았습니다.")
-            cls_model_path = os.path.join(MODEL_BASE_PATH, f"xgb_model_{category_int}_class.pkl")
-            reg_model_path = os.path.join(MODEL_BASE_PATH, f"xgb_model_{category_int}.pkl")
-            print(f"🔍 XGBoost 모델 경로:")
-            print(f"   - 분류: {cls_model_path} (존재: {os.path.exists(cls_model_path)})")
-            print(f"   - 회귀: {reg_model_path} (존재: {os.path.exists(reg_model_path)})")
             
-            if os.path.exists(cls_model_path) and os.path.exists(reg_model_path):
-                cls_model = joblib.load(cls_model_path)
-                reg_model = joblib.load(reg_model_path)
-                models = {
-                    'cls': cls_model,
-                    'reg': reg_model,
-                    'type': 'xgboost'
-                }
+            cls_filename = f"xgb_model_{category_int}_class.pkl"
+            reg_filename = f"xgb_model_{category_int}.pkl"
+            
+            print(f"📥 Hugging Face에서 XGBoost 모델 다운로드 중...")
+            cls_model_path = hf_hub_download(repo_id=HF_REPO_ID, filename=cls_filename)
+            reg_model_path = hf_hub_download(repo_id=HF_REPO_ID, filename=reg_filename)
+            
+            print(f"✅ 모델 다운로드 완료")
+            cls_model = joblib.load(cls_model_path)
+            reg_model = joblib.load(reg_model_path)
+            models = {
+                'cls': cls_model,
+                'reg': reg_model,
+                'type': 'xgboost'
+            }
         
         if models:
             prediction_models[category] = models
             print(f"✅ 카테고리 {category} 모델 로드 완료")
         else:
-            print(f"⚠️ 카테고리 {category} 모델 파일을 찾을 수 없습니다.")
-            if os.path.exists(MODEL_BASE_PATH):
-                print(f"📂 모델 디렉토리 전체 내용:")
-                for file in os.listdir(MODEL_BASE_PATH):
-                    print(f"   - {file}")
+            print(f"⚠️ 카테고리 {category} 모델을 로드할 수 없습니다.")
             
     except Exception as e:
         print(f"❌ 카테고리 {category} 모델 로드 실패: {str(e)}")
@@ -582,18 +584,23 @@ class VideoResponse(BaseModel):
     data: Optional[Dict[str, Any]] = None
 
 def load_tag_model():
-    """태그 추천 모델 로드"""
+    """태그 추천 모델 로드 (Hugging Face Hub에서 다운로드)"""
     global tag_model
     try:
-        model_path = "tag_recommendation_model.pkl"
-        if os.path.exists(model_path):
-            tag_model = TagRecommendationModel()
-            tag_model.load_model(model_path)
-            print("✅ 태그 추천 모델 로드 완료")
-        else:
-            print("⚠️ 태그 추천 모델 파일이 없습니다. 먼저 모델을 학습시켜주세요.")
+        if not HF_HUB_AVAILABLE:
+            print("⚠️ huggingface_hub가 설치되지 않았습니다.")
+            tag_model = None
+            return
+        
+        print("📥 Hugging Face에서 태그 추천 모델 다운로드 중...")
+        model_path = hf_hub_download(repo_id=HF_REPO_ID, filename="tag_recommendation_model.pkl")
+        tag_model = TagRecommendationModel()
+        tag_model.load_model(model_path)
+        print("✅ 태그 추천 모델 로드 완료")
     except Exception as e:
         print(f"❌ 태그 추천 모델 로드 실패: {e}")
+        import traceback
+        print(f"❌ 상세 오류:\n{traceback.format_exc()}")
         tag_model = None
 
 def get_current_user(session_token: str = None):
@@ -1058,14 +1065,21 @@ async def enrich_tags(request: TagEnrichRequest):
                 detail="제목을 입력해주세요."
             )
         
-        # 모델 경로 설정
-        model_path = os.path.join(os.path.dirname(__file__), "tag_recommendation_model.pkl")
-        if not os.path.exists(model_path):
-            model_path = "tag_recommendation_model.pkl"
-        if not os.path.exists(model_path):
+        # 모델 경로 설정 (Hugging Face Hub에서 다운로드)
+        if not HF_HUB_AVAILABLE:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="태그 추천 모델 파일을 찾을 수 없습니다."
+                detail="huggingface_hub가 설치되지 않았습니다."
+            )
+        
+        try:
+            print("📥 Hugging Face에서 태그 추천 모델 다운로드 중...")
+            model_path = hf_hub_download(repo_id=HF_REPO_ID, filename="tag_recommendation_model.pkl")
+            print(f"✅ 모델 다운로드 완료: {model_path}")
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"태그 추천 모델을 Hugging Face에서 다운로드할 수 없습니다: {str(e)}"
             )
         
         # enrich_tags 파이프라인 실행 (제목과 설명 모두 사용)
