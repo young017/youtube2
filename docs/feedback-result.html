@@ -1002,6 +1002,80 @@
             }
         };
 
+        // 영상 길이 입력값 변환 함수
+        // 지원 형식: "9시간 40분 5초", "40분 5초", "5초", "9시간", "2.5" (2분 5초), "10" (10분)
+        function parseLengthInput(lengthStr) {
+            if (!lengthStr) return 0;
+            
+            const str = String(lengthStr).trim();
+            
+            // 한글 형식 파싱: "9시간 40분 5초", "40분 5초", "5초", "9시간" 등
+            const koreanPattern = /(?:(\d+)\s*시간\s*)?(?:(\d+)\s*분\s*)?(?:(\d+)\s*초\s*)?/;
+            const match = str.match(koreanPattern);
+            
+            // 한글 단위(시간, 분, 초)가 포함되어 있는지 확인
+            if (match && /[시간분초]/.test(str) && (match[1] || match[2] || match[3])) {
+                const hours = parseInt(match[1] || 0) || 0;
+                const minutes = parseInt(match[2] || 0) || 0;
+                const seconds = parseInt(match[3] || 0) || 0;
+                
+                // 총 분으로 변환
+                return hours * 60 + minutes + seconds / 60;
+            }
+            
+            // 숫자 형식 파싱 (기존 로직 유지)
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            
+            const parts = str.split('.');
+            
+            if (parts.length === 1) {
+                // 정수만 있으면 그대로 반환 (예: "10" → 10분)
+                return num;
+            }
+            
+            // 소수 부분이 있으면
+            const integerPart = parseInt(parts[0]) || 0;
+            const decimalPart = parts[1];
+            
+            if (decimalPart) {
+                const decimalInt = parseInt(decimalPart);
+                // 소수 부분이 60 미만이면 초로 해석
+                // 예: 2.5 → 2분 5초 → 2.083분
+                // 예: 2.35 → 2분 35초 → 2.583분
+                // 예: 80.58 → 80분 58초 → 80.967분 (1시간 20분 58초)
+                if (decimalInt < 60) {
+                    const seconds = decimalInt;
+                    return integerPart + seconds / 60;
+                }
+            }
+            
+            // 그 외에는 기존 방식 (예: 2.60 → 2.60분)
+            return num;
+        }
+        
+        // 분 값을 "시간 분 초" 형식 문자열로 변환하는 함수
+        function formatLengthDisplay(lengthStr) {
+            if (!lengthStr) return '0분';
+            
+            // 먼저 parseLengthInput으로 변환
+            const lengthInMinutes = parseLengthInput(lengthStr);
+            
+            // 총 초로 변환
+            const totalSeconds = Math.round(lengthInMinutes * 60);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            // 표시 형식 반환
+            const parts = [];
+            if (hours > 0) parts.push(`${hours}시간`);
+            if (minutes > 0) parts.push(`${minutes}분`);
+            if (seconds > 0 || parts.length === 0) parts.push(`${seconds}초`);
+            
+            return parts.join(' ');
+        }
+
         // Load video data and generate feedback
         document.addEventListener('DOMContentLoaded', function() {
             const videoData = JSON.parse(localStorage.getItem('videoData'));
@@ -1079,7 +1153,7 @@
                         <i class="bi bi-clock"></i>
                         영상 길이
                     </span>
-                    <span class="info-value">${data.length || '0'}분</span>
+                    <span class="info-value">${formatLengthDisplay(data.length)}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">
@@ -1251,7 +1325,7 @@
                     body: JSON.stringify({
                         title: videoData.title,
                         category: videoData.category,
-                        length: parseInt(videoData.length),
+                        length: parseLengthInput(videoData.length),
                         upload_time: newTime,
                         description: videoData.description || '',
                         thumbnail_image: videoData.thumbnailImage || '',
@@ -1390,7 +1464,7 @@
                 const requestBody = {
                     title: data.title,
                     category: data.category,
-                    length: parseInt(data.length),
+                    length: parseLengthInput(data.length),
                     upload_time: data.uploadTime,
                     description: data.description || '',
                     thumbnail_image: data.thumbnailImage || '',
@@ -1469,8 +1543,13 @@
             }
         }
         
-        // 카테고리 순위 상태 확인 함수 (1-10월 기본값 + 11-12월 Kaggle 데이터)
+        // 카테고리 순위 상태 확인 함수 (현재 월 기준)
         function getCategoryRankStatus(categoryId) {
+            // 현재 월 구하기
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1; // 1-12
+            const currentMonthKey = `${currentMonth}월`;
+            
             // localStorage에서 최신 트렌드 데이터 가져오기
             let trendData = null;
             try {
@@ -1496,52 +1575,43 @@
                 '10월': ['10', '20', '24', '1', '22']
             };
             
-            // 1-10월은 기본값 사용, 11-12월은 Kaggle 데이터 사용
-            const monthTop5 = {};
-            const defaultMonths = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월'];
-            const kaggleMonths = ['11월', '12월'];
-            const allMonths = [...defaultMonths, ...kaggleMonths];
+            // 현재 월의 TOP 5 카테고리 가져오기
+            let currentMonthTop5 = [];
             
-            // 1-10월: 기본값 사용 (이미 있으니까)
-            defaultMonths.forEach(month => {
-                monthTop5[month] = defaultTop5[month] || [];
-            });
-            
-            // 11-12월: Kaggle에서 가져온 데이터 사용
-            kaggleMonths.forEach(month => {
-                if (trendData && trendData[month] && Array.isArray(trendData[month]) && trendData[month].length > 0) {
-                    // localStorage에 Kaggle 데이터가 있으면 사용
-                    monthTop5[month] = trendData[month].map(id => String(id));
+            // 1-10월: 기본값 사용
+            if (currentMonth >= 1 && currentMonth <= 10) {
+                currentMonthTop5 = defaultTop5[currentMonthKey] || [];
+            } else {
+                // 11-12월: localStorage의 트렌드 데이터 사용
+                if (trendData && trendData[currentMonthKey] && Array.isArray(trendData[currentMonthKey]) && trendData[currentMonthKey].length > 0) {
+                    currentMonthTop5 = trendData[currentMonthKey].map(id => String(id));
                 } else {
-                    // Kaggle 데이터가 없으면 빈 배열
-                    monthTop5[month] = [];
+                    currentMonthTop5 = [];
                 }
-            });
+            }
             
-            // 각 월에서 카테고리의 순위 찾기 (없으면 0)
-            const ranks = [];
-            allMonths.forEach(month => {
-                if (monthTop5[month].length > 0) { // 데이터가 있는 월만 체크
-                    const rank = monthTop5[month].indexOf(String(categoryId)) + 1; // 1-5 또는 0 (없으면)
-                    if (rank > 0) {
-                        ranks.push(rank);
-                    }
-                }
-            });
-            
-            // 한 달이라도 TOP 5에 포함되어 있으면 평균 순위 계산
-            if (ranks.length > 0) {
-                const averageRank = (ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length).toFixed(1);
+            // 현재 월의 데이터가 있는지 확인
+            if (currentMonthTop5.length === 0) {
                 return {
-                    display: averageRank + '위',
-                    desc: '',
+                    display: '데이터 없음',
+                    desc: `${currentMonth}월 트렌드 데이터가 없습니다.`,
+                    inTop5: false
+                };
+            }
+            
+            // 현재 월에서 카테고리의 순위 찾기
+            const rank = currentMonthTop5.indexOf(String(categoryId)) + 1; // 1-5 또는 0 (없으면)
+            
+            if (rank > 0) {
+                return {
+                    display: `${rank}위`,
+                    desc: `${currentMonth}월 기준`,
                     inTop5: true
                 };
             } else {
-                // 모든 달에서 TOP 5에 포함되지 않음
                 return {
-                    display: 'X',
-                    desc: '2025년 1-12월 상위 30% 인기 카테고리 아님',
+                    display: '순위 없음',
+                    desc: `${currentMonth}월 트렌드 TOP 5에 포함되지 않음`,
                     inTop5: false
                 };
             }
@@ -1552,15 +1622,18 @@
             // 구독자 수 범위 확인
             if (subscriberCount <= 100) {
                 // 100 이하
-                return Math.round(predictedViews * (isTrendCategory ? 0.005 : 0.001));
+                return Math.round(predictedViews * (isTrendCategory ? 0.0005 : 0.00025));
             } else if (subscriberCount >= 100 && subscriberCount <= 999) {
                 // 백 단위 (100~999)
-                return Math.round(predictedViews * (isTrendCategory ? 0.05 : 0.01));
+                return Math.round(predictedViews * (isTrendCategory ? 0.005 : 0.0025));
             } else if (subscriberCount >= 1000 && subscriberCount <= 9999) {
                 // 천 단위 (1,000~9,999)
-                return Math.round(predictedViews * (isTrendCategory ? 0.4 : 0.2));
-            } else if (subscriberCount >= 10000 && subscriberCount <= 99999) {
-                // 만 단위 (10,000~99,999)
+                return Math.round(predictedViews * (isTrendCategory ? 0.025 : 0.012));
+            } else if (subscriberCount >= 10000 && subscriberCount <= 59999) {
+                // 만 단위 (10,000~59,999)
+                return Math.round(predictedViews * (isTrendCategory ? 0.12 : 0.06));
+            } else if (subscriberCount >= 60000 && subscriberCount <= 99999) {
+                // 60,000~99,999
                 return Math.round(predictedViews * (isTrendCategory ? 0.5 : 0.25));
             } else {
                 // 그 외의 경우 (100,000 이상) 원래 값 그대로
@@ -1580,7 +1653,8 @@
                 recommendations.push("조회수 향상을 위해 콘텐츠 전략을 재검토해보세요.");
             }
             
-            if (data.length > 20) {
+            const videoLengthForCheck = parseLengthInput(data.length);
+            if (videoLengthForCheck > 20) {
                 recommendations.push("영상 길이가 길어 시청자 이탈이 있을 수 있습니다.");
             }
             
@@ -1753,10 +1827,11 @@
 
             // 4. 영상 길이 검사
             if (recommendations.duration_sec) {
-                const videoLengthSeconds = (data.length || 0) * 60; // 분을 초로 변환
+                const videoLengthSeconds = (parseLengthInput(data.length) || 0) * 60; // 분을 초로 변환
                 const currentMin = Math.floor(videoLengthSeconds / 60);
                 const currentSec = videoLengthSeconds % 60;
-                const currentLengthStr = currentSec === 0 ? `${currentMin}분` : `${currentMin}분 ${currentSec}초`;
+                // 잘한점/개선점 텍스트에서는 formatLengthDisplay 사용 (이미 시간/분/초 형식 포함)
+                const currentLengthStr = formatLengthDisplay(data.length);
                 
                 if (videoLengthSeconds >= recommendations.duration_sec.min && videoLengthSeconds <= recommendations.duration_sec.max) {
                     const minMin = Math.floor(recommendations.duration_sec.min / 60);
@@ -1845,6 +1920,8 @@
         let globalImprovements = [];
         
         function generateRecommendations(data, predictionResult) {
+            // 영상 길이를 변환된 값으로 사용
+            const videoLengthForCheck = parseLengthInput(data.length);
             // 카테고리별 기준 기반 피드백
             const categoryFeedback = generateCategoryBasedFeedback(data);
             
@@ -1863,7 +1940,7 @@
             }
             
             // Generate strengths based on input data (기존 로직)
-            if (data.length >= 5 && data.length <= 15) {
+            if (videoLengthForCheck >= 5 && videoLengthForCheck <= 15) {
                 if (!categoryFeedback.strengths.some(s => s.includes('영상 길이'))) {
                 strengths.push('적절한 영상 길이로 시청자 이탈률이 낮을 것으로 예상됩니다.');
                 }
@@ -1901,24 +1978,25 @@
             }
             
             // Generate improvements based on input data (기존 로직) - 상세 권장사항에 추가
-            if (data.length > 20) {
+            const convertedLength = parseLengthInput(data.length);
+            if (convertedLength > 20) {
                 if (!categoryFeedback.detailedRecommendations.some(r => r.type === 'length')) {
                     const improvementText = '영상 길이가 길어 시청자 이탈률이 높을 수 있습니다. 20분 이상의 긴 영상은 시청자들의 집중력 유지가 어려워 중간에 이탈하는 경우가 많습니다. 영상을 여러 개의 짧은 에피소드로 나누거나, 핵심 내용에 집중하여 불필요한 부분을 편집하는 것이 좋습니다. 시청 완료율이 높아지면 YouTube 알고리즘이 영상을 더 많이 추천하게 됩니다.';
                     categoryFeedback.detailedRecommendations.push({
                         type: 'length',
-                        current: `${data.length}분`,
+                        current: formatLengthDisplay(data.length),
                         recommended: '20분 이하',
                         description: improvementText
                     });
                 }
             }
             
-            if (data.length < 3) {
+            if (convertedLength < 3) {
                 if (!categoryFeedback.detailedRecommendations.some(r => r.type === 'length')) {
                     const improvementText = '영상이 너무 짧아 충분한 내용 전달이 어려울 수 있습니다. 3분 미만의 짧은 영상은 시청자들에게 충분한 가치를 제공하기 어려우며, 시청 시간이 짧아 광고 수익이나 알고리즘 추천에도 불리합니다. 핵심 내용을 유지하면서도 시청자들이 만족할 만한 적절한 길이로 확장하는 것을 권장합니다.';
                     categoryFeedback.detailedRecommendations.push({
                         type: 'length',
-                        current: `${data.length}분`,
+                        current: formatLengthDisplay(data.length),
                         recommended: '3분 이상',
                         description: improvementText
                     });
@@ -2110,16 +2188,9 @@
                 optimizedData.videoQuality = recommendations.definition === 1 ? 'HD' : 'SD';
             }
             
-            // 5. 구독자 수: subscriber_count 값 사용 (이미 최적화된 값)
-            // 주의: subscriber_count는 이미 90% 위치 값으로 저장되어 있으므로, 50% 위치를 원하면 원본 값 사용
-            if (recommendations.subscriber_count !== undefined) {
-                if (percentLocation === 0.5) {
-                    // 50% 위치를 원하는 경우, 원본 값 사용
-                    optimizedData.subscriberCount = originalData.subscriberCount || 0;
-                } else {
-                    optimizedData.subscriberCount = recommendations.subscriber_count;
-                }
-            }
+            // 5. 구독자 수: 실제 사용자 입력 값 사용 (원본 값 유지)
+            // 권장사항 적용 시에도 사용자의 실제 구독자 수를 사용하여 개별 차이를 반영
+            optimizedData.subscriberCount = originalData.subscriberCount || 0;
             
             return optimizedData;
         }
@@ -2216,6 +2287,8 @@
                 // 최적화된 데이터 생성 (90% 위치 값)
                 const optimizedData = createOptimizedData(data, categoryFeedback, 0.9);
                 console.log('📊 최적화된 데이터:', optimizedData);
+                console.log('📊 원본 데이터:', data);
+                console.log('📊 카테고리 피드백:', categoryFeedback);
                 
                 if (!optimizedData) {
                     console.log('⚠️ 카테고리별 추천 기준이 없어 권장사항 조회수 계산을 건너뜁니다.');
@@ -2298,11 +2371,11 @@
                 const requestBody = {
                     title: optimizedData.title,
                     category: optimizedData.category,
-                    length: parseInt(optimizedData.length),
+                    length: typeof optimizedData.length === 'number' ? optimizedData.length : parseLengthInput(String(optimizedData.length)),
                     upload_time: optimizedData.uploadTime,
                     description: optimizedData.description || data.description || '',
                     thumbnail_image: optimizedData.thumbnailImage || data.thumbnailImage || '',
-                    has_subtitles: optimizedData.hasSubtitles !== undefined ? optimizedData.hasSubtitles : (data.hasSubtitles || false),
+                    has_subtitles: optimizedData.hasSubtitles !== undefined ? optimizedData.hasSubtitles : (data.hasSubtitles || 'not_provided'),
                     video_quality: optimizedData.videoQuality || data.videoQuality || 'HD',
                     subscriber_count: optimizedData.subscriberCount || data.subscriberCount || 0
                 };
@@ -2327,13 +2400,15 @@
                         const recommendedViewsRaw = saveData.data.prediction.predicted_views;
                         console.log('📊 원본 예상 조회수:', recommendedViewsRaw);
                         
-                        // 권장사항 적용 시 예상 조회수도 조정 (구독자 수와 트렌드 카테고리 기준)
+                        // 현재 조회수 계산을 위한 변수 선언
                         const videoData = JSON.parse(localStorage.getItem('videoData') || '{}');
                         const categoryRankInfo = getCategoryRankStatus(data.category);
                         const isTrendCategory = categoryRankInfo.inTop5;
                         const subscriberCount = (videoData && videoData.subscriberCount) ? videoData.subscriberCount : (data.subscriberCount || 0);
+                        
+                        // 권장사항 적용 시 예상 조회수에도 가중치 적용 (현재 예상 조회수와 동일하게)
                         const recommendedViews = adjustPredictedViews(recommendedViewsRaw, subscriberCount, isTrendCategory);
-                        console.log('📊 조정된 예상 조회수:', recommendedViews);
+                        console.log('📊 권장사항 적용 시 예상 조회수 (가중치 적용):', recommendedViews, '(원본:', recommendedViewsRaw, ')');
                         
                         // 현재 조회수 계산: localStorage의 원본 값에 가중치를 적용한 값을 사용 (더 정확함)
                         const savedPredictionResult = JSON.parse(localStorage.getItem('predictionResult') || '{}');
@@ -2405,11 +2480,21 @@
                 } else {
                     const errorText = await response.text().catch(() => '알 수 없는 오류');
                     console.error('❌ API 호출 실패:', response.status, errorText);
+                    console.error('❌ 요청 데이터:', requestBody);
                     recommendedViewsElement.textContent = `계산 실패 (${response.status})`;
+                    
+                    // 에러 상세 정보 표시
+                    const errorInfo = document.createElement('div');
+                    errorInfo.style.color = '#ff6b6b';
+                    errorInfo.style.fontSize = '0.9rem';
+                    errorInfo.style.marginTop = '10px';
+                    errorInfo.textContent = `서버 응답: ${response.status} ${response.statusText}`;
+                    recommendedViewsElement.parentElement.appendChild(errorInfo);
                 }
             } catch (error) {
                 console.error('❌ 권장사항 적용 조회수 계산 실패:', error);
                 console.error('❌ 에러 스택:', error.stack);
+                console.error('❌ 최적화된 데이터:', optimizedData);
                 const recommendedViewsElement = document.getElementById('recommendedViews');
                 if (recommendedViewsElement) {
                     recommendedViewsElement.textContent = `계산 실패: ${error.message}`;
@@ -2755,7 +2840,7 @@
                 <div class="info-value">${categoryName}</div>
                 
                 <div class="info-label">길이:</div>
-                <div class="info-value">${videoData.length || 0}분</div>
+                <div class="info-value">${formatLengthDisplay(videoData.length)}</div>
                 
                 <div class="info-label">업로드 예정:</div>
                 <div class="info-value">${videoData.upload_time || '미설정'}</div>`;
@@ -2869,7 +2954,7 @@
                 textContent += `[영상 정보]\n`;
                 textContent += `제목: ${videoData.title || 'N/A'}\n`;
                 textContent += `카테고리: ${categoryName}\n`;
-                textContent += `길이: ${videoData.length || 0}분\n`;
+                textContent += `길이: ${formatLengthDisplay(videoData.length)}\n`;
                 textContent += `업로드 예정: ${videoData.upload_time || '미설정'}\n`;
                 if (videoData.description) {
                     textContent += `설명: ${videoData.description}\n`;
