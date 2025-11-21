@@ -844,6 +844,77 @@
         // 전역 인증 관리자
         const authManager = new AuthManager();
         
+        // 영상 길이 입력값 변환 함수
+        // 지원 형식: "9시간 40분 5초", "40분 5초", "5초", "9시간", "2.5" (2분 5초), "10" (10분)
+        function parseLengthInput(lengthStr) {
+            if (!lengthStr) return 0;
+            
+            const str = String(lengthStr).trim();
+            
+            // 한글 형식 파싱: "9시간 40분 5초", "40분 5초", "5초", "9시간" 등
+            const koreanPattern = /(?:(\d+)\s*시간\s*)?(?:(\d+)\s*분\s*)?(?:(\d+)\s*초\s*)?/;
+            const match = str.match(koreanPattern);
+            
+            // 한글 단위(시간, 분, 초)가 포함되어 있는지 확인
+            if (match && /[시간분초]/.test(str) && (match[1] || match[2] || match[3])) {
+                const hours = parseInt(match[1] || 0) || 0;
+                const minutes = parseInt(match[2] || 0) || 0;
+                const seconds = parseInt(match[3] || 0) || 0;
+                
+                // 총 분으로 변환
+                return hours * 60 + minutes + seconds / 60;
+            }
+            
+            // 숫자 형식 파싱 (기존 로직 유지)
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            
+            const parts = str.split('.');
+            
+            if (parts.length === 1) {
+                // 정수만 있으면 그대로 반환 (예: "10" → 10분)
+                return num;
+            }
+            
+            // 소수 부분이 있으면
+            const integerPart = parseInt(parts[0]) || 0;
+            const decimalPart = parts[1];
+            
+            if (decimalPart) {
+                const decimalInt = parseInt(decimalPart);
+                // 소수 부분이 60 미만이면 초로 해석
+                if (decimalInt < 60) {
+                    const seconds = decimalInt;
+                    return integerPart + seconds / 60;
+                }
+            }
+            
+            // 그 외에는 기존 방식
+            return num;
+        }
+        
+        // 분 값을 "시간 분 초" 형식 문자열로 변환하는 함수
+        function formatLengthDisplay(lengthStr) {
+            if (!lengthStr) return '0초';
+            
+            // 먼저 parseLengthInput으로 변환
+            const lengthInMinutes = parseLengthInput(lengthStr);
+            
+            // 총 초로 변환
+            const totalSeconds = Math.round(lengthInMinutes * 60);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            // 표시 형식 반환
+            const parts = [];
+            if (hours > 0) parts.push(`${hours}시간`);
+            if (minutes > 0) parts.push(`${minutes}분`);
+            if (seconds > 0 || parts.length === 0) parts.push(`${seconds}초`);
+            
+            return parts.join(' ');
+        }
+        
         // 내 페이지 관련 함수들
         function showMyPage() {
             document.getElementById('myPage').style.display = 'block';
@@ -934,7 +1005,7 @@
                         <div class="video-title">${video.title || '제목 없음'}</div>
                         <div class="video-meta">
                             <span class="category-badge">${categoryMap[video.category] || '기타'}</span>
-                            <span class="ms-2">${video.length || 0}분</span>
+                            <span class="ms-2">${formatLengthDisplay(video.length || 0)}</span>
                         </div>
                         <div class="video-description">${video.description || '설명이 없습니다.'}</div>
                         <div class="video-meta">
@@ -1064,7 +1135,7 @@
 영상 정보:
 - 제목: ${analysis.video_info.title}
 - 카테고리: ${getCategoryName(analysis.video_info.category)}
-- 길이: ${analysis.video_info.length}분
+- 길이: ${formatLengthDisplay(analysis.video_info.length)}
 - 업로드 예정: ${analysis.video_info.upload_time || '미설정'}
 - 설명: ${analysis.video_info.description || '없음'}
 
