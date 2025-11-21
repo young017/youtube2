@@ -2053,8 +2053,10 @@
             displayRecommendations(strengths, [], formattedDetailedRecommendations);
             
             // 피드백 적용시 예상 조회수 계산
+            // 카테고리별 권장사항만 체크하기 위해 원본 categoryFeedback 생성
+            const originalCategoryFeedback = generateCategoryBasedFeedback(data);
             if (predictionResult && predictionResult.predicted_views > 0) {
-                calculateRecommendedPrediction(data, categoryFeedback, predictionResult);
+                calculateRecommendedPrediction(data, originalCategoryFeedback, predictionResult);
             }
         }
         
@@ -2431,31 +2433,38 @@
                             console.log('📊 currentPredictionResult에서 계산한 현재 조회수:', currentViews);
                         }
                         
-                        // 화면에 표시된 값과 비교하여 검증 (디버깅용)
+                        // 화면에 표시된 값을 직접 사용 (가장 정확함)
                         const currentViewsElement = document.getElementById('predictedViews');
+                        let currentViewsForCalculation = currentViews;
+                        
                         if (currentViewsElement) {
                             const displayedText = currentViewsElement.textContent.trim();
                             const displayedNumber = parseInt(displayedText.replace(/,/g, '').replace(/[^0-9]/g, ''));
                             if (!isNaN(displayedNumber) && displayedNumber > 0) {
+                                currentViewsForCalculation = displayedNumber;
+                                console.log('✅ 화면에 표시된 값을 사용합니다:', currentViewsForCalculation);
+                                
+                                // 계산 값과 비교하여 검증 (디버깅용)
                                 const diff = Math.abs(displayedNumber - currentViews);
                                 const diffPercent = (diff / currentViews) * 100;
                                 if (diffPercent > 5) { // 5% 이상 차이나면 경고
                                     console.warn('⚠️ 화면 값과 계산 값이 다릅니다. 화면:', displayedNumber, '계산:', currentViews, '차이:', diffPercent.toFixed(1) + '%');
-                                } else {
-                                    console.log('✅ 화면 값과 계산 값이 일치합니다:', displayedNumber);
+                                    console.warn('⚠️ 화면 값을 우선 사용합니다.');
                                 }
+                            } else {
+                                console.log('📊 계산된 값을 사용합니다:', currentViews);
                             }
                         }
                         
-                        console.log('📊 현재 조회수:', currentViews);
+                        console.log('📊 현재 조회수 (계산용):', currentViewsForCalculation);
                         
                         // 결과 표시
                         animateNumber('recommendedViews', recommendedViews, '');
                         
-                        // 증가율 계산 (현재 화면에 표시된 조정된 조회수와 비교)
-                        if (currentViews > 0) {
-                            const improvement = ((recommendedViews - currentViews) / currentViews) * 100;
-                            const improvementAmount = recommendedViews - currentViews;
+                        // 증가율 계산 (화면에 표시된 현재 조회수와 비교)
+                        if (currentViewsForCalculation > 0) {
+                            const improvement = ((recommendedViews - currentViewsForCalculation) / currentViewsForCalculation) * 100;
+                            const improvementAmount = recommendedViews - currentViewsForCalculation;
                             
                             // 비정상적인 계산 결과 검증
                             if (Math.abs(improvement) > 1000) {
@@ -2472,9 +2481,9 @@
                                 `${improvementAmount > 0 ? '+' : ''}${Math.floor(improvementAmount).toLocaleString()}회`;
                             
                             console.log('📊 증가율:', improvement.toFixed(1) + '%', '증가량:', Math.floor(improvementAmount).toLocaleString() + '회');
-                            console.log('📊 비교 값 - 현재:', currentViews, '권장:', recommendedViews);
+                            console.log('📊 비교 값 - 현재:', currentViewsForCalculation, '권장:', recommendedViews);
                         } else {
-                            console.error('❌ 현재 조회수가 0이거나 유효하지 않습니다:', currentViews);
+                            console.error('❌ 현재 조회수가 0이거나 유효하지 않습니다:', currentViewsForCalculation);
                             document.getElementById('improvementPercent').textContent = '-';
                             document.getElementById('improvementAmount').textContent = '-';
                         }
