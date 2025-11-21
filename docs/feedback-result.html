@@ -1593,8 +1593,8 @@
             // 현재 월의 데이터가 있는지 확인
             if (currentMonthTop5.length === 0) {
                 return {
-                    display: 'X',
-                    desc: `${currentMonth}월 트렌드 카테고리가 아닙니다`,
+                    display: '데이터 없음',
+                    desc: `${currentMonth}월 트렌드 데이터가 없습니다.`,
                     inTop5: false
                 };
             }
@@ -1978,28 +1978,35 @@
             }
             
             // Generate improvements based on input data (기존 로직) - 상세 피드백에 추가
-            const convertedLength = parseLengthInput(data.length);
-            if (convertedLength > 20) {
-                if (!categoryFeedback.detailedRecommendations.some(r => r.type === 'length')) {
-                    const improvementText = '영상 길이가 길어 시청자 이탈률이 높을 수 있습니다. 20분 이상의 긴 영상은 시청자들의 집중력 유지가 어려워 중간에 이탈하는 경우가 많습니다. 영상을 여러 개의 짧은 에피소드로 나누거나, 핵심 내용에 집중하여 불필요한 부분을 편집하는 것이 좋습니다. 시청 완료율이 높아지면 YouTube 알고리즘이 영상을 더 많이 추천하게 됩니다.';
-                    categoryFeedback.detailedRecommendations.push({
-                        type: 'length',
-                        current: formatLengthDisplay(data.length),
-                        recommended: '20분 이하',
-                        description: improvementText
-                    });
-                }
-            }
+            // 카테고리별 권장사항이 없는 경우에만 일반적인 영상 길이 체크 적용
+            const hasCategoryLengthRecommendation = categoryFeedback.detailedRecommendations.some(r => r.type === 'length');
+            const categoryHasDurationRecommendation = categoryRecommendations[data.category] && categoryRecommendations[data.category].duration_sec;
             
-            if (convertedLength < 3) {
-                if (!categoryFeedback.detailedRecommendations.some(r => r.type === 'length')) {
-                    const improvementText = '영상이 너무 짧아 충분한 내용 전달이 어려울 수 있습니다. 3분 미만의 짧은 영상은 시청자들에게 충분한 가치를 제공하기 어려우며, 시청 시간이 짧아 광고 수익이나 알고리즘 추천에도 불리합니다. 핵심 내용을 유지하면서도 시청자들이 만족할 만한 적절한 길이로 확장하는 것을 권장합니다.';
-                    categoryFeedback.detailedRecommendations.push({
-                        type: 'length',
-                        current: formatLengthDisplay(data.length),
-                        recommended: '3분 이상',
-                        description: improvementText
-                    });
+            // 카테고리별 영상 길이 권장사항이 없을 때만 일반 체크 적용
+            if (!categoryHasDurationRecommendation) {
+                const convertedLength = parseLengthInput(data.length);
+                if (convertedLength > 20) {
+                    if (!hasCategoryLengthRecommendation) {
+                        const improvementText = '영상 길이가 길어 시청자 이탈률이 높을 수 있습니다. 20분 이상의 긴 영상은 시청자들의 집중력 유지가 어려워 중간에 이탈하는 경우가 많습니다. 영상을 여러 개의 짧은 에피소드로 나누거나, 핵심 내용에 집중하여 불필요한 부분을 편집하는 것이 좋습니다. 시청 완료율이 높아지면 YouTube 알고리즘이 영상을 더 많이 추천하게 됩니다.';
+                        categoryFeedback.detailedRecommendations.push({
+                            type: 'length',
+                            current: formatLengthDisplay(data.length),
+                            recommended: '20분 이하',
+                            description: improvementText
+                        });
+                    }
+                }
+                
+                if (convertedLength < 3) {
+                    if (!hasCategoryLengthRecommendation) {
+                        const improvementText = '영상이 너무 짧아 충분한 내용 전달이 어려울 수 있습니다. 3분 미만의 짧은 영상은 시청자들에게 충분한 가치를 제공하기 어려우며, 시청 시간이 짧아 광고 수익이나 알고리즘 추천에도 불리합니다. 핵심 내용을 유지하면서도 시청자들이 만족할 만한 적절한 길이로 확장하는 것을 권장합니다.';
+                        categoryFeedback.detailedRecommendations.push({
+                            type: 'length',
+                            current: formatLengthDisplay(data.length),
+                            recommended: '3분 이상',
+                            description: improvementText
+                        });
+                    }
                 }
             }
             
