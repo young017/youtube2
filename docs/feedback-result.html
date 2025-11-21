@@ -644,7 +644,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-6 text-center">
                             <h4 class="mb-3" style="color: #ffc107; font-size: 1.5rem; font-weight: 700;">
-                                <i class="bi bi-lightbulb-fill me-2"></i>권장사항 적용 시 예상 조회수
+                                <i class="bi bi-lightbulb-fill me-2"></i>피드백 적용시 예상 조회수
                             </h4>
                             <div class="prediction-number" id="recommendedViews" style="color: #ffc107; font-size: 3.5rem; font-weight: 800;">계산 중...</div>
                         </div>
@@ -660,7 +660,7 @@
                                 </div>
                                 <p class="text-muted small mt-3">
                                     <i class="bi bi-info-circle me-1"></i>
-                                    상세 권장사항을 모두 따를 경우 예상되는 최대 조회수입니다.
+                                    상세 피드백을 모두 따를 경우 예상되는 최대 조회수입니다.
                                 </p>
                             </div>
                         </div>
@@ -671,7 +671,7 @@
 
         <!-- Recommendations -->
         <div class="feedback-card">
-            <h3 class="mb-4" style="color: #ff0000; font-size: 1.75rem; font-weight: 700;">상세 권장사항</h3>
+            <h3 class="mb-4" style="color: #ff0000; font-size: 1.75rem; font-weight: 700;">상세 피드백</h3>
             
             <div class="row mb-4">
                 <div class="col-12">
@@ -1926,7 +1926,7 @@
             const categoryFeedback = generateCategoryBasedFeedback(data);
             
             const strengths = [...categoryFeedback.strengths];
-            // improvements는 더 이상 사용하지 않음 (상세 권장사항으로 대체)
+            // improvements는 더 이상 사용하지 않음 (상세 피드백으로 대체)
             
             // 전역 변수에 저장 (저장 시 사용)
             globalStrengths = strengths;
@@ -1954,7 +1954,7 @@
                 strengths.push('활발한 시청자층을 타겟으로 하고 있습니다.');
             }
             
-            // Generate improvements based on prediction results - 상세 권장사항에 추가
+            // Generate improvements based on prediction results - 상세 피드백에 추가
             if (predictionResult) {
                 if (predictionResult.popularity_probability < 0.3) {
                     const improvementText = '인기도 확률이 낮아 제목이나 썸네일 개선이 필요합니다. 제목은 시청자의 호기심을 자극하고 검색 키워드를 포함해야 하며, 썸네일은 눈에 띄는 이미지와 명확한 텍스트로 클릭률을 높일 수 있습니다. 강력한 제목과 썸네일은 첫 인상에서 차이를 만들고, 클릭률을 높여 알고리즘 추천에 유리하게 작용합니다.';
@@ -1977,7 +1977,7 @@
                 }
             }
             
-            // Generate improvements based on input data (기존 로직) - 상세 권장사항에 추가
+            // Generate improvements based on input data (기존 로직) - 상세 피드백에 추가
             const convertedLength = parseLengthInput(data.length);
             if (convertedLength > 20) {
                 if (!categoryFeedback.detailedRecommendations.some(r => r.type === 'length')) {
@@ -2045,7 +2045,7 @@
             // Display recommendations (중복 제거를 위해 formattedDetailedRecommendations 사용)
             displayRecommendations(strengths, [], formattedDetailedRecommendations);
             
-            // 권장사항 적용 시 예상 조회수 계산
+            // 피드백 적용시 예상 조회수 계산
             if (predictionResult && predictionResult.predicted_views > 0) {
                 calculateRecommendedPrediction(data, categoryFeedback, predictionResult);
             }
@@ -2195,10 +2195,10 @@
             return optimizedData;
         }
         
-        // 권장사항 적용 시 예상 조회수 계산 (90% 위치 값만)
+        // 피드백 적용시 예상 조회수 계산 (90% 위치 값만)
         async function calculateRecommendedPrediction(data, categoryFeedback, currentPredictionResult) {
             try {
-                console.log('🔍 권장사항 적용 시 예상 조회수 계산 시작');
+                console.log('🔍 피드백 적용시 예상 조회수 계산 시작');
                 
                 // 권장사항이 없는 경우 (모든 항목이 최적 범위에 있는 경우)
                 if (!categoryFeedback.detailedRecommendations || categoryFeedback.detailedRecommendations.length === 0) {
@@ -2340,7 +2340,7 @@
                                     <h5 class="mt-3 mb-3" style="color: #6c757d; font-weight: 700;">카테고리별 기준 정보 없음</h5>
                                     <p style="color: #ffffff; line-height: 1.8; font-size: 1rem;">
                                         이 카테고리에 대한 추천 기준 데이터가 아직 준비되지 않았습니다.<br>
-                                        현재 예상 조회수는 표시되지만, 권장사항 적용 시 예상 조회수는 계산할 수 없습니다.<br>
+                                        현재 예상 조회수는 표시되지만, 피드백 적용시 예상 조회수는 계산할 수 없습니다.<br>
                                         <strong style="color: #6c757d;">일반적인 권장사항을 참고하여 영상을 최적화해보세요.</strong>
                                     </p>
                                 </div>
@@ -2406,9 +2406,9 @@
                         const isTrendCategory = categoryRankInfo.inTop5;
                         const subscriberCount = (videoData && videoData.subscriberCount) ? videoData.subscriberCount : (data.subscriberCount || 0);
                         
-                        // 권장사항 적용 시 예상 조회수에도 가중치 적용 (현재 예상 조회수와 동일하게)
+                        // 피드백 적용시 예상 조회수에도 가중치 적용 (현재 예상 조회수와 동일하게)
                         const recommendedViews = adjustPredictedViews(recommendedViewsRaw, subscriberCount, isTrendCategory);
-                        console.log('📊 권장사항 적용 시 예상 조회수 (가중치 적용):', recommendedViews, '(원본:', recommendedViewsRaw, ')');
+                        console.log('📊 피드백 적용시 예상 조회수 (가중치 적용):', recommendedViews, '(원본:', recommendedViewsRaw, ')');
                         
                         // 현재 조회수 계산: localStorage의 원본 값에 가중치를 적용한 값을 사용 (더 정확함)
                         const savedPredictionResult = JSON.parse(localStorage.getItem('predictionResult') || '{}');
@@ -2454,9 +2454,9 @@
                             if (Math.abs(improvement) > 1000) {
                                 console.error('❌ 비정상적인 증가율 감지:', improvement.toFixed(1) + '%');
                                 console.error('   현재 조회수:', currentViews);
-                                console.error('   권장사항 적용 시 예상 조회수:', recommendedViews);
+                                console.error('   피드백 적용시 예상 조회수:', recommendedViews);
                                 console.error('   원본 예상 조회수:', originalViews);
-                                console.error('   권장사항 원본 예상 조회수:', recommendedViewsRaw);
+                                console.error('   피드백 원본 예상 조회수:', recommendedViewsRaw);
                             }
                             
                             document.getElementById('improvementPercent').textContent = 
@@ -2472,7 +2472,7 @@
                             document.getElementById('improvementAmount').textContent = '-';
                         }
                         
-                        console.log('✅ 권장사항 적용 시 예상 조회수 계산 완료');
+                        console.log('✅ 피드백 적용시 예상 조회수 계산 완료');
                     } else {
                         console.error('❌ API 응답에 예측 데이터가 없습니다:', saveData);
                         recommendedViewsElement.textContent = '계산 실패 (데이터 없음)';
