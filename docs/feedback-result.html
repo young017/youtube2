@@ -1078,8 +1078,8 @@
 
         // Load video data and generate feedback
         document.addEventListener('DOMContentLoaded', function() {
-            const videoData = JSON.parse(localStorage.getItem('videoData'));
-            const predictionResult = JSON.parse(localStorage.getItem('predictionResult'));
+            const videoData = JSON.parse(sessionStorage.getItem('videoData'));
+            const predictionResult = JSON.parse(sessionStorage.getItem('predictionResult'));
             
             if (!videoData) {
                 alert('영상 정보가 없습니다. 다시 입력해주세요.');
@@ -1303,11 +1303,11 @@
             if (!newTime) return;
             
             // videoData 업데이트
-            const videoData = JSON.parse(localStorage.getItem('videoData'));
+            const videoData = JSON.parse(sessionStorage.getItem('videoData'));
             if (!videoData) return;
             
             videoData.uploadTime = newTime;
-            localStorage.setItem('videoData', JSON.stringify(videoData));
+            sessionStorage.setItem('videoData', JSON.stringify(videoData));
             
             // 실제 모델로 다시 예측 (API 호출)
             try {
@@ -1349,7 +1349,7 @@
                             model_type: saveData.data.prediction.model_type || 'unknown',
                             model_used: `${saveData.data.prediction.cls_model || 'Unknown'} + ${saveData.data.prediction.reg_model || 'Unknown'}`
                         };
-                        localStorage.setItem('predictionResult', JSON.stringify(predictionResult));
+                        sessionStorage.setItem('predictionResult', JSON.stringify(predictionResult));
                         
                         // 카테고리 순위 정보 가져오기
                         const categoryRankInfo = getCategoryRankStatus(videoData.category);
@@ -1387,7 +1387,7 @@
         function displayPredictionResults(result) {
             // Display category rank status
             // videoData에서 카테고리 정보를 찾아서 다시 계산
-            const videoData = JSON.parse(localStorage.getItem('videoData'));
+            const videoData = JSON.parse(sessionStorage.getItem('videoData'));
             let categoryRankInfo;
             if (videoData && videoData.category) {
                 categoryRankInfo = getCategoryRankStatus(videoData.category);
@@ -1511,7 +1511,7 @@
                             model_type: saveData.data.prediction.model_type || 'unknown',
                             model_used: `${saveData.data.prediction.cls_model || 'Unknown'} + ${saveData.data.prediction.reg_model || 'Unknown'}`
                         };
-                        localStorage.setItem('predictionResult', JSON.stringify(predictionResult));
+                        sessionStorage.setItem('predictionResult', JSON.stringify(predictionResult));
                         console.log('✅ 실제 모델 예측 완료:', predictionResult);
                         
                         // 예측 결과 표시
@@ -2401,7 +2401,7 @@
                         console.log('📊 원본 예상 조회수:', recommendedViewsRaw);
                         
                         // 현재 조회수 계산을 위한 변수 선언
-                        const videoData = JSON.parse(localStorage.getItem('videoData') || '{}');
+                        const videoData = JSON.parse(sessionStorage.getItem('videoData') || '{}');
                         const categoryRankInfo = getCategoryRankStatus(data.category);
                         const isTrendCategory = categoryRankInfo.inTop5;
                         const subscriberCount = (videoData && videoData.subscriberCount) ? videoData.subscriberCount : (data.subscriberCount || 0);
@@ -2411,7 +2411,7 @@
                         console.log('📊 피드백 적용시 예상 조회수 (가중치 적용):', recommendedViews, '(원본:', recommendedViewsRaw, ')');
                         
                         // 현재 조회수 계산: localStorage의 원본 값에 가중치를 적용한 값을 사용 (더 정확함)
-                        const savedPredictionResult = JSON.parse(localStorage.getItem('predictionResult') || '{}');
+                        const savedPredictionResult = JSON.parse(sessionStorage.getItem('predictionResult') || '{}');
                         const originalViews = savedPredictionResult.predicted_views || currentPredictionResult.predicted_views;
                         
                         let currentViews = null;
@@ -2593,8 +2593,8 @@
         function downloadReport() {
             try {
                 // 현재 분석 결과 수집
-                const videoData = JSON.parse(localStorage.getItem('videoData'));
-                const predictionResult = JSON.parse(localStorage.getItem('predictionResult'));
+                const videoData = JSON.parse(sessionStorage.getItem('videoData'));
+                const predictionResult = JSON.parse(sessionStorage.getItem('predictionResult'));
                 
                 if (!videoData) {
                     alert('저장할 영상 정보가 없습니다. 다시 입력해주세요.');
@@ -3106,9 +3106,9 @@
                     resultsDiv.style.display = 'block';
                 
                 // predictionResult에도 저장
-                const predictionResult = JSON.parse(localStorage.getItem('predictionResult') || '{}');
+                const predictionResult = JSON.parse(sessionStorage.getItem('predictionResult') || '{}');
                 predictionResult.title_suggestions = titles;
-                localStorage.setItem('predictionResult', JSON.stringify(predictionResult));
+                sessionStorage.setItem('predictionResult', JSON.stringify(predictionResult));
                 
             } catch (error) {
                 console.error("Error displaying title suggestions:", error);
@@ -3138,9 +3138,9 @@
         // 제목 사용 함수
         function useTitle(title) {
             if (confirm(`"${title}"를 새 제목으로 사용하시겠습니까?`)) {
-                const videoData = JSON.parse(localStorage.getItem('videoData'));
+                const videoData = JSON.parse(sessionStorage.getItem('videoData'));
                 videoData.title = title;
-                localStorage.setItem('videoData', JSON.stringify(videoData));
+                sessionStorage.setItem('videoData', JSON.stringify(videoData));
                 
                 const titleElement = document.getElementById('currentTitleForTags');
                 if (titleElement) {
@@ -3153,14 +3153,14 @@
         
         // 새로운 제목 생성 함수
         function regenerateTitles() {
-            const videoData = JSON.parse(localStorage.getItem('videoData'));
+            const videoData = JSON.parse(sessionStorage.getItem('videoData'));
             displayTitleSuggestions(videoData);
         }
         
         // 자동으로 제목 추천 표시
         async function autoGenerateTitles(videoData) {
             if (!videoData) {
-                videoData = JSON.parse(localStorage.getItem('videoData'));
+                videoData = JSON.parse(sessionStorage.getItem('videoData'));
             }
             
             if (!videoData || !videoData.title) {
@@ -3173,7 +3173,7 @@
         
         // 태그 추천 기능
         async function generateTags() {
-            const videoData = JSON.parse(localStorage.getItem('videoData'));
+            const videoData = JSON.parse(sessionStorage.getItem('videoData'));
             console.log('태그 추천을 위한 videoData:', videoData);
             
             if (!videoData || !videoData.title) {
@@ -3360,7 +3360,7 @@
         async function autoGenerateTags(videoData) {
             // videoData가 없으면 localStorage에서 다시 가져오기
             if (!videoData) {
-                videoData = JSON.parse(localStorage.getItem('videoData'));
+                videoData = JSON.parse(sessionStorage.getItem('videoData'));
             }
             
             if (!videoData || !videoData.title) {
@@ -3427,8 +3427,8 @@
                 console.log('저장 함수 시작');
                 
                 // 현재 분석 결과 수집
-            const videoData = JSON.parse(localStorage.getItem('videoData'));
-                const predictionResult = JSON.parse(localStorage.getItem('predictionResult'));
+            const videoData = JSON.parse(sessionStorage.getItem('videoData'));
+                const predictionResult = JSON.parse(sessionStorage.getItem('predictionResult'));
                 
                 console.log('videoData:', videoData);
                 console.log('predictionResult:', predictionResult);
