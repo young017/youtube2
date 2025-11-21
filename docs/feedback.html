@@ -563,9 +563,10 @@
                         <div class="form-group">
                             <label for="videoLength" class="form-label">
                                 <i class="bi bi-clock"></i>
-                                <span>영상 길이 (분)</span>
+                                <span>영상 길이</span>
                             </label>
-                            <input type="number" class="form-control" id="videoLength" placeholder="예: 10 또는 2.35 (2분 35초) 또는 80.58 (80분 58초)" min="0.01" max="1440" step="0.01" required>
+                            <input type="text" class="form-control" id="videoLength" placeholder="예: 9시간 40분 5초, 40분 5초, 5초, 10분" required>
+                            <small class="form-text text-muted">한글 형식으로 입력해주세요. 예: 9시간 40분 5초, 40분 5초, 5초, 10분</small>
                         </div>
                         
                         <!-- 자막 제공 여부 -->
@@ -694,15 +695,31 @@
     
     <!-- Custom JavaScript -->
     <script>
-        // 영상 길이 입력값 변환 함수 (2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
+        // 영상 길이 입력값 변환 함수
+        // 지원 형식: "9시간 40분 5초", "40분 5초", "5초", "9시간", "2.5" (2분 5초), "10" (10분)
         function parseLengthInput(lengthStr) {
             if (!lengthStr) return 0;
             
-            const num = parseFloat(lengthStr);
+            const str = String(lengthStr).trim();
+            
+            // 한글 형식 파싱: "9시간 40분 5초", "40분 5초", "5초", "9시간" 등
+            const koreanPattern = /(?:(\d+)\s*시간\s*)?(?:(\d+)\s*분\s*)?(?:(\d+)\s*초\s*)?/;
+            const match = str.match(koreanPattern);
+            
+            // 한글 단위(시간, 분, 초)가 포함되어 있는지 확인
+            if (match && /[시간분초]/.test(str) && (match[1] || match[2] || match[3])) {
+                const hours = parseInt(match[1] || 0) || 0;
+                const minutes = parseInt(match[2] || 0) || 0;
+                const seconds = parseInt(match[3] || 0) || 0;
+                
+                // 총 분으로 변환
+                return hours * 60 + minutes + seconds / 60;
+            }
+            
+            // 숫자 형식 파싱 (기존 로직 유지)
+            const num = parseFloat(str);
             if (isNaN(num)) return 0;
             
-            // 문자열로 변환하여 소수점 확인
-            const str = lengthStr.toString();
             const parts = str.split('.');
             
             if (parts.length === 1) {
@@ -717,6 +734,7 @@
             if (decimalPart) {
                 const decimalInt = parseInt(decimalPart);
                 // 소수 부분이 60 미만이면 초로 해석
+                // 예: 2.5 → 2분 5초 → 2.083분
                 // 예: 2.35 → 2분 35초 → 2.583분
                 // 예: 80.58 → 80분 58초 → 80.967분 (1시간 20분 58초)
                 if (decimalInt < 60) {
@@ -764,7 +782,7 @@
                 
                 // DB에 영상 정보 저장
                 console.log('DB 저장 시작...');
-                // 영상 길이 변환 (2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
+                // 영상 길이 변환 (2.5 → 2분 5초 → 2.083분, 2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
                 const convertedLength = parseLengthInput(formData.length);
                 console.log(`영상 길이 변환: ${formData.length} → ${convertedLength}분`);
                 
@@ -794,7 +812,7 @@
                 }
                 
                 console.log('API 요청 URL:', url);
-                // 영상 길이 변환 (2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
+                // 영상 길이 변환 (2.5 → 2분 5초 → 2.083분, 2.35 → 2분 35초 → 2.583분, 80.58 → 80분 58초 → 80.967분)
                 const convertedLength2 = parseLengthInput(formData.length);
                 console.log(`영상 길이 변환: ${formData.length} → ${convertedLength2}분`);
                 
