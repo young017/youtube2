@@ -931,8 +931,8 @@
                     // 저장 실패해도 계속 진행
                 }
                 
-                // Store data in localStorage
-                localStorage.setItem('videoData', JSON.stringify(formData));
+                // Store data in sessionStorage (탭/창이 닫히면 자동 삭제)
+                sessionStorage.setItem('videoData', JSON.stringify(formData));
                 console.log('데이터 저장 완료');
                 
                 // Redirect to feedback result page
@@ -1099,8 +1099,8 @@
                 hourSelect.appendChild(option);
             }
             
-            // 기본값 설정 (현재 시간 + 1시간) - localStorage에 데이터가 없을 때만
-            const savedVideoData = JSON.parse(localStorage.getItem('videoData'));
+            // 기본값 설정 (현재 시간 + 1시간) - sessionStorage에 데이터가 없을 때만
+            const savedVideoData = JSON.parse(sessionStorage.getItem('videoData'));
             if (!savedVideoData || !savedVideoData.uploadTime) {
                 now.setHours(now.getHours() + 1);
                 document.getElementById('uploadMonth').value = now.getMonth() + 1;
@@ -1126,10 +1126,10 @@
             document.getElementById('uploadTime').value = dateTimeValue;
         }
         
-        // localStorage에서 videoData를 불러와 폼에 채우는 함수
+        // sessionStorage에서 videoData를 불러와 폼에 채우는 함수
         function loadVideoDataFromStorage() {
             try {
-                const videoData = JSON.parse(localStorage.getItem('videoData'));
+                const videoData = JSON.parse(sessionStorage.getItem('videoData'));
                 if (!videoData) {
                     console.log('저장된 videoData가 없습니다.');
                     return;
