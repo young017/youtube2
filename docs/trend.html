@@ -726,32 +726,6 @@
                 
                 console.log(`📊 이미 있는 월 데이터: ${existingMonths.join(', ')}`);
                 
-                // localStorage에 있는 데이터를 sessionStorage로 복사 (화면 표시용)
-                if (existingTrendData && Object.keys(existingTrendData).length > 0) {
-                    // localStorage의 데이터를 defaultTrendData 형식으로 변환
-                    const loadedTrendData = {};
-                    for (const [monthKey, categoryIds] of Object.entries(existingTrendData)) {
-                        if (monthKey === 'updated_at') continue;
-                        if (Array.isArray(categoryIds) && categoryIds.length > 0) {
-                            loadedTrendData[monthKey] = {
-                                top5: categoryIds.map((categoryId, index) => ({
-                                    rank: index + 1,
-                                    category_id: String(categoryId),
-                                    count: 0 // localStorage에는 count 정보가 없으므로 0으로 설정
-                                }))
-                            };
-                        }
-                    }
-                    // 기존 데이터를 allTrends에 추가
-                    Object.assign(allTrends, loadedTrendData);
-                    
-                    // 이미 있는 데이터를 즉시 화면에 표시 (API 호출 없이 바로 표시)
-                    if (Object.keys(loadedTrendData).length > 0) {
-                        updateTrendDisplay(loadedTrendData);
-                        console.log('✅ localStorage에서 기존 트렌드 데이터를 화면에 표시했습니다.');
-                    }
-                }
-                
                 // 1월부터 12월까지 순차적으로 처리 (없는 월만)
                 for (let month = 1; month <= 12; month++) {
                     const monthKey = `${month}월`;
@@ -789,10 +763,8 @@
                             // 즉시 화면에 업데이트 (데이터가 없어도 표시)
                             updateTrendDisplay(data.data.trends);
                             
-                            // localStorage와 sessionStorage에 모두 저장
+                            // localStorage에도 업데이트
                             updateCategoryRankStatus(data.data.trends);
-                            // sessionStorage에도 저장 (현재 세션에서만 화면에 표시)
-                            sessionStorage.setItem('trendDisplayData', JSON.stringify(data.data.trends));
                             
                             // 데이터가 있는지 확인
                             const monthKey = `${month}월`;
@@ -809,11 +781,9 @@
                     }
                 }
                 
-                // 최종 결과를 localStorage와 sessionStorage에 저장
+                // 최종 결과를 localStorage에 저장
                 if (Object.keys(allTrends).length > 0) {
                     updateCategoryRankStatus(allTrends);
-                    // sessionStorage에도 저장 (현재 세션에서만 화면에 표시)
-                    sessionStorage.setItem('trendDisplayData', JSON.stringify(allTrends));
                     alert(`✅ 트렌드 분석이 완료되었습니다!`);
                 } else {
                     alert('⚠️ 분석된 데이터가 없습니다.');
@@ -974,28 +944,10 @@
                 tabContent.appendChild(panel);
             });
             
-            // sessionStorage에 저장된 트렌드 데이터 확인 (현재 세션에서만 표시)
-            let sessionTrendData = null;
-            try {
-                const storedSessionData = sessionStorage.getItem('trendDisplayData');
-                if (storedSessionData) {
-                    sessionTrendData = JSON.parse(storedSessionData);
-                }
-            } catch (e) {
-                console.error('세션 트렌드 데이터 파싱 실패:', e);
-            }
+            // 기본 트렌드 데이터 표시 (1~10월)
+            updateTrendDisplay(defaultTrendData);
             
-            // sessionStorage에 데이터가 있으면 화면에 표시 (같은 세션에서 업데이트한 경우)
-            if (sessionTrendData && Object.keys(sessionTrendData).length > 0) {
-                updateTrendDisplay(sessionTrendData);
-                console.log('✅ sessionStorage에서 트렌드 데이터를 로드했습니다.');
-            } else {
-                // sessionStorage에 데이터가 없으면 기본 메시지만 표시 (다른 페이지에서 돌아온 경우)
-                // localStorage에는 저장되어 있지만 화면에는 표시하지 않음
-                console.log('ℹ️ sessionStorage에 트렌드 데이터가 없습니다. 업데이트 버튼을 눌러주세요.');
-            }
-            
-            // localStorage에도 기본 데이터 저장 (feedback-result.html에서 사용)
+            // localStorage에도 기본 데이터 저장
             updateCategoryRankStatus(defaultTrendData);
         }
         
