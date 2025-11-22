@@ -744,6 +744,12 @@
                     }
                     // 기존 데이터를 allTrends에 추가
                     Object.assign(allTrends, loadedTrendData);
+                    
+                    // 이미 있는 데이터를 즉시 화면에 표시 (API 호출 없이 바로 표시)
+                    if (Object.keys(loadedTrendData).length > 0) {
+                        updateTrendDisplay(loadedTrendData);
+                        console.log('✅ localStorage에서 기존 트렌드 데이터를 화면에 표시했습니다.');
+                    }
                 }
                 
                 // 1월부터 12월까지 순차적으로 처리 (없는 월만)
