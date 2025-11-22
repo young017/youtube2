@@ -2067,38 +2067,41 @@
             console.log('   - strengths:', originalCategoryFeedback.strengths);
             console.log('   - detailedRecommendations:', originalCategoryFeedback.detailedRecommendations);
             
-            // 예측 결과가 있으면 즉시 체크, 없으면 예측 결과가 준비되면 체크
+            // 예측 결과가 있으면 즉시 체크
             if (predictionResult && predictionResult.predicted_views > 0) {
                 calculateRecommendedPrediction(data, originalCategoryFeedback, predictionResult);
             } else {
                 // 예측 결과가 아직 없어도 카테고리별 권장사항만 체크해서 "완벽합니다" 표시 가능
-                // 예측 결과가 준비되면 다시 체크하도록 함
-                const checkPerfectStatus = () => {
-                    const categoryOnlyRecommendations = originalCategoryFeedback.detailedRecommendations 
-                        ? originalCategoryFeedback.detailedRecommendations.filter(rec => 
-                            ['time', 'day', 'date', 'length', 'caption', 'quality'].includes(rec.type)
-                        )
-                        : [];
-                    
-                    if ((!categoryOnlyRecommendations || categoryOnlyRecommendations.length === 0) && 
-                        originalCategoryFeedback.strengths && originalCategoryFeedback.strengths.length > 0) {
-                        // 예측 결과가 준비되면 calculateRecommendedPrediction 호출
-                        const checkInterval = setInterval(() => {
-                            const savedPredictionResult = JSON.parse(sessionStorage.getItem('predictionResult') || '{}');
-                            if (savedPredictionResult && savedPredictionResult.predicted_views > 0) {
-                                clearInterval(checkInterval);
-                                calculateRecommendedPrediction(data, originalCategoryFeedback, savedPredictionResult);
-                            }
-                        }, 500); // 0.5초마다 체크
-                        
-                        // 10초 후에도 예측 결과가 없으면 타임아웃
-                        setTimeout(() => {
-                            clearInterval(checkInterval);
-                        }, 10000);
-                    }
-                };
+                const categoryOnlyRecommendations = originalCategoryFeedback.detailedRecommendations 
+                    ? originalCategoryFeedback.detailedRecommendations.filter(rec => 
+                        ['time', 'day', 'date', 'length', 'caption', 'quality'].includes(rec.type)
+                    )
+                    : [];
                 
-                checkPerfectStatus();
+                // 카테고리별 권장사항이 없고 strengths가 있으면 즉시 "완벽합니다" 표시
+                if ((!categoryOnlyRecommendations || categoryOnlyRecommendations.length === 0) && 
+                    originalCategoryFeedback.strengths && originalCategoryFeedback.strengths.length > 0) {
+                    // 예측 결과가 없어도 "완벽합니다" 표시 (임시 예측 결과 객체 생성)
+                    const tempPredictionResult = {
+                        predicted_views: 0, // 나중에 실제 값으로 업데이트됨
+                        pred_popular_prob: 0
+                    };
+                    calculateRecommendedPrediction(data, originalCategoryFeedback, tempPredictionResult);
+                    
+                    // 예측 결과가 준비되면 다시 체크
+                    const checkInterval = setInterval(() => {
+                        const savedPredictionResult = JSON.parse(sessionStorage.getItem('predictionResult') || '{}');
+                        if (savedPredictionResult && savedPredictionResult.predicted_views > 0) {
+                            clearInterval(checkInterval);
+                            calculateRecommendedPrediction(data, originalCategoryFeedback, savedPredictionResult);
+                        }
+                    }, 500); // 0.5초마다 체크
+                    
+                    // 10초 후에도 예측 결과가 없으면 타임아웃
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                    }, 10000);
+                }
             }
         }
         
@@ -2286,8 +2289,13 @@
                         }
                         
                         // 현재 예상 조회수 표시 (가중치 적용하지 않은 원본 값)
+                        // 예측 결과가 아직 없으면 "계산 중..." 표시
                         const originalViews = currentPredictionResult.predicted_views || 0;
-                        recommendedViewsElement.textContent = Math.floor(originalViews).toLocaleString();
+                        if (originalViews > 0) {
+                            recommendedViewsElement.textContent = Math.floor(originalViews).toLocaleString();
+                        } else {
+                            recommendedViewsElement.textContent = '계산 중...';
+                        }
                         recommendedViewsElement.style.color = '#28a745';
                         
                         // 숫자와 통계 부분 표시
