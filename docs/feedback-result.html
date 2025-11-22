@@ -1376,6 +1376,10 @@
                         
                         // 모델 정보 업데이트
                         displayPredictionResults(predictionResult);
+                        
+                        // 예측 결과가 준비되었으므로 "완벽합니다" 체크 다시 수행
+                        const originalCategoryFeedback = generateCategoryBasedFeedback(videoData);
+                        calculateRecommendedPrediction(videoData, originalCategoryFeedback, predictionResult);
                     }
                 }
             } catch (error) {
@@ -1516,6 +1520,10 @@
                         
                         // 예측 결과 표시
                         displayPredictionResults(predictionResult);
+                        
+                        // 예측 결과가 준비되었으므로 "완벽합니다" 체크 다시 수행
+                        const originalCategoryFeedback = generateCategoryBasedFeedback(data);
+                        calculateRecommendedPrediction(data, originalCategoryFeedback, predictionResult);
                     } else {
                         console.error('❌ 응답 구조 오류');
                         console.error('saveData.success:', saveData.success);
@@ -1634,7 +1642,7 @@
                 return Math.round(predictedViews * (isTrendCategory ? 0.5 : 0.25));
             } else if (subscriberCount >= 100000 && subscriberCount <= 1000000) {
                 // 십만 단위 (100,000~1,000,000)
-                return Math.round(predictedViews * (isTrendCategory ? 1.0 : 0.9));
+                return Math.round(predictedViews * (isTrendCategory ? 1.0 : 0.95));
             } else {
                 // 그 외의 경우 (1,000,000 이상) 원래 값 그대로
                 return Math.round(predictedViews);
@@ -2058,8 +2066,39 @@
             console.log('🔍 originalCategoryFeedback 생성:', originalCategoryFeedback);
             console.log('   - strengths:', originalCategoryFeedback.strengths);
             console.log('   - detailedRecommendations:', originalCategoryFeedback.detailedRecommendations);
+            
+            // 예측 결과가 있으면 즉시 체크, 없으면 예측 결과가 준비되면 체크
             if (predictionResult && predictionResult.predicted_views > 0) {
                 calculateRecommendedPrediction(data, originalCategoryFeedback, predictionResult);
+            } else {
+                // 예측 결과가 아직 없어도 카테고리별 권장사항만 체크해서 "완벽합니다" 표시 가능
+                // 예측 결과가 준비되면 다시 체크하도록 함
+                const checkPerfectStatus = () => {
+                    const categoryOnlyRecommendations = originalCategoryFeedback.detailedRecommendations 
+                        ? originalCategoryFeedback.detailedRecommendations.filter(rec => 
+                            ['time', 'day', 'date', 'length', 'caption', 'quality'].includes(rec.type)
+                        )
+                        : [];
+                    
+                    if ((!categoryOnlyRecommendations || categoryOnlyRecommendations.length === 0) && 
+                        originalCategoryFeedback.strengths && originalCategoryFeedback.strengths.length > 0) {
+                        // 예측 결과가 준비되면 calculateRecommendedPrediction 호출
+                        const checkInterval = setInterval(() => {
+                            const savedPredictionResult = JSON.parse(sessionStorage.getItem('predictionResult') || '{}');
+                            if (savedPredictionResult && savedPredictionResult.predicted_views > 0) {
+                                clearInterval(checkInterval);
+                                calculateRecommendedPrediction(data, originalCategoryFeedback, savedPredictionResult);
+                            }
+                        }, 500); // 0.5초마다 체크
+                        
+                        // 10초 후에도 예측 결과가 없으면 타임아웃
+                        setTimeout(() => {
+                            clearInterval(checkInterval);
+                        }, 10000);
+                    }
+                };
+                
+                checkPerfectStatus();
             }
         }
         
