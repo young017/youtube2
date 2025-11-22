@@ -2055,6 +2055,9 @@
             // 피드백 적용시 예상 조회수 계산
             // 카테고리별 권장사항만 체크하기 위해 원본 categoryFeedback 생성
             const originalCategoryFeedback = generateCategoryBasedFeedback(data);
+            console.log('🔍 originalCategoryFeedback 생성:', originalCategoryFeedback);
+            console.log('   - strengths:', originalCategoryFeedback.strengths);
+            console.log('   - detailedRecommendations:', originalCategoryFeedback.detailedRecommendations);
             if (predictionResult && predictionResult.predicted_views > 0) {
                 calculateRecommendedPrediction(data, originalCategoryFeedback, predictionResult);
             }
@@ -2216,8 +2219,15 @@
                     )
                     : [];
                 
+                console.log('🔍 카테고리별 권장사항 체크:');
+                console.log('   - 전체 detailedRecommendations:', categoryFeedback.detailedRecommendations);
+                console.log('   - 카테고리별 권장사항만 필터링:', categoryOnlyRecommendations);
+                console.log('   - 카테고리별 권장사항 개수:', categoryOnlyRecommendations ? categoryOnlyRecommendations.length : 0);
+                
                 // 카테고리별 권장사항이 없는 경우 (모든 카테고리 항목이 최적 범위에 있는 경우)
-                if (!categoryOnlyRecommendations || categoryOnlyRecommendations.length === 0) {
+                // 또는 카테고리별 권장 기준 데이터가 없는 경우도 "완벽합니다" 표시
+                if ((!categoryOnlyRecommendations || categoryOnlyRecommendations.length === 0) && 
+                    categoryFeedback.strengths && categoryFeedback.strengths.length > 0) {
                     console.log('✅ 모든 카테고리 항목이 최적 범위에 있어 추가 권장사항이 없습니다.');
                     
                     // UI에 긍정적인 메시지 표시
