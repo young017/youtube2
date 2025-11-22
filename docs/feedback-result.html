@@ -1109,15 +1109,14 @@
                 !predictionResult.model_used?.includes('Unknown')) {
                 console.log('실제 예측 결과 있음:', predictionResult);
                 displayPredictionResults(predictionResult);
+                // 예측 결과가 있으면 즉시 recommendations 생성
+                generateRecommendations(videoData, predictionResult);
             } else {
                 // 실제 예측 결과가 없으면 API 호출로 다시 예측
                 console.log('예측 결과 없음, 실제 모델로 예측 수행:', videoData);
+                // fetchRealPrediction 내부에서 이미 generateRecommendations를 호출하므로 여기서는 호출하지 않음
                 fetchRealPrediction(videoData);
             }
-            
-            
-            // Generate recommendations
-            generateRecommendations(videoData, predictionResult);
             
             // Auto-generate titles (자동으로 제목 생성)
             setTimeout(() => {
@@ -1521,9 +1520,8 @@
                         // 예측 결과 표시
                         displayPredictionResults(predictionResult);
                         
-                        // 예측 결과가 준비되었으므로 "완벽합니다" 체크 다시 수행
-                        const originalCategoryFeedback = generateCategoryBasedFeedback(data);
-                        calculateRecommendedPrediction(data, originalCategoryFeedback, predictionResult);
+                        // 예측 결과가 준비되었으므로 recommendations 생성
+                        generateRecommendations(data, predictionResult);
                     } else {
                         console.error('❌ 응답 구조 오류');
                         console.error('saveData.success:', saveData.success);
@@ -1547,6 +1545,8 @@
             } catch (error) {
                 console.error('❌ 예측 실패 (예외 발생):', error);
                 console.error('❌ 에러 스택:', error.stack);
+                // 에러가 발생해도 recommendations는 생성 (예측 결과 없이)
+                generateRecommendations(data, null);
                 alert(`조회수 예측 중 오류가 발생했습니다: ${error.message}\n\n콘솔을 확인해주세요.`);
             }
         }
@@ -1642,7 +1642,7 @@
                 return Math.round(predictedViews * (isTrendCategory ? 0.5 : 0.25));
             } else if (subscriberCount >= 100000 && subscriberCount <= 1000000) {
                 // 십만 단위 (100,000~1,000,000)
-                return Math.round(predictedViews * (isTrendCategory ? 0.9 : 0.85));
+                return Math.round(predictedViews * (isTrendCategory ? 0.9 : 0.80));
             } else {
                 // 그 외의 경우 (1,000,000 이상) 원래 값 그대로
                 return Math.round(predictedViews);
