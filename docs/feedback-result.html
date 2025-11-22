@@ -2209,9 +2209,16 @@
             try {
                 console.log('🔍 피드백 적용시 예상 조회수 계산 시작');
                 
-                // 권장사항이 없는 경우 (모든 항목이 최적 범위에 있는 경우)
-                if (!categoryFeedback.detailedRecommendations || categoryFeedback.detailedRecommendations.length === 0) {
-                    console.log('✅ 모든 항목이 최적 범위에 있어 추가 권장사항이 없습니다.');
+                // 카테고리별 권장사항만 체크 (예측 결과나 설명 길이 등은 제외)
+                const categoryOnlyRecommendations = categoryFeedback.detailedRecommendations 
+                    ? categoryFeedback.detailedRecommendations.filter(rec => 
+                        ['time', 'day', 'date', 'length', 'caption', 'quality'].includes(rec.type)
+                    )
+                    : [];
+                
+                // 카테고리별 권장사항이 없는 경우 (모든 카테고리 항목이 최적 범위에 있는 경우)
+                if (!categoryOnlyRecommendations || categoryOnlyRecommendations.length === 0) {
+                    console.log('✅ 모든 카테고리 항목이 최적 범위에 있어 추가 권장사항이 없습니다.');
                     
                     // UI에 긍정적인 메시지 표시
                     const recommendedSection = document.getElementById('recommendedPredictionSection');
