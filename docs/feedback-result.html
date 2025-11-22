@@ -1622,22 +1622,19 @@
             // 구독자 수 범위 확인
             if (subscriberCount <= 100) {
                 // 100 이하
-                return Math.round(predictedViews * (isTrendCategory ? 0.0005 : 0.00025));
+                return Math.round(predictedViews * (isTrendCategory ? 0.005 : 0.001));
             } else if (subscriberCount >= 100 && subscriberCount <= 999) {
                 // 백 단위 (100~999)
-                return Math.round(predictedViews * (isTrendCategory ? 0.005 : 0.0025));
+                return Math.round(predictedViews * (isTrendCategory ? 0.05 : 0.01));
             } else if (subscriberCount >= 1000 && subscriberCount <= 9999) {
                 // 천 단위 (1,000~9,999)
-                return Math.round(predictedViews * (isTrendCategory ? 0.025 : 0.012));
-            } else if (subscriberCount >= 10000 && subscriberCount <= 59999) {
-                // 만 단위 (10,000~59,999)
-                return Math.round(predictedViews * (isTrendCategory ? 0.12 : 0.06));
-            } else if (subscriberCount >= 60000 && subscriberCount <= 99999) {
-                // 60,000~99,999
+                return Math.round(predictedViews * (isTrendCategory ? 0.4 : 0.2));
+            } else if (subscriberCount >= 10000 && subscriberCount <= 99999) {
+                // 만 단위 (10,000~99,999)
                 return Math.round(predictedViews * (isTrendCategory ? 0.5 : 0.25));
             } else {
                 // 그 외의 경우 (100,000 이상) 원래 값 그대로
-                return predictedViews;
+                return Math.round(predictedViews);
             }
         }
         
