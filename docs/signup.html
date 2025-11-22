@@ -301,7 +301,6 @@
                     </label>
                     <input type="password" class="form-control" id="confirmPassword" placeholder="비밀번호를 다시 입력하세요" required>
                     <div class="invalid-feedback">
-                        비밀번호가 일치하지 않습니다.
                     </div>
                 </div>
                 
@@ -454,7 +453,7 @@
             const confirmField = document.getElementById('confirmPassword');
             
             if (confirmPassword && password !== confirmPassword) {
-                confirmField.setCustomValidity('비밀번호가 일치하지 않습니다.');
+                confirmField.setCustomValidity('');
                 confirmField.classList.add('is-invalid');
                 confirmField.classList.remove('is-valid');
             } else if (confirmPassword && password === confirmPassword) {
