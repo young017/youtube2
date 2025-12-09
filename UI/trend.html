@@ -712,14 +712,8 @@
                 updateBtn.disabled = true;
                 updateBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>업데이트 중...';
                 
-                // API 기본 URL 설정
-                let API_BASE_URL = 'http://localhost:8001';
-                if (window.location.hostname && 
-                    window.location.hostname !== 'localhost' && 
-                    window.location.hostname !== '127.0.0.1' &&
-                    window.location.protocol !== 'file:') {
-                    API_BASE_URL = 'https://youtube-analytics-production.up.railway.app';
-                }
+                // API Base URL 설정 (Railway 배포 URL)
+                const API_BASE = "https://youtube-production-a386.up.railway.app";
                 
                 // 전체 트렌드 결과 저장
                 const allTrends = {};
@@ -746,7 +740,7 @@
                         updateBtn.innerHTML = `<i class="bi bi-hourglass-split me-2"></i>${month}월 분석 중...`;
                         
                         // 월별 API 호출
-                        const response = await fetch(`${API_BASE_URL}/api/trends/update-month?month=${month}`, {
+                        const response = await fetch(`${API_BASE}/api/trends/update-month?month=${month}`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
