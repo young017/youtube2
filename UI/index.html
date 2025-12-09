@@ -718,20 +718,11 @@
                         body: JSON.stringify({ email, password })
                     });
                     
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('서버 응답 오류:', response.status, errorText);
-                        return { success: false, message: `서버 오류 (${response.status}): 서버에 연결할 수 없습니다.` };
-                    }
-                    
                     const data = await response.json();
                     return data;
                 } catch (error) {
                     console.error('로그인 API 오류:', error);
-                    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                        return { success: false, message: `서버 연결 실패: ${API_BASE}에 연결할 수 없습니다. 서버가 실행 중인지 확인하세요.` };
-                    }
-                    return { success: false, message: `서버 연결 실패: ${error.message}` };
+                    return { success: false, message: '서버 연결 실패' };
                 }
             }
             
@@ -745,20 +736,11 @@
                         body: JSON.stringify(userData)
                     });
                     
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('서버 응답 오류:', response.status, errorText);
-                        return { success: false, message: `서버 오류 (${response.status}): 서버에 연결할 수 없습니다.` };
-                    }
-                    
                     const data = await response.json();
                     return data;
                 } catch (error) {
                     console.error('회원가입 API 오류:', error);
-                    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                        return { success: false, message: `서버 연결 실패: ${API_BASE}에 연결할 수 없습니다. 서버가 실행 중인지 확인하세요.` };
-                    }
-                    return { success: false, message: `서버 연결 실패: ${error.message}` };
+                    return { success: false, message: '서버 연결 실패' };
                 }
             }
             
@@ -896,10 +878,6 @@
                     }
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`서버 응답 오류: ${response.status} ${response.statusText}`);
-                }
-                
                 const data = await response.json();
                 
                 if (data.success && data.data.videos.length > 0) {
@@ -909,10 +887,6 @@
                 }
             } catch (error) {
                 console.error('영상 목록 로드 실패:', error);
-                console.error('서버 URL:', `${API_BASE}/api/videos/list`);
-                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                    alert(`서버 연결 실패!\n\n서버 주소: ${API_BASE}\n\n서버가 실행 중인지 확인하세요.`);
-                }
                 emptyDiv.style.display = 'block';
             } finally {
                 loadingDiv.style.display = 'none';
@@ -1118,39 +1092,9 @@
             }
         }
         
-        // 서버 연결 테스트
-        async function testServerConnection() {
-            try {
-                const response = await fetch(`${API_BASE}/health`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ 서버 연결 확인:', API_BASE, data);
-                    return true;
-                } else {
-                    console.warn('⚠️ 서버 응답 오류:', response.status);
-                    return false;
-                }
-            } catch (error) {
-                console.error('❌ 서버 연결 실패:', error);
-                console.error('서버 URL:', API_BASE);
-                console.error('에러 메시지:', error.message);
-                alert(`서버 연결 실패!\n\n서버 주소: ${API_BASE}\n\n에러: ${error.message}\n\n확인 사항:\n1. Railway 서버가 배포되어 실행 중인지 확인\n2. 서버 URL이 올바른지 확인\n3. 브라우저 콘솔(F12)에서 자세한 에러 확인`);
-                return false;
-            }
-        }
-        
-        // 페이지 로드 시 네비게이션 업데이트 및 서버 연결 확인
+        // 페이지 로드 시 네비게이션 업데이트
         document.addEventListener('DOMContentLoaded', function() {
             authManager.updateNavigation();
-            
-            // 서버 연결 상태 확인 (콘솔에만 표시)
-            testServerConnection();
             
             // 내 페이지 링크 클릭 이벤트
             const myPageLink = document.querySelector('a[href="#myPage"]');
