@@ -385,8 +385,11 @@
             btnText.textContent = '로그인 중...';
             
             try {
+                // API Base URL 설정 (Railway 배포 URL)
+                const API_BASE = "https://youtube-production-a386.up.railway.app";
+                
                 // FastAPI 서버로 로그인 시도
-                const response = await fetch('http://localhost:8001/api/auth/login', {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -416,7 +419,7 @@
                 }
             } catch (error) {
                 console.error('로그인 오류:', error);
-                showAlert('danger', '서버 연결에 실패했습니다. FastAPI 서버가 실행 중인지 확인하세요. (http://localhost:8001)');
+                showAlert('danger', '서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
             } finally {
                 // 로딩 상태 해제
                 loginBtn.disabled = false;
@@ -468,3 +471,4 @@
     </script>
 </body>
 </html>
+ㄴ
