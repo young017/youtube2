@@ -624,6 +624,11 @@ async def startup_event():
     """서버 시작 시 실행"""
     load_tag_model()
 
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    """CORS preflight 요청 처리"""
+    return {"status": "ok"}
+
 @app.get("/health")
 async def health_check():
     """서버 상태 확인용 헬스체크 엔드포인트"""
@@ -1960,13 +1965,33 @@ if __name__ == "__main__":
     print("1등 유튜버 되기 FastAPI 서버 시작")
     print("=" * 50)
     
-    # 데이터베이스 파일 존재 확인
-    if not os.path.exists('youtube_analytics.db'):
-        print("❌ 데이터베이스 파일이 없습니다.")
-        print("먼저 'python init_database.py'를 실행하여 데이터베이스를 초기화하세요.")
-        exit(1)
-    
-    print("✅ 데이터베이스 연결 확인")
+    # 데이터베이스 파일 존재 확인 및 자동 생성
+    db_path = 'youtube_analytics.db'
+    if not os.path.exists(db_path):
+        print("⚠️ 데이터베이스 파일이 없습니다. 자동으로 생성합니다...")
+        try:
+            # 데이터베이스 자동 초기화
+            # database 모듈은 이미 import되어 있음
+            from database import create_demo_data
+            # UserDatabase는 이미 db로 import되어 있지만, 새로 생성해야 하므로 다시 import
+            from database import UserDatabase
+            db = UserDatabase(db_path)
+            print("✓ 데이터베이스 테이블 생성 완료")
+            
+            # 데모 데이터 생성
+            try:
+                create_demo_data()
+                print("✓ 데모 데이터 생성 완료")
+            except Exception as e:
+                print(f"⚠️ 데모 데이터 생성 실패 (무시 가능): {e}")
+            
+            print("✅ 데이터베이스 자동 생성 완료")
+        except Exception as e:
+            print(f"❌ 데이터베이스 생성 중 오류 발생: {e}")
+            print("수동으로 'python init_database.py'를 실행하세요.")
+            exit(1)
+    else:
+        print("✅ 데이터베이스 파일 확인")
     print("🚀 FastAPI 서버 시작 중...")
     
     import os
