@@ -699,10 +699,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>    
     <!-- Auth JavaScript -->
     <script>
+        // API Base URL 설정 (Railway 배포 URL)
+        const API_BASE = "https://youtube-production-a386.up.railway.app";
+        
         // FastAPI 기반 인증 관리자
         class AuthAPI {
             constructor() {
-                this.baseURL = 'http://localhost:8001/api';
+                this.baseURL = `${API_BASE}/api`;
             }
             
             async login(email, password) {
@@ -868,7 +871,7 @@
             
             try {
                 const sessionToken = localStorage.getItem('session_token');
-                const response = await fetch('http://localhost:8001/api/videos/list', {
+                const response = await fetch(`${API_BASE}/api/videos/list`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1118,6 +1121,41 @@
                 });
             }
         });
+        
+        // 제목 생성 API 함수
+        async function generateTitles(keyword, n = 5, imageText = "") {
+            try {
+                const response = await fetch(`${API_BASE}/api/titles/generate`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        keyword: keyword,
+                        n: n,
+                        imageText: imageText,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+                    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log("생성된 제목들:", data.titles);
+                    return data.titles;
+                } else {
+                    console.error("제목 생성 실패:", data.message);
+                    return [];
+                }
+            } catch (error) {
+                console.error("제목 생성 중 오류 발생:", error);
+                throw error;
+            }
+        }
         
         // 데모 계정 정보 표시
         console.log('데모 계정: demo@youtubeanalytics.com / demo123');
