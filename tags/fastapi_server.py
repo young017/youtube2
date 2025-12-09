@@ -624,6 +624,11 @@ async def startup_event():
     """서버 시작 시 실행"""
     load_tag_model()
 
+@app.get("/health")
+async def health_check():
+    """서버 상태 확인용 헬스체크 엔드포인트"""
+    return {"status": "ok", "message": "서버가 정상적으로 실행 중입니다."}
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """메인 페이지"""
