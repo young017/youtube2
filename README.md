@@ -1,4 +1,4 @@
-# 🎬 1등 유튜버 되기 - 유튜브 영상 제작을 위한 맞춤형 피드백 서비스
+# 🎬 유튜브 영상 제작을 위한 맞춤형 피드백 서비스
 
 배포 주소 : https://yudaag.github.io/youtube/index.html
 
